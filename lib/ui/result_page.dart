@@ -5,6 +5,7 @@ import '../models/firearm.dart';
 import '../physics/atmosphere.dart';
 import '../physics/ballistics_solver.dart';
 import '../physics/coriolis.dart';
+import '../physics/hit_probability.dart';
 import '../physics/units.dart' as U;
 import '../services/shot_builder.dart';
 import '../services/dope_card.dart';
@@ -29,6 +30,7 @@ class _ResultPageState extends State<ResultPage> {
   double? _transonicM;
   double? _leadM; // linear lead at max range for moving target
   List<Map<String, double>> _multiTargets = const [];
+  double? _hitProb; // hit probability at max range target
   ShotConfig? _cfg;
   String? _error;
   bool _showMoa = true; // toggle MOA <-> MIL for corrections
@@ -77,6 +79,7 @@ class _ResultPageState extends State<ResultPage> {
         powderTempF: s.powderTempF,
         mvTempSensitivityFpsPerF: s.mvTempSensitivityFpsPerF,
         cantAngleDeg: s.cantAngleDeg,
+        dropScaleFactors: s.dsf,
       );
       final solver = BallisticsSolver(cfg);
       final traj = solver.solve(
@@ -116,6 +119,42 @@ class _ResultPageState extends State<ResultPage> {
           'tof': pt.timeOfFlight,
         });
       }
+      // Hit probability at the max-range target: estimate the wind-drift and
+      // drop sensitivities from adjacent trajectory samples (cheap, no extra
+      // integration) and feed the shooter's error budget.
+      double hitProb = 0;
+      if (traj.length >= 3) {
+        final last = traj.last;
+        final prev = traj[traj.length - 2];
+        final dRange = (last.range - prev.range).abs();
+        // drop per yard (m per yd)
+        final dropPerYd = dRange > 1e-9
+            ? ((last.drop - prev.drop).abs()) / (dRange * 1.09361)
+            : 0.0;
+        // wind drift per mph: approximate using current windage and the
+        // configured wind speed; if calm, use a nominal 0.1m per mph at range.
+        double driftPerMph = 0.0;
+        if (s.windSpeedMph > 0.1) {
+          driftPerMph = last.windage.abs() / s.windSpeedMph;
+        } else {
+          driftPerMph = (last.range * 0.0005); // nominal sensitivity
+        }
+        final sigma = HitProbability.sigmaRadFromBudget(
+          gunMoa: s.gunAccuracyMoa,
+          shooterMoa: s.shooterErrorMoa,
+          windErrMph: s.windErrorMph,
+          rangeErrYd: s.rangeErrorYd,
+          windDriftPerMphM: driftPerMph,
+          dropPerYdM: dropPerYd,
+          rangeM: last.range,
+        );
+        final targetRadiusM = U.Units.inchToM(s.targetSizeIn) / 2;
+        hitProb = HitProbability.circularP(
+          targetRadiusM: targetRadiusM,
+          rangeM: last.range,
+          sigmaRad: sigma,
+        );
+      }
       setState(() {
         _cfg = cfg;
         _traj = traj;
@@ -126,6 +165,7 @@ class _ResultPageState extends State<ResultPage> {
         _transonicM = transonic;
         _leadM = lead;
         _multiTargets = multiTargets;
+        _hitProb = hitProb;
         _error = null;
       });
     } catch (e) {
@@ -173,6 +213,11 @@ class _ResultPageState extends State<ResultPage> {
             tooltip: '导出 DOPE 卡',
             onPressed: () => _showDope(context, bullet, ct, traj, sys),
             icon: const Icon(Icons.ios_share),
+          ),
+          IconButton(
+            tooltip: '导出 CSV',
+            onPressed: () => _showCsv(context, traj, sys),
+            icon: const Icon(Icons.table_view),
           ),
           IconButton(
             tooltip: _showMoa ? '切换 MIL' : '切换 MOA',
@@ -286,6 +331,25 @@ class _ResultPageState extends State<ResultPage> {
                     style: const TextStyle(fontSize: 12)),
               ),
             ],
+            // Hit probability banner
+            if (_hitProb != null) ...[
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: _hitProbColor(_hitProb!).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                    '🎯 命中率 @${widget.state.maxRangeYd.toStringAsFixed(0)}yd '
+                    '(目标 ${widget.state.targetSizeIn.toStringAsFixed(0)}"): '
+                    '${(_hitProb! * 100).toStringAsFixed(0)}%',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 13, fontWeight: FontWeight.w600)),
+              ),
+            ],
             const SizedBox(height: 8),
             GridView.count(
               shrinkWrap: true,
@@ -339,6 +403,12 @@ class _ResultPageState extends State<ResultPage> {
   Color _sgColor(double sg) {
     if (sg < 1.0) return Colors.red;
     if (sg < 1.3) return Colors.orange;
+    return Colors.green;
+  }
+
+  Color _hitProbColor(double p) {
+    if (p < 0.3) return Colors.red;
+    if (p < 0.7) return Colors.orange;
     return Colors.green;
   }
 
@@ -528,6 +598,31 @@ class _ResultPageState extends State<ResultPage> {
             child: SelectableText(text,
                 style: const TextStyle(
                     fontFamily: 'monospace', fontSize: 12)),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('关闭'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show the trajectory as copyable CSV for spreadsheet import.
+  void _showCsv(BuildContext context, List<TrajectoryPoint> traj, U.UnitSystem sys) {
+    final csv = DopeCard.toCsv(traj: traj, sys: sys);
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('CSV 轨迹数据'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: SelectableText(csv,
+                style: const TextStyle(
+                    fontFamily: 'monospace', fontSize: 11)),
           ),
         ),
         actions: [

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/firearm.dart';
 import '../services/database_service.dart';
 import 'app_state.dart';
+import 'dsf_page.dart';
 import 'edit_custom_page.dart';
 import 'firearm_detail_page.dart';
 import 'profile_page.dart';
@@ -66,6 +67,19 @@ class _HomePageState extends State<HomePage> {
                 context,
                 MaterialPageRoute(
                   builder: (_) => TruingPage(state: widget.state),
+                ),
+              );
+              setState(() {});
+            },
+          ),
+          IconButton(
+            tooltip: '多点落点校准 (DSF)',
+            icon: const Icon(Icons.stacked_line_chart),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => DsfPage(state: widget.state),
                 ),
               );
               setState(() {});

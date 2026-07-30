@@ -99,6 +99,12 @@ class ShotConfig {
   /// output points (it does not change the trajectory itself).
   final double cantAngleRad;
 
+  /// Drop Scale Factors (DSF): per-range multipliers that scale the computed
+  /// drop to match observed impacts. Keyed by range in meters; the value
+  /// multiplies the drop at/around that range. Empty = no DSF (model drop used
+  /// as-is). Used by the multi-point drop-truing workflow.
+  final Map<double, double> dropScaleFactors;
+
   const ShotConfig({
     required this.muzzleVelocity,
     required this.mass,
@@ -116,6 +122,7 @@ class ShotConfig {
     this.lengthIn = 0,
     this.losAngleRad = 0,
     this.cantAngleRad = 0,
+    this.dropScaleFactors = const {},
   });
 }
 
@@ -415,6 +422,13 @@ class BallisticsSolver {
         dropZ = nz;
       }
 
+      // Drop Scale Factor (DSF): scale the drop by an interpolated factor from
+      // the user's multi-point truing data, so the model matches observed
+      // impacts across several ranges.
+      if (config.dropScaleFactors.isNotEmpty) {
+        dropZ *= _dsfAt(x);
+      }
+
       // Come-up (sight correction) to hit at this range: -drop/x, small angle.
       final comeUp = x > 1 ? -dropZ / x : 0.0;
 
@@ -430,6 +444,25 @@ class BallisticsSolver {
       nextSample += stepM;
     }
     return pts;
+  }
+
+  /// Interpolate the Drop Scale Factor at [rangeM] from the (range -> factor)
+  /// map. Below the smallest key the first factor is used; above the largest
+  /// key the last is used.
+  double _dsfAt(double rangeM) {
+    final dsf = config.dropScaleFactors;
+    if (dsf.isEmpty) return 1.0;
+    final keys = dsf.keys.toList()..sort();
+    if (rangeM <= keys.first) return dsf[keys.first]!;
+    if (rangeM >= keys.last) return dsf[keys.last]!;
+    for (int i = 0; i < keys.length - 1; i++) {
+      final r0 = keys[i], r1 = keys[i + 1];
+      if (rangeM >= r0 && rangeM <= r1) {
+        final f = (rangeM - r0) / (r1 - r0);
+        return dsf[r0]! + f * (dsf[r1]! - dsf[r0]!);
+      }
+    }
+    return 1.0;
   }
 
   /// Maximum level-flight range [m] for the current elevation, i.e. where the
@@ -523,6 +556,26 @@ class BallisticsSolver {
       }
     }
     return 0.5 * (lo + hi);
+  }
+
+  /// Multi-point drop truing (Drop Scale Factors). Given a set of observed
+  /// (range, drop) pairs, compute the per-range scale factor that makes the
+  /// model drop match each observation. Returns a map range_m -> factor.
+  ///
+  /// factor = observedDrop / modelDrop  (both relative to LOS). A factor >1
+  /// means the bullet drops more than the model predicts (model underestimates
+  /// drop).
+  Map<double, double> computeDsf(Map<double, double> observedDropsM) {
+    final out = <double, double>{};
+    for (final entry in observedDropsM.entries) {
+      final rangeM = entry.key;
+      final observed = entry.value;
+      final model = dropAtRange(rangeM);
+      if (model.abs() > 1e-6) {
+        out[rangeM] = observed / model;
+      }
+    }
+    return out;
   }
 
   /// Lead (hold-off) for a moving target, in meters of horizontal displacement

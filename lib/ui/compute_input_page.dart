@@ -153,6 +153,19 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
             ),
           ]),
           const SizedBox(height: 12),
+          _section('命中率 (Hit Probability)', [
+            _slider('目标尺寸 (直径)', s.targetSizeIn, 2, 48, ' in', 1, 0,
+                (v) => setState(() => s.targetSizeIn = v)),
+            _slider('枪械精度 (1σ MOA)', s.gunAccuracyMoa, 0.1, 4, ' MOA', 0.1, 1,
+                (v) => setState(() => s.gunAccuracyMoa = v)),
+            _slider('射手误差 (1σ MOA)', s.shooterErrorMoa, 0, 3, ' MOA', 0.1, 1,
+                (v) => setState(() => s.shooterErrorMoa = v)),
+            _slider('测风误差 (1σ mph)', s.windErrorMph, 0, 10, ' mph', 0.5, 1,
+                (v) => setState(() => s.windErrorMph = v)),
+            _slider('测距误差 (1σ yd)', s.rangeErrorYd, 0, 50, ' yd', 1, 0,
+                (v) => setState(() => s.rangeErrorYd = v)),
+          ]),
+          const SizedBox(height: 12),
           _section('改装', [
             ListTile(
               leading: const Icon(Icons.build),

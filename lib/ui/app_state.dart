@@ -54,6 +54,19 @@ class AppState extends ChangeNotifier {
   /// Scope click value in MOA per click (e.g. 0.25 for 1/4 MOA). Used to show
   /// turret click counts alongside angular corrections.
   double clickMoa = 0.25;
+  // --- Hit-probability inputs ---
+  /// Target size (inches), used as a circular target diameter.
+  double targetSizeIn = 12;
+  /// Rifle inherent accuracy (MOA, 1-sigma).
+  double gunAccuracyMoa = 1.0;
+  /// Shooter/position error (MOA, 1-sigma).
+  double shooterErrorMoa = 0.5;
+  /// Wind-estimation error (mph, 1-sigma).
+  double windErrorMph = 2;
+  /// Range-estimation error (yards, 1-sigma).
+  double rangeErrorYd = 10;
+  /// Drop Scale Factors keyed by range in meters (from multi-point truing).
+  Map<double, double> dsf = const {};
   /// Optional explicit list of multiple target distances (yards). When non-empty,
   /// the results page reports per-target corrections in addition to the table.
   List<double> customTargetsYd = const [];
@@ -228,6 +241,11 @@ class AppState extends ChangeNotifier {
         'mvTempSensitivityFpsPerF': mvTempSensitivityFpsPerF,
         'cantAngleDeg': cantAngleDeg,
         'clickMoa': clickMoa,
+        'targetSizeIn': targetSizeIn,
+        'gunAccuracyMoa': gunAccuracyMoa,
+        'shooterErrorMoa': shooterErrorMoa,
+        'windErrorMph': windErrorMph,
+        'rangeErrorYd': rangeErrorYd,
         'customTargetsYd': customTargetsYd,
         'unitSystem': unitSystem.name,
       };
@@ -255,6 +273,11 @@ class AppState extends ChangeNotifier {
         (m['mvTempSensitivityFpsPerF'] as num?)?.toDouble() ?? 0;
     cantAngleDeg = (m['cantAngleDeg'] as num?)?.toDouble() ?? 0;
     clickMoa = (m['clickMoa'] as num?)?.toDouble() ?? 0.25;
+    targetSizeIn = (m['targetSizeIn'] as num?)?.toDouble() ?? 12;
+    gunAccuracyMoa = (m['gunAccuracyMoa'] as num?)?.toDouble() ?? 1.0;
+    shooterErrorMoa = (m['shooterErrorMoa'] as num?)?.toDouble() ?? 0.5;
+    windErrorMph = (m['windErrorMph'] as num?)?.toDouble() ?? 2;
+    rangeErrorYd = (m['rangeErrorYd'] as num?)?.toDouble() ?? 10;
     customTargetsYd = (m['customTargetsYd'] as List?)
             ?.map((e) => (e as num).toDouble())
             .toList() ??

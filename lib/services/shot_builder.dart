@@ -59,6 +59,7 @@ class ShotBuilder {
     double powderTempF = 0, // temp at chrono time (0 = feature off)
     double mvTempSensitivityFpsPerF = 0, // fps change per °F
     double cantAngleDeg = 0,
+    Map<double, double> dropScaleFactors = const {},
   }) {
     // Chronograph override takes precedence; otherwise compute from barrel
     // length + muzzle device.
@@ -97,6 +98,7 @@ class ShotBuilder {
       lengthIn: bullet.lengthIn,
       losAngleRad: losAngleDeg * 3.141592653589793 / 180.0,
       cantAngleRad: cantAngleDeg * 3.141592653589793 / 180.0,
+      dropScaleFactors: dropScaleFactors,
     );
   }
 
