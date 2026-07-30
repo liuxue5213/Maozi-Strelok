@@ -51,7 +51,9 @@ class _SplashState extends State<Splash> {
   Future<AppState> _loadState() async {
     final db = DatabaseService();
     await db.load();
-    return AppState(db);
+    final state = AppState(db);
+    await state.loadSettings();
+    return state;
   }
 
   @override

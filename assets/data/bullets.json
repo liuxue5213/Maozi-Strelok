@@ -41,5 +41,24 @@
 
   {"id":"12ga-rifled-slug","manufacturer":"Brenneke","model":"12ga Rifled Slug 1oz (438gr)","caliber":"12 Gauge","massGr":438,"diameterIn":0.729,"lengthIn":0.85,"bcG1":0.080,"type":"slug"},
   {"id":"12ga-buck-00","manufacturer":"Federal","model":"12ga 00 Buckshot","caliber":"12 Gauge","massGr":48,"diameterIn":0.330,"lengthIn":0.33,"bcG1":0.050,"type":"shotgunShell"},
-  {"id":"12ga-bird-7.5","manufacturer":"Winchester","model":"12ga #7.5 Birdshot","caliber":"12 Gauge","massGr":2,"diameterIn":0.095,"lengthIn":0.095,"bcG1":0.020,"type":"shotgunShell"}
+  {"id":"12ga-bird-7.5","manufacturer":"Winchester","model":"12ga #7.5 Birdshot","caliber":"12 Gauge","massGr":2,"diameterIn":0.095,"lengthIn":0.095,"bcG1":0.020,"type":"shotgunShell"},
+
+  {"id":"hornady-140eldm-65cm","manufacturer":"Hornady","model":"ELD-M 140gr","caliber":"6.5 Creedmoor","massGr":140,"diameterIn":0.264,"lengthIn":1.25,"bcG1":0.546,"bcG7":0.276,"type":"hpbt"},
+  {"id":"berger-140hyb-65cm","manufacturer":"Berger","model":"Hybrid Target 140gr","caliber":"6.5 Creedmoor","massGr":140,"diameterIn":0.264,"lengthIn":1.26,"bcG1":0.536,"bcG7":0.271,"type":"hpbt"},
+  {"id":"sierra-142smk-65cm","manufacturer":"Sierra","model":"MatchKing 142gr","caliber":"6.5 Creedmoor","massGr":142,"diameterIn":0.264,"lengthIn":1.27,"bcG1":0.539,"bcG7":0.273,"type":"bthp"},
+  {"id":"lapua-136scenar-65cm","manufacturer":"Lapua","model":"Scenar 136gr","caliber":"6.5 Creedmoor","massGr":136,"diameterIn":0.264,"lengthIn":1.24,"bcG1":0.515,"bcG7":0.261,"type":"hpbt"},
+  {"id":"hornady-120eldx-65cm","manufacturer":"Hornady","model":"ELD-X 120gr","caliber":"6.5 Creedmoor","massGr":120,"diameterIn":0.264,"lengthIn":1.16,"bcG1":0.431,"bcG7":0.218,"type":"hpbt"},
+
+  {"id":"7n1-762x54r","manufacturer":"Novosibirsk","model":"7N1 (147gr sniper)","caliber":"7.62x54R","massGr":147,"diameterIn":0.311,"lengthIn":1.14,"bcG1":0.430,"type":"bthp"},
+  {"id":"7n14-762x54r","manufacturer":"Novosibirsk","model":"7N14 (152gr AP)","caliber":"7.62x54R","massGr":152,"diameterIn":0.311,"lengthIn":1.16,"bcG1":0.435,"type":"ap"},
+  {"id":"lps-762x54r","manufacturer":"Barnaul","model":"LPS 148gr FMJ","caliber":"7.62x54R","massGr":148,"diameterIn":0.311,"lengthIn":1.15,"bcG1":0.430,"type":"fmj"},
+
+  {"id":"goldDot-124-9mm-v2","manufacturer":"Federal","model":"HST 124gr JHP","caliber":"9x19","massGr":124,"diameterIn":0.355,"lengthIn":0.57,"bcG1":0.132,"type":"hp"},
+  {"id":"critical-9mm","manufacturer":"Federal","model":"Critical Duty 135gr FlexLock","caliber":"9x19","massGr":135,"diameterIn":0.355,"lengthIn":0.60,"bcG1":0.120,"type":"hp"},
+  {"id":"fmj-124-9mm","manufacturer":"Winchester","model":"NATO 124gr FMJ","caliber":"9x19 NATO","massGr":124,"diameterIn":0.355,"lengthIn":0.58,"bcG1":0.150,"type":"fmj"},
+  {"id":"147fmj-9mm","manufacturer":"Federal","model":"147gr FMJ","caliber":"9x19","massGr":147,"diameterIn":0.355,"lengthIn":0.62,"bcG1":0.155,"type":"fmj"},
+  {"id":"40sw-165fmj","manufacturer":"Federal","model":"165gr FMJ","caliber":".40 S&W","massGr":165,"diameterIn":0.400,"lengthIn":0.60,"bcG1":0.135,"type":"fmj"},
+  {"id":"357mag-158jhp","manufacturer":"Speer","model":"357 Mag 158gr JHP","caliber":".357 Mag","massGr":158,"diameterIn":0.357,"lengthIn":0.68,"bcG1":0.170,"type":"hp"},
+  {"id":"57x28-ss190","manufacturer":"FN","model":"SS190 27gr","caliber":"5.7x28","massGr":27,"diameterIn":0.224,"lengthIn":0.65,"bcG1":0.110,"type":"fmj"},
+  {"id":"58x21-58dp","manufacturer":"Norinco","model":"5.8x21 DP 50gr","caliber":"5.8x42","massGr":50,"diameterIn":0.236,"lengthIn":0.88,"bcG1":0.265,"type":"fmj"}
 ]

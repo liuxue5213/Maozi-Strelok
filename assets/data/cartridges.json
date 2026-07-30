@@ -34,5 +34,21 @@
 
   {"id":"ct-12ga-slug","designation":"12ga Rifled Slug","manufacturer":"Brenneke","caliber":"12 Gauge","muzzleVelocityFps":1550,"refBarrelLengthIn":20,"bulletId":"12ga-rifled-slug"},
   {"id":"ct-12ga-buck","designation":"12ga 00 Buck","manufacturer":"Federal","caliber":"12 Gauge","muzzleVelocityFps":1325,"refBarrelLengthIn":18,"bulletId":"12ga-buck-00"},
-  {"id":"ct-12ga-bird","designation":"12ga #7.5 Birdshot","manufacturer":"Winchester","caliber":"12 Gauge","muzzleVelocityFps":1250,"refBarrelLengthIn":28,"bulletId":"12ga-bird-7.5"}
+  {"id":"ct-12ga-bird","designation":"12ga #7.5 Birdshot","manufacturer":"Winchester","caliber":"12 Gauge","muzzleVelocityFps":1250,"refBarrelLengthIn":28,"bulletId":"12ga-bird-7.5"},
+
+  {"id":"ct-65cm-140eldm","designation":"6.5 CM 140gr ELD-M","manufacturer":"Hornady","caliber":"6.5 Creedmoor","muzzleVelocityFps":2700,"refBarrelLengthIn":24,"bulletId":"hornady-140eldm-65cm","notes":"Match factory load"},
+  {"id":"ct-65cm-140berger","designation":"6.5 CM 140gr Berger","manufacturer":"Berger","caliber":"6.5 Creedmoor","muzzleVelocityFps":2710,"refBarrelLengthIn":24,"bulletId":"berger-140hyb-65cm"},
+  {"id":"ct-65cm-136lapua","designation":"6.5 CM 136gr Scenar","manufacturer":"Lapua","caliber":"6.5 Creedmoor","muzzleVelocityFps":2740,"refBarrelLengthIn":24,"bulletId":"lapua-136scenar-65cm"},
+
+  {"id":"ct-7n1-762x54r","designation":"7N1 Sniper","manufacturer":"Novosibirsk","caliber":"7.62x54R","muzzleVelocityFps":2720,"refBarrelLengthIn":24.4,"bulletId":"7n1-762x54r","notes":"SVD sniper load"},
+  {"id":"ct-7n14-762x54r","designation":"7N14 AP","manufacturer":"Novosibirsk","caliber":"7.62x54R","muzzleVelocityFps":2690,"refBarrelLengthIn":24.4,"bulletId":"7n14-762x54r","notes":"SVD armor piercing"},
+  {"id":"ct-lps-762x54r","designation":"LPS Ball","manufacturer":"Barnaul","caliber":"7.62x54R","muzzleVelocityFps":2750,"refBarrelLengthIn":24.4,"bulletId":"lps-762x54r","notes":"PKM ball"},
+
+  {"id":"ct-hst-9mm","designation":"9mm 124gr HST","manufacturer":"Federal","caliber":"9x19","muzzleVelocityFps":1150,"refBarrelLengthIn":4.5,"bulletId":"goldDot-124-9mm-v2","notes":"Defense JHP"},
+  {"id":"ct-critical-9mm","designation":"9mm 135gr Critical Duty","manufacturer":"Federal","caliber":"9x19","muzzleVelocityFps":1110,"refBarrelLengthIn":4.5,"bulletId":"critical-9mm","notes":"Barrier-blind defense"},
+  {"id":"ct-9mm-147fmj","designation":"9mm 147gr FMJ","manufacturer":"Federal","caliber":"9x19","muzzleVelocityFps":1000,"refBarrelLengthIn":4.5,"bulletId":"147fmj-9mm"},
+  {"id":"ct-40sw-165","designation":".40 S&W 165gr FMJ","manufacturer":"Federal","caliber":".40 S&W","muzzleVelocityFps":1010,"refBarrelLengthIn":4,"bulletId":"40sw-165fmj"},
+  {"id":"ct-357mag-158","designation":".357 Mag 158gr JHP","manufacturer":"Speer","caliber":".357 Mag","muzzleVelocityFps":1235,"refBarrelLengthIn":4,"bulletId":"357mag-158jhp"},
+  {"id":"ct-57x28-ss190","designation":"SS190","manufacturer":"FN","caliber":"5.7x28","muzzleVelocityFps":2350,"refBarrelLengthIn":10.4,"bulletId":"57x28-ss190","notes":"P90 / Five-seven"},
+  {"id":"ct-58x21-dp","designation":"DBP88 5.8mm","manufacturer":"Norinco","caliber":"5.8x42","muzzleVelocityFps":3180,"refBarrelLengthIn":24.8,"bulletId":"58x21-58dp","notes":"QBU-88 DMR load"}
 ]

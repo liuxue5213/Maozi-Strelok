@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/firearm.dart';
 import '../services/database_service.dart';
 import 'app_state.dart';
+import 'edit_custom_page.dart';
 import 'firearm_detail_page.dart';
 
 /// Browsing page: category chips, search, list of firearms.
@@ -42,6 +43,19 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Ballistics Calculator'),
         actions: [
+          IconButton(
+            tooltip: '自定义数据',
+            icon: const Icon(Icons.playlist_add),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => EditCustomPage(state: widget.state),
+                ),
+              );
+              setState(() {});
+            },
+          ),
           IconButton(
             tooltip: '单位切换',
             icon: Icon(widget.state.unitSystem.name == 'metric'

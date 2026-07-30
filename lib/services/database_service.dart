@@ -55,6 +55,22 @@ class DatabaseService {
       ..addAll(prefs.getStringList(_kFavorites) ?? const []);
   }
 
+  // ---- App settings persistence (selections, environment, units) ----
+  static const _kSettings = 'app_settings';
+
+  Future<void> loadSettingsInto(state) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_kSettings);
+    if (raw == null) return;
+    final m = jsonDecode(raw) as Map<String, dynamic>;
+    state.fromJson(m, this);
+  }
+
+  Future<void> saveSettingsFrom(state) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kSettings, jsonEncode(state.toJson()));
+  }
+
   List<T> _loadUser<T>(
     SharedPreferences prefs,
     String key,

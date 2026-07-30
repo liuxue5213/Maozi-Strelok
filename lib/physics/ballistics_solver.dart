@@ -357,4 +357,41 @@ class BallisticsSolver {
     }
     return pts;
   }
+
+  /// Maximum level-flight range [m] for the current elevation, i.e. where the
+  /// bullet path drops 2 m below the muzzle (a practical "max effective" proxy
+  /// when no target height is given). Returns null if not found within range.
+  double? maxEffectiveRange({double dropLimitM = 2.0, double scanToM = 3000}) {
+    final elevation = solveZeroAngle();
+    final raw = _integrate(stopRange: scanToM, elevation: elevation);
+    for (final s in raw) {
+      // bullet z relative to muzzle bore: z + sightHeight
+      if (s.z + config.sightHeight <= -dropLimitM) return s.x;
+    }
+    return null;
+  }
+
+  /// Find the near and far zero crossings (where the path crosses the LOS,
+  /// z=0), given the solved elevation. Returns ranges in meters.
+  ({double? nearZero, double? farZero}) zeroCrossings(
+      {double scanToM = 3000}) {
+    final elevation = solveZeroAngle();
+    final raw = _integrate(stopRange: scanToM, elevation: elevation);
+    double? near, far;
+    for (int i = 1; i < raw.length; i++) {
+      final z0 = raw[i - 1].z;
+      final z1 = raw[i].z;
+      if (z0 == 0 && z1 == 0) continue;
+      if ((z0 <= 0 && z1 > 0) || (z0 >= 0 && z1 < 0)) {
+        final x = raw[i - 1].x +
+            (raw[i].x - raw[i - 1].x) * (-z0) / (z1 - z0);
+        if (near == null) {
+          near = x;
+        } else {
+          far = x;
+        }
+      }
+    }
+    return (nearZero: near, farZero: far);
+  }
 }

@@ -20,7 +20,12 @@ class ResultPage extends StatefulWidget {
 class _ResultPageState extends State<ResultPage> {
   List<TrajectoryPoint>? _traj;
   double? _sg;
+  double? _nearZero;
+  double? _farZero;
+  double? _maxRange;
+  ShotConfig? _cfg;
   String? _error;
+  bool _showMoa = true; // toggle MOA <-> MIL for corrections
 
   @override
   void initState() {
@@ -73,9 +78,14 @@ class _ResultPageState extends State<ResultPage> {
         mod: s.mod,
         atmosphere: atmo,
       );
+      final zeros = solver.zeroCrossings();
       setState(() {
+        _cfg = cfg;
         _traj = traj;
         _sg = sg;
+        _nearZero = zeros.nearZero;
+        _farZero = zeros.farZero;
+        _maxRange = solver.maxEffectiveRange();
         _error = null;
       });
     } catch (e) {
@@ -93,7 +103,7 @@ class _ResultPageState extends State<ResultPage> {
       );
     }
     final traj = _traj;
-    if (traj == null) {
+    if (traj == null || traj.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: const Text('结果')),
         body: const Center(child: CircularProgressIndicator()),
@@ -102,47 +112,52 @@ class _ResultPageState extends State<ResultPage> {
 
     final bullet = widget.state.bullet!;
     final ct = widget.state.cartridge!;
+    final last = traj.last;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('弹道结果')),
+      appBar: AppBar(
+        title: const Text('弹道结果'),
+        actions: [
+          IconButton(
+            tooltip: _showMoa ? '切换 MIL' : '切换 MOA',
+            onPressed: () => setState(() => _showMoa = !_showMoa),
+            icon: Icon(_showMoa ? Icons.architecture : Icons.straighten),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(12),
         children: [
+          // Loadout summary
           Card(
             child: ListTile(
+              leading: const Icon(Icons.gps_fixed),
               title: Text('${widget.state.firearm!.name} · ${ct.designation}'),
               subtitle: Text(
-                  '${bullet.manufacturer} ${bullet.model} · ${bullet.massGr}gr · BC ${widget.state.useG7 ? (bullet.bcG7 ?? bullet.bcG1) : bullet.bcG1}'),
+                  '${bullet.manufacturer} ${bullet.model} · ${bullet.massGr}gr · BC ${widget.state.useG7 ? (bullet.bcG7 ?? bullet.bcG1).toStringAsFixed(3) : bullet.bcG1.toStringAsFixed(3)} (${widget.state.useG7 ? 'G7' : 'G1'})'),
             ),
           ),
-          if (_sg != null)
-            Card(
-              color: _sg! < 1.0
-                  ? Colors.red.withValues(alpha: 0.15)
-                  : (_sg! < 1.3 ? Colors.orange.withValues(alpha: 0.15) : Colors.green.withValues(alpha: 0.15)),
-              child: ListTile(
-                leading: const Icon(Icons.timeline),
-                title: Text('陀螺稳定性 Sg = ${_sg!.toStringAsFixed(2)}'),
-                subtitle: Text(_sgAssess(_sg!)),
-              ),
-            ),
+          // Stability + key results grid
+          _keyResultsCard(bullet, sys),
           const SizedBox(height: 8),
           Text('弹道曲线（超高 drop vs 距离）',
               style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
-          SizedBox(
-            height: 200,
-            child: _dropChart(traj, sys),
-          ),
+          SizedBox(height: 220, child: _dropChart(traj, sys)),
           const SizedBox(height: 8),
           Text('剩余速度（vs 距离）',
               style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
-          SizedBox(
-            height: 160,
-            child: _velocityChart(traj, sys),
-          ),
+          SizedBox(height: 160, child: _velocityChart(traj, sys)),
           const SizedBox(height: 12),
-          Text('数据表', style: Theme.of(context).textTheme.titleSmall),
+          Row(
+            children: [
+              Text('数据表', style: Theme.of(context).textTheme.titleSmall),
+              const Spacer(),
+              Text('修正: ${_showMoa ? 'MOA' : 'MIL'}',
+                  style: Theme.of(context).textTheme.bodySmall),
+            ],
+          ),
           const SizedBox(height: 8),
           _dataTable(traj, sys),
         ],
@@ -150,20 +165,113 @@ class _ResultPageState extends State<ResultPage> {
     );
   }
 
+  Widget _keyResultsCard(Bullet bullet, U.UnitSystem sys) {
+    final muzzleV = _cfg != null ? _cfg!.muzzleVelocity : 0.0;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          children: [
+            // stability banner
+            if (_sg != null)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: _sgColor(_sg!).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                    '陀螺稳定性 Sg = ${_sg!.toStringAsFixed(2)} · ${_sgAssess(_sg!)}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+              ),
+            const SizedBox(height: 8),
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 3,
+              childAspectRatio: 2.2,
+              mainAxisSpacing: 6,
+              crossAxisSpacing: 6,
+              children: [
+                _stat('初速', Fmt.velocity(muzzleV, sys)),
+                _stat('归零距离',
+                    '${widget.state.mod.zeroRangeYd.toStringAsFixed(0)} yd'),
+                _stat('近零点', _nearZero == null
+                    ? '-'
+                    : '${(_nearZero! * 1.09361).toStringAsFixed(0)} yd'),
+                _stat('远零点', _farZero == null
+                    ? '-'
+                    : '${(_farZero! * 1.09361).toStringAsFixed(0)} yd'),
+                _stat('最大有效射程', _maxRange == null
+                    ? '-'
+                    : '${(_maxRange! * 1.09361).toStringAsFixed(0)} yd'),
+                _stat('末速', Fmt.velocity(_traj!.last.speed, sys)),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _stat(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.grey.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(label,
+              style: const TextStyle(fontSize: 11, color: Colors.grey)),
+          Text(value,
+              style:
+                  const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+        ],
+      ),
+    );
+  }
+
+  Color _sgColor(double sg) {
+    if (sg < 1.0) return Colors.red;
+    if (sg < 1.3) return Colors.orange;
+    return Colors.green;
+  }
+
   Widget _dropChart(List<TrajectoryPoint> traj, U.UnitSystem sys) {
-    final spots = traj
-        .map((p) => FlSpot(
-            sys == U.UnitSystem.imperial ? p.range * 1.09361 : p.range,
-            sys == U.UnitSystem.imperial ? p.drop * 39.37 : p.drop * 100))
-        .toList();
+    final toX = (double m) =>
+        sys == U.UnitSystem.imperial ? m * 1.09361 : m;
+    final toY = (double m) =>
+        sys == U.UnitSystem.imperial ? m * 39.37 : m * 100;
+    final spots = traj.map((p) => FlSpot(toX(p.range), toY(p.drop))).toList();
     final xs = spots.map((e) => e.x).toList()..sort();
     final ys = spots.map((e) => e.y).toList()..sort();
+    // zero (LOS) reference line
+    double minX = 0, maxX = xs.last * 1.05;
+    double minY = (ys.first * 1.1).floorToDouble();
+    double maxY = (ys.last * 1.1).ceilToDouble();
     return LineChart(LineChartData(
-      minY: (ys.first * 1.1).floorToDouble(),
-      maxY: (ys.last * 1.1).ceilToDouble(),
-      minX: 0,
-      maxX: xs.last * 1.05,
-      gridData: FlGridData(show: true, drawVerticalLine: false),
+      minY: minY,
+      maxY: maxY,
+      minX: minX,
+      maxX: maxX,
+      gridData: FlGridData(
+        show: true,
+        drawVerticalLine: false,
+        getDrawingHorizontalLine: (v) => FlLine(
+          color: v == 0 ? Colors.green : Colors.grey.withValues(alpha: 0.3),
+          strokeWidth: v == 0 ? 1.5 : 1,
+        ),
+        checkToShowHorizontalLine: (v) =>
+            v == 0 || v == minY || v == maxY,
+      ),
+      extraLinesData: ExtraLinesData(horizontalLines: [
+        HorizontalLine(y: 0, color: Colors.green, strokeWidth: 1.5),
+      ]),
       titlesData: FlTitlesData(
         bottomTitles: AxisTitles(
             sideTitles: SideTitles(
@@ -175,7 +283,8 @@ class _ResultPageState extends State<ResultPage> {
           sideTitles: SideTitles(showTitles: true, reservedSize: 36),
         ),
         topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        rightTitles:
+            const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       ),
       lineBarsData: [
         LineChartBarData(
@@ -190,17 +299,32 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   Widget _velocityChart(List<TrajectoryPoint> traj, U.UnitSystem sys) {
-    final spots = traj
-        .map((p) => FlSpot(
-            sys == U.UnitSystem.imperial ? p.range * 1.09361 : p.range,
-            sys == U.UnitSystem.imperial ? p.speed * 3.28084 : p.speed))
-        .toList();
+    final toX = (double m) =>
+        sys == U.UnitSystem.imperial ? m * 1.09361 : m;
+    final toY = (double m) =>
+        sys == U.UnitSystem.imperial ? m * 3.28084 : m;
+    final spots = traj.map((p) => FlSpot(toX(p.range), toY(p.speed))).toList();
     final xs = spots.map((e) => e.x).toList()..sort();
+    // Mach 1 reference (speed of sound ~ 340 m/s / 1115 fps)
+    final mach1y = sys == U.UnitSystem.imperial ? 1115.0 : 340.0;
     return LineChart(LineChartData(
       minY: 0,
       minX: 0,
       maxX: xs.last * 1.05,
       gridData: const FlGridData(show: true, drawVerticalLine: false),
+      extraLinesData: ExtraLinesData(horizontalLines: [
+        HorizontalLine(
+            y: mach1y,
+            color: Colors.red,
+            strokeWidth: 1,
+            dashArray: [4, 4],
+            label: HorizontalLineLabel(
+              show: true,
+              alignment: Alignment.topRight,
+              style: const TextStyle(fontSize: 10, color: Colors.red),
+              labelResolver: (_) => 'Mach 1',
+            )),
+      ]),
       titlesData: FlTitlesData(
         bottomTitles: AxisTitles(
             sideTitles: SideTitles(
@@ -212,7 +336,8 @@ class _ResultPageState extends State<ResultPage> {
           sideTitles: SideTitles(showTitles: true, reservedSize: 36),
         ),
         topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        rightTitles:
+            const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       ),
       lineBarsData: [
         LineChartBarData(
@@ -234,7 +359,9 @@ class _ResultPageState extends State<ResultPage> {
           columns: [
             DataColumn(label: Text(sys == U.UnitSystem.imperial ? 'yd' : 'm')),
             DataColumn(label: Text(sys == U.UnitSystem.imperial ? 'drop(in)' : 'drop(cm)')),
-            DataColumn(label: Text(sys == U.UnitSystem.imperial ? 'wind(in)' : 'wind(cm)')),
+            DataColumn(label: Text('高低修正')),
+            DataColumn(label: Text(sys == U.UnitSystem.imperial ? '风偏(in)' : '风偏(cm)')),
+            DataColumn(label: Text('风向修正')),
             DataColumn(label: Text(sys == U.UnitSystem.imperial ? 'vel(fps)' : 'vel(m/s)')),
             DataColumn(label: Text(sys == U.UnitSystem.imperial ? 'E(ftlb)' : 'E(J)')),
             DataColumn(label: const Text('t(s)')),
@@ -243,7 +370,13 @@ class _ResultPageState extends State<ResultPage> {
               .map((p) => DataRow(cells: [
                     DataCell(Text(Fmt.dist(p.range, sys))),
                     DataCell(Text(Fmt.shortLen(p.drop, sys))),
+                    DataCell(Text(p.range > 1
+                        ? Fmt.comeUp(p.comeUpRad, moa: _showMoa)
+                        : '-')),
                     DataCell(Text(Fmt.shortLen(p.windage, sys))),
+                    DataCell(Text(p.range > 1
+                        ? _windageCorrection(p, sys)
+                        : '-')),
                     DataCell(Text(Fmt.velocity(p.speed, sys))),
                     DataCell(Text(Fmt.energy(p.energy, sys))),
                     DataCell(Text(Fmt.time(p.timeOfFlight))),
@@ -252,6 +385,15 @@ class _ResultPageState extends State<ResultPage> {
         ),
       ),
     );
+  }
+
+  /// Windage angular correction (same magnitude formula as come-up, but for
+  /// the horizontal windage offset). Sign: + = push right.
+  String _windageCorrection(TrajectoryPoint p, U.UnitSystem sys) {
+    final rad = p.windage / p.range; // small angle
+    final sign = rad >= 0 ? '+' : '';
+    final val = _showMoa ? U.Units.radToMoa(rad.abs()) : U.Units.radToMil(rad.abs());
+    return '$sign${val.toStringAsFixed(1)} ${_showMoa ? 'MOA' : 'MIL'}';
   }
 
   String _sgAssess(double sg) {
