@@ -1,11 +1,13 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
+import '../models/firearm.dart';
 import '../physics/atmosphere.dart';
 import '../physics/ballistics_solver.dart';
 import '../physics/coriolis.dart';
 import '../physics/units.dart' as U;
 import '../services/shot_builder.dart';
+import '../services/dope_card.dart';
 import 'app_state.dart';
 import 'format.dart';
 
@@ -65,6 +67,8 @@ class _ResultPageState extends State<ResultPage> {
         wind: wind,
         coriolis: cor,
         dragModelId: s.useG7 ? 'G7' : 'G1',
+        spinDrift: s.useSpinDrift,
+        losAngleDeg: s.losAngleDeg,
       );
       final solver = BallisticsSolver(cfg);
       final traj = solver.solve(
@@ -118,6 +122,11 @@ class _ResultPageState extends State<ResultPage> {
       appBar: AppBar(
         title: const Text('弹道结果'),
         actions: [
+          IconButton(
+            tooltip: '导出 DOPE 卡',
+            onPressed: () => _showDope(context, bullet, ct, traj, sys),
+            icon: const Icon(Icons.ios_share),
+          ),
           IconButton(
             tooltip: _showMoa ? '切换 MIL' : '切换 MOA',
             onPressed: () => setState(() => _showMoa = !_showMoa),
@@ -394,6 +403,46 @@ class _ResultPageState extends State<ResultPage> {
     final sign = rad >= 0 ? '+' : '';
     final val = _showMoa ? U.Units.radToMoa(rad.abs()) : U.Units.radToMil(rad.abs());
     return '$sign${val.toStringAsFixed(1)} ${_showMoa ? 'MOA' : 'MIL'}';
+  }
+
+  /// Show the DOPE card in a copyable dialog.
+  void _showDope(BuildContext context, Bullet bullet, Cartridge ct,
+      List<TrajectoryPoint> traj, U.UnitSystem sys) {
+    final s = widget.state;
+    final loadout = '${s.firearm!.name} | ${ct.designation} | '
+        '${bullet.manufacturer} ${bullet.model} ${bullet.massGr}gr | '
+        'BC ${s.useG7 ? (bullet.bcG7 ?? bullet.bcG1) : bullet.bcG1} (${s.useG7 ? 'G7' : 'G1'}) | '
+        '归零 ${s.mod.zeroRangeYd.toStringAsFixed(0)}yd';
+    final conditions =
+        '${s.temperatureC.toStringAsFixed(0)}°C / ${s.pressureHpa.toStringAsFixed(0)}hPa / '
+        '海拔${s.altitudeM.toStringAsFixed(0)}m / 风${s.windSpeedMph.toStringAsFixed(0)}mph@${s.windDirectionDeg.toStringAsFixed(0)}°';
+    final text = DopeCard.build(
+      loadout: loadout,
+      traj: traj,
+      sys: sys,
+      moa: _showMoa,
+      conditions: conditions,
+    );
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('DOPE 卡'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: SelectableText(text,
+                style: const TextStyle(
+                    fontFamily: 'monospace', fontSize: 12)),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('关闭'),
+          ),
+        ],
+      ),
+    );
   }
 
   String _sgAssess(double sg) {

@@ -5,6 +5,7 @@ import '../services/database_service.dart';
 import 'app_state.dart';
 import 'edit_custom_page.dart';
 import 'firearm_detail_page.dart';
+import 'truing_page.dart';
 
 /// Browsing page: category chips, search, list of firearms.
 class HomePage extends StatefulWidget {
@@ -43,6 +44,19 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Ballistics Calculator'),
         actions: [
+          IconButton(
+            tooltip: '弹道校准 (Truing)',
+            icon: const Icon(Icons.tune),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TruingPage(state: widget.state),
+                ),
+              );
+              setState(() {});
+            },
+          ),
           IconButton(
             tooltip: '自定义数据',
             icon: const Icon(Icons.playlist_add),

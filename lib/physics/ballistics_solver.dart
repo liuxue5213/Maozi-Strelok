@@ -78,6 +78,21 @@ class ShotConfig {
   /// Coriolis parameters (null disables the effect).
   final Coriolis? coriolis;
 
+  /// Whether to compute spin drift (gyroscopic drift to the right for a
+  /// right-hand-twist barrel). Default true.
+  final bool spinDrift;
+
+  /// Barrel twist rate [in/turn]. Used for spin-drift magnitude (and mirrors
+  /// the Modification's twist, kept here so the solver is self-contained).
+  final double twistIn;
+
+  /// Bullet length [in]. Used for spin-drift.
+  final double lengthIn;
+
+  /// Line-of-sight elevation angle [rad], +uphill. For uphill/downhill shooting
+  /// the gravity component along the bore changes. 0 = level fire.
+  final double losAngleRad;
+
   const ShotConfig({
     required this.muzzleVelocity,
     required this.mass,
@@ -90,6 +105,10 @@ class ShotConfig {
     required this.atmosphere,
     required this.wind,
     this.coriolis,
+    this.spinDrift = true,
+    this.twistIn = 0,
+    this.lengthIn = 0,
+    this.losAngleRad = 0,
   });
 }
 
@@ -146,6 +165,12 @@ class BallisticsSolver {
       : _crossArea = pi * config.diameter * config.diameter / 4.0,
         _massGr = config.mass / 0.45359237 * 7000.0,
         _diaIn = config.diameter * 39.3701;
+
+  /// Effective gravity along the bullet's path. For uphill/downhill fire the
+  /// gravity component in the plane of motion is g*cos(LOS angle); this is the
+  /// standard simplified treatment used by commercial solvers. Level fire: g.
+  double get _effectiveGravity =>
+      config.atmosphere.gravity * cos(config.losAngleRad.abs());
 
   /// Solve the bore elevation angle [rad] that zeros the trajectory at the
   /// configured zero range (bisection on bullet height at zero range).
@@ -287,7 +312,7 @@ class BallisticsSolver {
   /// Integrate from the muzzle to [stopRange] (or ground), returning raw states.
   List<_State> _integrate(
       {required double stopRange, required double elevation}) {
-    final g = config.atmosphere.gravity;
+    final g = _effectiveGravity;
     final rho = config.atmosphere.density;
     final cSound = config.atmosphere.speedOfSound;
 
@@ -320,6 +345,24 @@ class BallisticsSolver {
     final halfMass = config.mass * 0.5;
     final pts = <TrajectoryPoint>[];
 
+    // Precompute spin-drift scale factor if enabled.
+    // Litz gyroscopic drift (right-hand twist -> drift to the right, +y):
+    //   drift_inches = 1.25 * (Sg + 1.2) * tof^1.83
+    // where Sg is the Miller stability factor at the muzzle. We scale by
+    // (reference_twist / actual_twist) to reflect twist rate.
+    final bool useSpin = config.spinDrift && config.twistIn > 0 && config.lengthIn > 0;
+    double sg = 0;
+    if (useSpin) {
+      // muzzle Mach-based Miller Sg
+      const rho0 = 1.225;
+      final t = config.twistIn / _diaIn;
+      final l = config.lengthIn / _diaIn;
+      final base = (30.0 * _massGr) /
+          (rho0 * t * t * _diaIn * _diaIn * _diaIn * l);
+      final v0fps = config.muzzleVelocity * 3.28084;
+      sg = base * sqrt(v0fps / (7000.0 * _diaIn));
+    }
+
     double nextSample = 0;
     int i = 0;
     while (nextSample <= maxRangeM + 1e-6) {
@@ -332,7 +375,7 @@ class BallisticsSolver {
       final spanx = p1.x - p0.x;
       final f = spanx.abs() > 1e-9 ? (nextSample - p0.x) / spanx : 0.0;
       final x = nextSample;
-      final y = p0.y + f * (p1.y - p0.y);
+      double y = p0.y + f * (p1.y - p0.y);
       final z = p0.z + f * (p1.z - p0.z);
       final vx = p0.vx + f * (p1.vx - p0.vx);
       final vy = p0.vy + f * (p1.vy - p0.vy);
@@ -340,6 +383,12 @@ class BallisticsSolver {
       final tof = (i - 1 + f) * dt;
       final speed = sqrt(vx * vx + vy * vy + vz * vz);
       final energy = halfMass * speed * speed;
+
+      // Spin (gyroscopic) drift, additive to windage.
+      if (useSpin) {
+        final driftIn = 1.25 * (sg + 1.2) * pow(tof, 1.83);
+        y += driftIn * 0.0254; // inches -> meters, +right
+      }
 
       // Come-up (sight correction) to hit at this range: -drop/x, small angle.
       final comeUp = x > 1 ? -z / x : 0.0;
@@ -393,5 +442,61 @@ class BallisticsSolver {
       }
     }
     return (nearZero: near, farZero: far);
+  }
+
+  /// Drop (relative to LOS) at a given range [rangeM], with current config.
+  double dropAtRange(double rangeM) {
+    final elev = solveZeroAngle();
+    final raw = _integrate(stopRange: rangeM, elevation: elev);
+    if (raw.isEmpty) return 0;
+    return raw.last.z;
+  }
+
+  /// Drop (m, relative to LOS) at a given range for a hypothetical BC.
+  /// Used by the truing routine.
+  double _dropAtRangeWithBc(double rangeM, double bc) {
+    final alt = ShotConfig(
+      muzzleVelocity: config.muzzleVelocity,
+      mass: config.mass,
+      diameter: config.diameter,
+      bc: bc,
+      dragModel: config.dragModel,
+      sightHeight: config.sightHeight,
+      zeroRange: config.zeroRange,
+      atmosphere: config.atmosphere,
+      wind: config.wind,
+      coriolis: config.coriolis,
+      spinDrift: false,
+      twistIn: 0,
+      lengthIn: 0,
+      losAngleRad: config.losAngleRad,
+    );
+    return BallisticsSolver(alt, dt: dt).dropAtRange(rangeM);
+  }
+
+  /// Truing: given an observed drop [observedDropM] (relative to LOS, negative
+  /// = bullet low) at [rangeM], find the BC that reproduces it. Returns the
+  /// trued BC, or null if the solver can't match it within a sane BC band.
+  /// (Lower BC -> more drop; higher BC -> less drop.)
+  double? truedBc({required double rangeM, required double observedDropM}) {
+    double lo = config.bc * 0.4;
+    double hi = config.bc * 2.0;
+    double fLo = _dropAtRangeWithBc(rangeM, lo) - observedDropM;
+    double fHi = _dropAtRangeWithBc(rangeM, hi) - observedDropM;
+    // Lower BC => more negative drop => fLo (drop - obs) more negative.
+    // We need a sign change in f.
+    if ((fLo > 0) == (fHi > 0)) return null; // observed drop out of band
+    for (int i = 0; i < 60; i++) {
+      final mid = 0.5 * (lo + hi);
+      final fMid = _dropAtRangeWithBc(rangeM, mid) - observedDropM;
+      if ((fLo > 0) != (fMid > 0)) {
+        hi = mid;
+        fHi = fMid;
+      } else {
+        lo = mid;
+        fLo = fMid;
+      }
+    }
+    return 0.5 * (lo + hi);
   }
 }

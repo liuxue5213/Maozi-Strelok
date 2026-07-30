@@ -39,6 +39,8 @@ class AppState extends ChangeNotifier {
   bool useG7 = false;
   double maxRangeYd = 800;
   double stepYd = 100;
+  bool useSpinDrift = true;
+  double losAngleDeg = 0; // line-of-sight elevation, +uphill
 
   U.UnitSystem unitSystem = U.UnitSystem.metric;
 
@@ -163,6 +165,8 @@ class AppState extends ChangeNotifier {
         'useG7': useG7,
         'maxRangeYd': maxRangeYd,
         'stepYd': stepYd,
+        'useSpinDrift': useSpinDrift,
+        'losAngleDeg': losAngleDeg,
         'unitSystem': unitSystem.name,
       };
 
@@ -179,6 +183,8 @@ class AppState extends ChangeNotifier {
     useG7 = (m['useG7'] as bool?) ?? false;
     maxRangeYd = (m['maxRangeYd'] as num?)?.toDouble() ?? 800;
     stepYd = (m['stepYd'] as num?)?.toDouble() ?? 100;
+    useSpinDrift = (m['useSpinDrift'] as bool?) ?? true;
+    losAngleDeg = (m['losAngleDeg'] as num?)?.toDouble() ?? 0;
     unitSystem = U.UnitSystem.values
         .byName((m['unitSystem'] as String?) ?? 'metric');
     _mod = m['mod'] is Map

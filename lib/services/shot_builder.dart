@@ -53,6 +53,8 @@ class ShotBuilder {
     required Wind wind,
     Coriolis? coriolis,
     String dragModelId = 'G1',
+    bool spinDrift = true,
+    double losAngleDeg = 0,
   }) {
     final effBarrel = mod.effectiveBarrelLength(firearm);
     final mvFps = effectiveMuzzleVelocity(
@@ -75,6 +77,10 @@ class ShotBuilder {
       atmosphere: atmosphere,
       wind: wind,
       coriolis: coriolis,
+      spinDrift: spinDrift,
+      twistIn: mod.effectiveTwistRate(firearm),
+      lengthIn: bullet.lengthIn,
+      losAngleRad: losAngleDeg * 3.141592653589793 / 180.0,
     );
   }
 
