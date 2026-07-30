@@ -1,0 +1,63 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Flutter doctor
+        run: flutter doctor -v
+
+      # The repo intentionally does NOT include platform folders (android/, ios/,
+      # ...). They are regenerated here so the source tree stays portable.
+      # We back up our pubspec first: `flutter create` would otherwise overwrite
+      # it with a default one and drop our dependencies/assets.
+      - name: Generate platform folders
+        run: |
+          cp pubspec.yaml pubspec.yaml.bak
+          flutter create --platforms=android --org com.ballistics --project-name ballistics_calculator .
+          cp pubspec.yaml.bak pubspec.yaml
+          rm pubspec.yaml.bak
+          # `flutter create` also generates a default widget_test referencing the
+          # template counter app; remove it so `flutter test` only runs our suite.
+          rm -f test/widget_test.dart
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run unit tests (physics engine)
+        run: flutter test
+
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ballistics-calculator-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 30

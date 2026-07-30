@@ -1,0 +1,38 @@
+[
+  {"id":"ct-m80-762","designation":"M80 Ball","manufacturer":"Lake City","caliber":"7.62 NATO","muzzleVelocityFps":2800,"refBarrelLengthIn":24,"bulletId":"m80-762nato","notes":"Standard NATO ball"},
+  {"id":"ct-m118lr-762","designation":"M118LR Special Ball","manufacturer":"Lake City","caliber":"7.62 NATO","muzzleVelocityFps":2580,"refBarrelLengthIn":24,"bulletId":"m118lr-762","notes":"Sniper load, 175gr SMK"},
+  {"id":"ct-m993-762","designation":"M993 AP","manufacturer":"Lake City","caliber":"7.62 NATO","muzzleVelocityFps":3050,"refBarrelLengthIn":24,"bulletId":"m993-762","notes":"Armor piercing"},
+  {"id":"ct-mk316-762","designation":"MK316 MOD 0","manufacturer":"Federal","caliber":"7.62 NATO","muzzleVelocityFps":2550,"refBarrelLengthIn":24,"bulletId":"sierra-175smk-308","notes":"Match sniping"},
+  {"id":"ct-308win-168","designation":".308 Win Match 168gr","manufacturer":"Federal","caliber":".308 Win","muzzleVelocityFps":2620,"refBarrelLengthIn":24,"bulletId":"sierra-168smk-308"},
+  {"id":"ct-308win-175","designation":".308 Win Gold Medal 175gr","manufacturer":"Federal","caliber":".308 Win","muzzleVelocityFps":2600,"refBarrelLengthIn":24,"bulletId":"sierra-175smk-308"},
+
+  {"id":"ct-m855-556","designation":"M855 (SS109)","manufacturer":"Lake City","caliber":"5.56/.223","muzzleVelocityFps":3020,"refBarrelLengthIn":20,"bulletId":"m855-ss109-556","notes":"62gr penetrator"},
+  {"id":"ct-m193-556","designation":"M193 Ball","manufacturer":"Lake City","caliber":"5.56/.223","muzzleVelocityFps":3165,"refBarrelLengthIn":20,"bulletId":"m193-55fmj-556","notes":"55gr FMJ"},
+  {"id":"ct-mk262-556","designation":"MK262 MOD 1","manufacturer":"Black Hills","caliber":"5.56/.223","muzzleVelocityFps":2750,"refBarrelLengthIn":20,"bulletId":"mk262-77smk-556","notes":"77gr match, SOF/Sniper"},
+  {"id":"ct-mk318-556","designation":"MK318 MOD 0 SOST","manufacturer":"Federal","caliber":"5.56/.223","muzzleVelocityFps":2950,"refBarrelLengthIn":14.5,"bulletId":"mk318-556","notes":"Barrier-blind"},
+  {"id":"ct-m855a-556","designation":"M855A1 EPR","manufacturer":"Lake City","caliber":"5.56/.223","muzzleVelocityFps":3050,"refBarrelLengthIn":14.5,"bulletId":"m855-ss109-556","notes":"Enhanced performance"},
+
+  {"id":"ct-m43-762x39","designation":"M43 (57-N-231)","manufacturer":"Tula","caliber":"7.62x39","muzzleVelocityFps":2330,"refBarrelLengthIn":16.3,"bulletId":"m43-123fmj-762x39","notes":"AK standard"},
+  {"id":"ct-m43-fmj-762x39","designation":"123gr FMJ","manufacturer":"Barnaul","caliber":"7.62x39","muzzleVelocityFps":2350,"refBarrelLengthIn":16.3,"bulletId":"m43-123fmj-762x39"},
+  {"id":"ct-7n10-545","designation":"7N10","manufacturer":"Barnaul","caliber":"5.45x39","muzzleVelocityFps":2950,"refBarrelLengthIn":16.0,"bulletId":"7n10-545","notes":"AK-74 improved"},
+  {"id":"ct-7n6-545","designation":"7N6","manufacturer":"Vympel","caliber":"5.45x39","muzzleVelocityFps":2970,"refBarrelLengthIn":16.0,"bulletId":"7n6-545","notes":"AK-74 original"},
+
+  {"id":"ct-300wm-208","designation":".300 WM 208gr ELD-M","manufacturer":"Hornady","caliber":".300 Win Mag","muzzleVelocityFps":2850,"refBarrelLengthIn":26,"bulletId":"hornady-208eldm-300wm"},
+  {"id":"ct-338lm-250","designation":".338 LM 250gr Scenar","manufacturer":"Lapua","caliber":".338 Lapua Mag","muzzleVelocityFps":2950,"refBarrelLengthIn":27,"bulletId":"lapua-220scenar-338","notes":"Long-range sniper"},
+  {"id":"ct-338lm-300","designation":".338 LM 300gr Hybrid","manufacturer":"Berger","caliber":".338 Lapua Mag","muzzleVelocityFps":2750,"refBarrelLengthIn":27,"bulletId":"berger-300hyb-338"},
+
+  {"id":"ct-m33-50bmg","designation":"M33 Ball","manufacturer":"Lake City","caliber":".50 BMG","muzzleVelocityFps":2910,"refBarrelLengthIn":45,"bulletId":"m33-660fmj-50bmg","notes":"Standard .50"},
+  {"id":"ct-m2ap-50bmg","designation":"M2 AP","manufacturer":"Lake City","caliber":".50 BMG","muzzleVelocityFps":2910,"refBarrelLengthIn":45,"bulletId":"m2ap-50bmg","notes":"Armor piercing"},
+  {"id":"ct-mk211-50bmg","designation":"MK211 RAUFOSS","manufacturer":"Raufoss","caliber":".50 BMG","muzzleVelocityFps":2900,"refBarrelLengthIn":45,"bulletId":"mcmillan-mk211-50bmg","notes":"HEIAP multipurpose"},
+  {"id":"ct-amax-50bmg","designation":".50 A-MAX 750gr","manufacturer":"Hornady","caliber":".50 BMG","muzzleVelocityFps":2700,"refBarrelLengthIn":45,"bulletId":"hornady-750eldx-50bmg","notes":"Extreme LR"},
+
+  {"id":"ct-m882-9mm","designation":"M882 NATO","manufacturer":"Winchester","caliber":"9x19 NATO","muzzleVelocityFps":1200,"refBarrelLengthIn":5,"bulletId":"m882-9mm"},
+  {"id":"ct-9mm-115","designation":"9mm 115gr FMJ","manufacturer":"Fiocchi","caliber":"9x19","muzzleVelocityFps":1150,"refBarrelLengthIn":4.5,"bulletId":"m855-115fmj-9mm"},
+  {"id":"ct-golddot-9mm","designation":"9mm 124gr Gold Dot","manufacturer":"Speer","caliber":"9x19","muzzleVelocityFps":1150,"refBarrelLengthIn":4.5,"bulletId":"goldDot-124-9mm"},
+  {"id":"ct-makarov-9x18","designation":"9x18 Mak 95gr","manufacturer":"Barnaul","caliber":"9x18 Mak","muzzleVelocityFps":1020,"refBarrelLengthIn":3.9,"bulletId":"makarov-95fmj-9x18"},
+  {"id":"ct-45acp-230","designation":".45 ACP 230gr FMJ","manufacturer":"Federal","caliber":".45 ACP","muzzleVelocityFps":835,"refBarrelLengthIn":5,"bulletId":"230fmj-45acp"},
+
+  {"id":"ct-12ga-slug","designation":"12ga Rifled Slug","manufacturer":"Brenneke","caliber":"12 Gauge","muzzleVelocityFps":1550,"refBarrelLengthIn":20,"bulletId":"12ga-rifled-slug"},
+  {"id":"ct-12ga-buck","designation":"12ga 00 Buck","manufacturer":"Federal","caliber":"12 Gauge","muzzleVelocityFps":1325,"refBarrelLengthIn":18,"bulletId":"12ga-buck-00"},
+  {"id":"ct-12ga-bird","designation":"12ga #7.5 Birdshot","manufacturer":"Winchester","caliber":"12 Gauge","muzzleVelocityFps":1250,"refBarrelLengthIn":28,"bulletId":"12ga-bird-7.5"}
+]

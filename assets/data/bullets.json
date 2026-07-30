@@ -1,0 +1,45 @@
+[
+  {"id":"sierra-168smk-308","manufacturer":"Sierra","model":"MatchKing HPBT 168gr","caliber":".308 Win","massGr":168,"diameterIn":0.308,"lengthIn":1.21,"bcG1":0.462,"bcG7":0.223,"type":"bthp"},
+  {"id":"sierra-175smk-308","manufacturer":"Sierra","model":"MatchKing HPBT 175gr","caliber":".308 Win","massGr":175,"diameterIn":0.308,"lengthIn":1.26,"bcG1":0.505,"bcG7":0.243,"type":"bthp"},
+  {"id":"sierra-155smk-308","manufacturer":"Sierra","model":"MatchKing HPBT 155gr (Palma)","caliber":".308 Win","massGr":155,"diameterIn":0.308,"lengthIn":1.16,"bcG1":0.404,"bcG7":0.197,"type":"bthp"},
+  {"id":"hornady-168amx-308","manufacturer":"Hornady","model":"A-MAX 168gr","caliber":".308 Win","massGr":168,"diameterIn":0.308,"lengthIn":1.28,"bcG1":0.475,"bcG7":0.235,"type":"hpbt"},
+  {"id":"hornady-178eldm-308","manufacturer":"Hornady","model":"ELD-M 178gr","caliber":".308 Win","massGr":178,"diameterIn":0.308,"lengthIn":1.36,"bcG1":0.530,"bcG7":0.266,"type":"hpbt"},
+  {"id":"berger-175vld-308","manufacturer":"Berger","model":"VLD Target 175gr","caliber":".308 Win","massGr":175,"diameterIn":0.308,"lengthIn":1.34,"bcG1":0.515,"bcG7":0.261,"type":"hpbt"},
+  {"id":"lapua-178scenar-308","manufacturer":"Lapua","model":"Scenar 178gr","caliber":".308 Win","massGr":178,"diameterIn":0.308,"lengthIn":1.30,"bcG1":0.525,"bcG7":0.265,"type":"hpbt"},
+
+  {"id":"sierra-77smk-223","manufacturer":"Sierra","model":"MatchKing HPBT 77gr","caliber":"5.56/.223","massGr":77,"diameterIn":0.224,"lengthIn":0.94,"bcG1":0.362,"bcG7":0.184,"type":"bthp"},
+  {"id":"hornady-75eldm-223","manufacturer":"Hornady","model":"ELD-M 75gr","caliber":"5.56/.223","massGr":75,"diameterIn":0.224,"lengthIn":0.95,"bcG1":0.397,"bcG7":0.200,"type":"hpbt"},
+  {"id":"sierra-69smk-223","manufacturer":"Sierra","model":"MatchKing HPBT 69gr","caliber":"5.56/.223","massGr":69,"diameterIn":0.224,"lengthIn":0.90,"bcG1":0.301,"bcG7":0.153,"type":"bthp"},
+  {"id":"m855-ss109-556","manufacturer":"Lake City","model":"M855/SS109 62gr penetrator","caliber":"5.56/.223","massGr":62,"diameterIn":0.224,"lengthIn":0.91,"bcG1":0.304,"type":"ap"},
+  {"id":"m193-55fmj-556","manufacturer":"Lake City","model":"M193 55gr FMJ","caliber":"5.56/.223","massGr":55,"diameterIn":0.224,"lengthIn":0.79,"bcG1":0.243,"type":"fmj"},
+  {"id":"mk262-77smk-556","manufacturer":"Black Hills","model":"MK262 MOD 1 (77gr SMK)","caliber":"5.56/.223","massGr":77,"diameterIn":0.224,"lengthIn":0.94,"bcG1":0.362,"bcG7":0.184,"type":"bthp"},
+  {"id":"mk318-556","manufacturer":"Federal","model":"MK318 SOST 62gr","caliber":"5.56/.223","massGr":62,"diameterIn":0.224,"lengthIn":0.86,"bcG1":0.300,"type":"openTip"},
+
+  {"id":"m80-762nato","manufacturer":"Lake City","model":"M80 147gr FMJ","caliber":"7.62 NATO","massGr":147,"diameterIn":0.308,"lengthIn":1.13,"bcG1":0.390,"type":"fmj"},
+  {"id":"m118lr-762","manufacturer":"Lake City","model":"M118LR 175gr SMK","caliber":"7.62 NATO","massGr":175,"diameterIn":0.308,"lengthIn":1.26,"bcG1":0.496,"bcG7":0.243,"type":"bthp"},
+  {"id":"m993-762","manufacturer":"Lake City","model":"M993 AP 130gr","caliber":"7.62 NATO","massGr":130,"diameterIn":0.308,"lengthIn":1.05,"bcG1":0.350,"type":"ap"},
+  {"id":"m43-123fmj-762x39","manufacturer":"Tula","model":"M43 123gr FMJ","caliber":"7.62x39","massGr":123,"diameterIn":0.311,"lengthIn":1.04,"bcG1":0.275,"type":"fmj"},
+  {"id":"7n10-545","manufacturer":"Barnaul","model":"7N10 53gr FMJ","caliber":"5.45x39","massGr":53,"diameterIn":0.221,"lengthIn":0.82,"bcG1":0.259,"type":"fmj"},
+  {"id":"7n6-545","manufacturer":"Vympel","model":"7N6 53gr FMJ","caliber":"5.45x39","massGr":53,"diameterIn":0.221,"lengthIn":0.80,"bcG1":0.251,"type":"fmj"},
+
+  {"id":"hornady-208eldm-300wm","manufacturer":"Hornady","model":"ELD-M 208gr","caliber":".300 Win Mag","massGr":208,"diameterIn":0.308,"lengthIn":1.50,"bcG1":0.645,"bcG7":0.326,"type":"hpbt"},
+  {"id":"berger-215hyb-300wm","manufacturer":"Berger","model":"Hybrid Target 215gr","caliber":".300 Win Mag","massGr":215,"diameterIn":0.308,"lengthIn":1.52,"bcG1":0.691,"bcG7":0.349,"type":"hpbt"},
+  {"id":"lapua-220scenar-338","manufacturer":"Lapua","model":"Scenar 250gr","caliber":".338 Lapua Mag","massGr":250,"diameterIn":0.338,"lengthIn":1.62,"bcG1":0.607,"bcG7":0.307,"type":"hpbt"},
+  {"id":"berger-300hyb-338","manufacturer":"Berger","model":"Hybrid OTM 300gr","caliber":".338 Lapua Mag","massGr":300,"diameterIn":0.338,"lengthIn":1.72,"bcG1":0.758,"bcG7":0.383,"type":"hpbt"},
+  {"id":"hornady-285eldm-338","manufacturer":"Hornady","model":"ELD-M 285gr","caliber":".338 Lapua Mag","massGr":285,"diameterIn":0.338,"lengthIn":1.66,"bcG1":0.718,"bcG7":0.363,"type":"hpbt"},
+
+  {"id":"hornady-750eldx-50bmg","manufacturer":"Hornady","model":"A-MAX 750gr","caliber":".50 BMG","massGr":750,"diameterIn":0.510,"lengthIn":2.40,"bcG1":1.050,"bcG7":0.532,"type":"hpbt"},
+  {"id":"m33-660fmj-50bmg","manufacturer":"Lake City","model":"M33 660gr FMJ","caliber":".50 BMG","massGr":660,"diameterIn":0.510,"lengthIn":2.27,"bcG1":0.620,"type":"fmj"},
+  {"id":"m2ap-50bmg","manufacturer":"Lake City","model":"M2 AP 661gr","caliber":".50 BMG","massGr":661,"diameterIn":0.510,"lengthIn":2.28,"bcG1":0.625,"type":"ap"},
+  {"id":"mcmillan-mk211-50bmg","manufacturer":"Raufoss","model":"NM140 MK211 600gr HEIAP","caliber":".50 BMG","massGr":600,"diameterIn":0.510,"lengthIn":2.30,"bcG1":0.660,"type":"ap"},
+
+  {"id":"m882-9mm","manufacturer":"Winchester","model":"M882 124gr FMJ","caliber":"9x19 NATO","massGr":124,"diameterIn":0.355,"lengthIn":0.58,"bcG1":0.150,"type":"fmj"},
+  {"id":"goldDot-124-9mm","manufacturer":"Speer","model":"Gold Dot 124gr JHP","caliber":"9x19","massGr":124,"diameterIn":0.355,"lengthIn":0.56,"bcG1":0.135,"type":"hp"},
+  {"id":"m855-115fmj-9mm","manufacturer":"Fiocchi","model":"115gr FMJ","caliber":"9x19","massGr":115,"diameterIn":0.355,"lengthIn":0.54,"bcG1":0.140,"type":"fmj"},
+  {"id":"makarov-95fmj-9x18","manufacturer":"Barnaul","model":"95gr FMJ","caliber":"9x18 Mak","massGr":95,"diameterIn":0.365,"lengthIn":0.53,"bcG1":0.130,"type":"fmj"},
+  {"id":"230fmj-45acp","manufacturer":"Federal","model":"230gr FMJ","caliber":".45 ACP","massGr":230,"diameterIn":0.452,"lengthIn":0.68,"bcG1":0.162,"type":"fmj"},
+
+  {"id":"12ga-rifled-slug","manufacturer":"Brenneke","model":"12ga Rifled Slug 1oz (438gr)","caliber":"12 Gauge","massGr":438,"diameterIn":0.729,"lengthIn":0.85,"bcG1":0.080,"type":"slug"},
+  {"id":"12ga-buck-00","manufacturer":"Federal","model":"12ga 00 Buckshot","caliber":"12 Gauge","massGr":48,"diameterIn":0.330,"lengthIn":0.33,"bcG1":0.050,"type":"shotgunShell"},
+  {"id":"12ga-bird-7.5","manufacturer":"Winchester","model":"12ga #7.5 Birdshot","caliber":"12 Gauge","massGr":2,"diameterIn":0.095,"lengthIn":0.095,"bcG1":0.020,"type":"shotgunShell"}
+]
