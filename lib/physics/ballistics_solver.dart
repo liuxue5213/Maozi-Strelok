@@ -499,4 +499,65 @@ class BallisticsSolver {
     }
     return 0.5 * (lo + hi);
   }
+
+  /// Lead (hold-off) for a moving target, in meters of horizontal displacement
+  /// the shooter must hold ahead of the target.
+  ///
+  /// [targetSpeedMps] target speed perpendicular to the line of sight (m/s).
+  /// [rangeM] target distance.
+  /// Returns the linear lead distance: lead = targetSpeed * timeOfFlight,
+  /// where the time of flight is taken from the solved trajectory at [rangeM].
+  double? leadAt({required double targetSpeedMps, required double rangeM}) {
+    final elev = solveZeroAngle();
+    final raw = _integrate(stopRange: rangeM, elevation: elev);
+    if (raw.isEmpty) return null;
+    final tof = (raw.length - 1) * dt;
+    return targetSpeedMps * tof;
+  }
+
+  /// Convert a linear lead (meters) to an angular hold-off (radians) at range.
+  static double leadToAngle(double leadM, double rangeM) =>
+      rangeM > 0 ? leadM / rangeM : 0;
+
+  /// Aerodynamic jump: the vertical deflection caused by a crosswind as the
+  /// bullet transitions through transonic flow. Litz approximate form:
+  ///
+  ///   jump_MOA ≈ -0.01 * Sg * (drift_MOA)
+  ///
+  /// i.e. a right crosswind (drift right) pushes the impact slightly down for
+  /// a right-hand twist. Returns the vertical correction in radians (+ = up).
+  /// [driftRad] is the horizontal wind drift angle at the target (rad, +right).
+  /// [sg] is the Miller stability factor.
+  double aerodynamicJump({required double driftRad, required double sg}) {
+    final driftMoa = driftRad * 60 * 180 / pi;
+    final jumpMoa = -0.01 * sg * driftMoa;
+    return jumpMoa * pi / (60 * 180);
+  }
+
+  /// Distance [m] at which the bullet's speed first drops below Mach 1.2
+  /// (start of the transonic transition). Returns null if it stays supersonic
+  /// within the scan range. Useful for warning the shooter that accuracy may
+  /// degrade beyond this range.
+  double? transonicRange({double machThreshold = 1.2, double scanToM = 3000}) {
+    final elev = solveZeroAngle();
+    final raw = _integrate(stopRange: scanToM, elevation: elev);
+    final cSound = config.atmosphere.speedOfSound;
+    final limit = machThreshold * cSound;
+    double? prevSpeed;
+    double? prevX;
+    for (final s in raw) {
+      final sp = sqrt(s.vx * s.vx + s.vy * s.vy + s.vz * s.vz);
+      if (sp <= limit) {
+        if (prevSpeed != null && prevX != null && prevSpeed > limit) {
+          // interpolate crossing
+          final frac = (prevSpeed - limit) / (prevSpeed - sp);
+          return prevX + frac * (s.x - prevX);
+        }
+        return s.x;
+      }
+      prevSpeed = sp;
+      prevX = s.x;
+    }
+    return null;
+  }
 }

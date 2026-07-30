@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../models/firearm.dart';
 import '../physics/atmosphere.dart';
 import '../physics/ballistics_solver.dart';
-import '../physics/coriolis.dart';
 import '../physics/units.dart' as U;
 import '../services/shot_builder.dart';
 import 'app_state.dart';
@@ -74,6 +74,30 @@ class _TruingPageState extends State<TruingPage> {
         _error = '无法在该 BC 范围内匹配实测落点（落点超出物理范围）';
       }
     });
+  }
+
+  /// Save the trued BC as a custom bullet (clone of current, new BC) so the
+  /// user can select it for precise future calculations.
+  void _applyTruedBc(Bullet? orig, double origBc) async {
+    if (_truedBc == null || orig == null) return;
+    final s = widget.state;
+    final custom = Bullet(
+      id: '${orig.id}-trued-${DateTime.now().millisecondsSinceEpoch}',
+      manufacturer: orig.manufacturer,
+      model: '${orig.model} (校准 BC=${_truedBc!.toStringAsFixed(3)})',
+      caliber: orig.caliber,
+      massGr: orig.massGr,
+      diameterIn: orig.diameterIn,
+      lengthIn: orig.lengthIn,
+      bcG1: s.useG7 ? orig.bcG1 : _truedBc!,
+      bcG7: s.useG7 ? _truedBc! : orig.bcG7,
+      type: orig.type,
+    );
+    await s.db.addBullet(custom);
+    s.selectBullet(custom);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('已保存校准弹头并应用 (BC=${_truedBc!.toStringAsFixed(3)})')));
   }
 
   @override
@@ -154,6 +178,12 @@ class _TruingPageState extends State<TruingPage> {
                       const SizedBox(height: 4),
                       const Text('提示: 可将此 BC 用于该批弹药的精确计算。'
                           '建议在远程距离 (≥500yd) 实测校准。'),
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
+                        icon: const Icon(Icons.save_alt),
+                        label: const Text('保存为校准弹头 (自定义)'),
+                        onPressed: () => _applyTruedBc(b, origBc),
+                      ),
                     ],
                     if (_error != null)
                       Padding(

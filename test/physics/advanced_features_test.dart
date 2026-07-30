@@ -149,4 +149,69 @@ void main() {
       expect(d600, lessThan(d300));
     });
   });
+
+  group('Lead (moving target)', () {
+    test('lead grows with target speed', () {
+      final cfg = baseConfig();
+      final solver = BallisticsSolver(cfg);
+      final range = U.Units.yardsToM(500);
+      final l1 = solver.leadAt(targetSpeedMps: 2, rangeM: range);
+      final l2 = solver.leadAt(targetSpeedMps: 4, rangeM: range);
+      expect(l1, isNotNull);
+      expect(l2, isNotNull);
+      expect(l2!, closeTo(2 * l1!, 1e-6)); // linear in speed
+    });
+
+    test('lead increases with range (longer time of flight)', () {
+      final cfg = baseConfig();
+      final solver = BallisticsSolver(cfg);
+      final near = solver.leadAt(targetSpeedMps: 3, rangeM: U.Units.yardsToM(300));
+      final far = solver.leadAt(targetSpeedMps: 3, rangeM: U.Units.yardsToM(800));
+      expect(near, isNotNull);
+      expect(far, isNotNull);
+      expect(far!, greaterThan(near!));
+    });
+
+    test('leadToAngle converts linear to angular', () {
+      // 1m lead at 100m -> 0.01 rad
+      expect(BallisticsSolver.leadToAngle(1.0, 100.0), closeTo(0.01, 1e-9));
+    });
+  });
+
+  group('Transonic range', () {
+    test('.308 goes transonic eventually (high-BC bullet flies far)', () {
+      final cfg = baseConfig(); // 175gr .308 BC=0.505 @ 2600fps
+      final solver = BallisticsSolver(cfg);
+      final t = solver.transonicRange();
+      expect(t, isNotNull);
+      // High-BC .308 stays supersonic far; Mach 1.2 crossover ~1500-2500 yd.
+      final yd = t! * 1.09361;
+      expect(yd, greaterThan(1500));
+      expect(yd, lessThan(2500));
+    });
+
+    test('higher-threshold triggers earlier', () {
+      final cfg = baseConfig();
+      final solver = BallisticsSolver(cfg);
+      final t12 = solver.transonicRange(machThreshold: 1.2)!;
+      final t15 = solver.transonicRange(machThreshold: 1.5)!;
+      expect(t15, lessThan(t12));
+    });
+  });
+
+  group('Aerodynamic jump', () {
+    test('right crosswind -> downward jump for RH twist (negative)', () {
+      final cfg = baseConfig();
+      final solver = BallisticsSolver(cfg);
+      // positive drift (right) -> negative jump (down) per Litz approx
+      final jump = solver.aerodynamicJump(driftRad: 0.01, sg: 1.5);
+      expect(jump, lessThan(0));
+    });
+
+    test('zero drift -> zero jump', () {
+      final cfg = baseConfig();
+      final solver = BallisticsSolver(cfg);
+      expect(solver.aerodynamicJump(driftRad: 0, sg: 2.0), closeTo(0, 1e-12));
+    });
+  });
 }

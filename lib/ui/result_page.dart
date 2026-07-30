@@ -10,6 +10,7 @@ import '../services/shot_builder.dart';
 import '../services/dope_card.dart';
 import 'app_state.dart';
 import 'format.dart';
+import 'reticle_page.dart';
 
 class ResultPage extends StatefulWidget {
   final AppState state;
@@ -25,6 +26,8 @@ class _ResultPageState extends State<ResultPage> {
   double? _nearZero;
   double? _farZero;
   double? _maxRange;
+  double? _transonicM;
+  double? _leadM; // linear lead at max range for moving target
   ShotConfig? _cfg;
   String? _error;
   bool _showMoa = true; // toggle MOA <-> MIL for corrections
@@ -83,6 +86,15 @@ class _ResultPageState extends State<ResultPage> {
         atmosphere: atmo,
       );
       final zeros = solver.zeroCrossings();
+      final transonic = solver.transonicRange();
+      // Lead at the max range for the moving-target speed.
+      double? lead;
+      if (s.targetSpeedMph > 0) {
+        final targetMps = U.Units.mphToMps(s.targetSpeedMph);
+        lead = solver.leadAt(
+            targetSpeedMps: targetMps,
+            rangeM: U.Units.yardsToM(s.maxRangeYd));
+      }
       setState(() {
         _cfg = cfg;
         _traj = traj;
@@ -90,6 +102,8 @@ class _ResultPageState extends State<ResultPage> {
         _nearZero = zeros.nearZero;
         _farZero = zeros.farZero;
         _maxRange = solver.maxEffectiveRange();
+        _transonicM = transonic;
+        _leadM = lead;
         _error = null;
       });
     } catch (e) {
@@ -122,6 +136,17 @@ class _ResultPageState extends State<ResultPage> {
       appBar: AppBar(
         title: const Text('弹道结果'),
         actions: [
+          IconButton(
+            tooltip: '分划板模拟',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                    ReticlePage(state: widget.state, traj: traj),
+              ),
+            ),
+            icon: const Icon(Icons.center_focus_strong),
+          ),
           IconButton(
             tooltip: '导出 DOPE 卡',
             onPressed: () => _showDope(context, bullet, ct, traj, sys),
@@ -195,6 +220,43 @@ class _ResultPageState extends State<ResultPage> {
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontWeight: FontWeight.w600)),
               ),
+            // Transonic warning
+            if (_transonicM != null &&
+                _transonicM! < U.Units.yardsToM(widget.state.maxRangeYd)) ...[
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                    '⚠ 弹丸在 ${(_transonicM! * 1.09361).toStringAsFixed(0)}yd '
+                    '(${_transonicM!.toStringAsFixed(0)}m) 进入跨音速区，'
+                    '此后精度可能下降',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 12)),
+              ),
+            ],
+            // Moving-target lead
+            if (_leadM != null && _leadM! > 0) ...[
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                    '🎯 移动目标提前量 @${widget.state.maxRangeYd.toStringAsFixed(0)}yd: '
+                    '${(_leadM! * (_showMoa ? 0 : 39.37)).toStringAsFixed(1)}${_showMoa ? '' : 'in'}'
+                    '${_showMoa ? '约 ${(U.Units.radToMil(_leadM! / U.Units.yardsToM(widget.state.maxRangeYd))).toStringAsFixed(1)} MIL' : ''}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 12)),
+              ),
+            ],
             const SizedBox(height: 8),
             GridView.count(
               shrinkWrap: true,

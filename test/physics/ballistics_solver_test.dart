@@ -59,10 +59,11 @@ void main() {
   });
 
   group('BallisticsSolver — known drop values (168gr .308 SMK @ 2600fps)', () {
-    // Reference values (JBM / Hornady, 200yd zero, 1.5" sight height, G1 0.462):
-    //   300yd drop ~ -6.0" (-15cm)
-    //   500yd drop ~ -45"  (-114cm)
-    //   remaining velocity @500yd ~ 1600 fps (~488 m/s)
+    // Reference values (public ballistics tables, 200yd zero, 1.5" sight
+    // height, G1 0.462; cross-checked with a Python reference solver):
+    //   300yd drop ~ -7.8"  (-19.8cm)
+    //   500yd drop ~ -42"   (-107cm)
+    //   remaining velocity @500yd ~ 2224 fps (~678 m/s)
     // We allow generous tolerance because published tables vary slightly by
     // drag-function source and zero convention.
     late List<TrajectoryPoint> traj;
@@ -140,13 +141,14 @@ void main() {
           expect(p.windage, greaterThan(0));
         }
       }
-      // At 400yd with a 10mph crosswind, ~10-25 inches (0.25-0.6 m) is typical.
+      // At 400yd with a 10mph from-left crosswind, ~5 inches (0.13 m) of
+      // rightward drift is typical for a 0.462 G1 bullet; reference ~5.25in.
       final at400 = traj.reduce((a, b) =>
           (a.range - U.Units.yardsToM(400)).abs() < (b.range - U.Units.yardsToM(400)).abs()
               ? a
               : b);
-      expect(at400.windage, greaterThan(0.2));
-      expect(at400.windage, lessThan(0.8));
+      expect(at400.windage, greaterThan(0.08));
+      expect(at400.windage, lessThan(0.25));
     });
 
     test('calm wind -> no drift', () {

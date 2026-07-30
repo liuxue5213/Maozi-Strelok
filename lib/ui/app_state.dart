@@ -41,6 +41,8 @@ class AppState extends ChangeNotifier {
   double stepYd = 100;
   bool useSpinDrift = true;
   double losAngleDeg = 0; // line-of-sight elevation, +uphill
+  bool useAeroJump = false; // aerodynamic jump correction
+  double targetSpeedMph = 0; // moving-target speed for lead calc
 
   U.UnitSystem unitSystem = U.UnitSystem.metric;
 
@@ -167,6 +169,8 @@ class AppState extends ChangeNotifier {
         'stepYd': stepYd,
         'useSpinDrift': useSpinDrift,
         'losAngleDeg': losAngleDeg,
+        'useAeroJump': useAeroJump,
+        'targetSpeedMph': targetSpeedMph,
         'unitSystem': unitSystem.name,
       };
 
@@ -185,6 +189,8 @@ class AppState extends ChangeNotifier {
     stepYd = (m['stepYd'] as num?)?.toDouble() ?? 100;
     useSpinDrift = (m['useSpinDrift'] as bool?) ?? true;
     losAngleDeg = (m['losAngleDeg'] as num?)?.toDouble() ?? 0;
+    useAeroJump = (m['useAeroJump'] as bool?) ?? false;
+    targetSpeedMph = (m['targetSpeedMph'] as num?)?.toDouble() ?? 0;
     unitSystem = U.UnitSystem.values
         .byName((m['unitSystem'] as String?) ?? 'metric');
     _mod = m['mod'] is Map
