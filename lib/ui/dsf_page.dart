@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../physics/atmosphere.dart';
 import '../physics/ballistics_solver.dart';
-import '../physics/coriolis.dart';
 import '../physics/units.dart' as U;
 import '../services/shot_builder.dart';
 import 'app_state.dart';

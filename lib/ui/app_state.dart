@@ -246,6 +246,7 @@ class AppState extends ChangeNotifier {
         'shooterErrorMoa': shooterErrorMoa,
         'windErrorMph': windErrorMph,
         'rangeErrorYd': rangeErrorYd,
+        'dsf': dsf.map((k, v) => MapEntry(k.toString(), v)),
         'customTargetsYd': customTargetsYd,
         'unitSystem': unitSystem.name,
       };
@@ -278,6 +279,9 @@ class AppState extends ChangeNotifier {
     shooterErrorMoa = (m['shooterErrorMoa'] as num?)?.toDouble() ?? 0.5;
     windErrorMph = (m['windErrorMph'] as num?)?.toDouble() ?? 2;
     rangeErrorYd = (m['rangeErrorYd'] as num?)?.toDouble() ?? 10;
+    dsf = (m['dsf'] as Map?)?.map((k, v) =>
+            MapEntry(double.parse(k as String), (v as num).toDouble())) ??
+        const {};
     customTargetsYd = (m['customTargetsYd'] as List?)
             ?.map((e) => (e as num).toDouble())
             .toList() ??
