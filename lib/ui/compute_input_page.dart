@@ -130,6 +130,27 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
             _multiTargetsEditor(s),
             const SizedBox(height: 8),
             _chronoField(s),
+            const SizedBox(height: 8),
+            _powderTempFields(s),
+            const SizedBox(height: 8),
+            _slider('枪身倾斜角 (Cant)', s.cantAngleDeg, -15, 15, '°', 1, 0,
+                (v) => setState(() => s.cantAngleDeg = v)),
+            Row(
+              children: [
+                const Text('瞄具点击值'),
+                const SizedBox(width: 8),
+                DropdownButton<double>(
+                  value: s.clickMoa,
+                  items: const [
+                    DropdownMenuItem(value: 0.25, child: Text('1/4 MOA')),
+                    DropdownMenuItem(value: 0.5, child: Text('1/2 MOA')),
+                    DropdownMenuItem(value: 0.125, child: Text('1/8 MOA')),
+                    DropdownMenuItem(value: 1.0, child: Text('1 MOA')),
+                  ],
+                  onChanged: (v) => setState(() => s.clickMoa = v ?? 0.25),
+                ),
+              ],
+            ),
           ]),
           const SizedBox(height: 12),
           _section('改装', [
@@ -376,6 +397,46 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
                     ? ''
                     : s.chronoVelocityFps.toStringAsFixed(0)),
             onChanged: (v) => s.chronoVelocityFps = double.tryParse(v) ?? 0,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Powder temperature sensitivity inputs: chrono-time temp + fps/°F rate.
+  Widget _powderTempFields(AppState s) {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            decoration: const InputDecoration(
+              labelText: '测速时温度 °F',
+              isDense: true,
+              border: OutlineInputBorder(),
+            ),
+            keyboardType: const TextInputType.numberWithOptions(
+                signed: true, decimal: true),
+            controller: TextEditingController(
+                text: s.powderTempF == 0 ? '' : s.powderTempF.toStringAsFixed(0)),
+            onChanged: (v) => s.powderTempF = double.tryParse(v) ?? 0,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: TextField(
+            decoration: const InputDecoration(
+              labelText: '初速系数 fps/°F',
+              isDense: true,
+              border: OutlineInputBorder(),
+            ),
+            keyboardType:
+                const TextInputType.numberWithOptions(decimal: true, signed: true),
+            controller: TextEditingController(
+                text: s.mvTempSensitivityFpsPerF == 0
+                    ? ''
+                    : s.mvTempSensitivityFpsPerF.toStringAsFixed(2)),
+            onChanged: (v) =>
+                s.mvTempSensitivityFpsPerF = double.tryParse(v) ?? 0,
           ),
         ),
       ],

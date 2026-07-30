@@ -56,18 +56,28 @@ class ShotBuilder {
     bool spinDrift = true,
     double losAngleDeg = 0,
     double chronoVelocityFps = 0,
+    double powderTempF = 0, // temp at chrono time (0 = feature off)
+    double mvTempSensitivityFpsPerF = 0, // fps change per °F
+    double cantAngleDeg = 0,
   }) {
     // Chronograph override takes precedence; otherwise compute from barrel
     // length + muzzle device.
     final effBarrel = mod.effectiveBarrelLength(firearm);
-    final mvFps = chronoVelocityFps > 0
+    var mvFps = chronoVelocityFps > 0
         ? chronoVelocityFps
         : effectiveMuzzleVelocity(
             cartridge: cartridge,
             effectiveBarrelIn: effBarrel,
             refBarrelIn: cartridge.refBarrelLengthIn,
-      device: mod.muzzleDevice,
-    );
+            device: mod.muzzleDevice,
+          );
+    // Powder temperature sensitivity: adjust MV for the difference between the
+    // current ambient temperature and the temperature at chrono time.
+    if (powderTempF != 0 && mvTempSensitivityFpsPerF != 0) {
+      final currentTempF = U.Units.cToF(atmosphere.temperatureC);
+      mvFps += (currentTempF - powderTempF) * mvTempSensitivityFpsPerF;
+      if (mvFps < 0) mvFps = 0;
+    }
     final drag = resolveDragModel(dragModelId);
     final bc = dragModelId == 'G7' ? (bullet.bcG7 ?? bullet.bcG1) : bullet.bcG1;
 
@@ -86,6 +96,7 @@ class ShotBuilder {
       twistIn: mod.effectiveTwistRate(firearm),
       lengthIn: bullet.lengthIn,
       losAngleRad: losAngleDeg * 3.141592653589793 / 180.0,
+      cantAngleRad: cantAngleDeg * 3.141592653589793 / 180.0,
     );
   }
 

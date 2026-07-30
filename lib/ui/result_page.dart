@@ -74,6 +74,9 @@ class _ResultPageState extends State<ResultPage> {
         spinDrift: s.useSpinDrift,
         losAngleDeg: s.losAngleDeg,
         chronoVelocityFps: s.chronoVelocityFps,
+        powderTempF: s.powderTempF,
+        mvTempSensitivityFpsPerF: s.mvTempSensitivityFpsPerF,
+        cantAngleDeg: s.cantAngleDeg,
       );
       final solver = BallisticsSolver(cfg);
       final traj = solver.solve(
@@ -457,6 +460,7 @@ class _ResultPageState extends State<ResultPage> {
             DataColumn(label: Text(sys == U.UnitSystem.imperial ? 'yd' : 'm')),
             DataColumn(label: Text(sys == U.UnitSystem.imperial ? 'drop(in)' : 'drop(cm)')),
             DataColumn(label: Text('高低修正')),
+            DataColumn(label: Text('旋钮格数')),
             DataColumn(label: Text(sys == U.UnitSystem.imperial ? '风偏(in)' : '风偏(cm)')),
             DataColumn(label: Text('风向修正')),
             DataColumn(label: Text(sys == U.UnitSystem.imperial ? 'vel(fps)' : 'vel(m/s)')),
@@ -469,6 +473,9 @@ class _ResultPageState extends State<ResultPage> {
                     DataCell(Text(Fmt.shortLen(p.drop, sys))),
                     DataCell(Text(p.range > 1
                         ? Fmt.comeUp(p.comeUpRad, moa: _showMoa)
+                        : '-')),
+                    DataCell(Text(p.range > 1
+                        ? '${Fmt.clicks(p.comeUpRad, widget.state.clickMoa)}↑'
                         : '-')),
                     DataCell(Text(Fmt.shortLen(p.windage, sys))),
                     DataCell(Text(p.range > 1

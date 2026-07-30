@@ -93,6 +93,12 @@ class ShotConfig {
   /// the gravity component along the bore changes. 0 = level fire.
   final double losAngleRad;
 
+  /// Rifle cant (roll) angle [rad]. A non-zero cant rotates the elevation and
+  /// windage corrections into each other: a portion of the vertical drop becomes
+  /// horizontal deflection and vice-versa. Applied as a post-process on the
+  /// output points (it does not change the trajectory itself).
+  final double cantAngleRad;
+
   const ShotConfig({
     required this.muzzleVelocity,
     required this.mass,
@@ -109,6 +115,7 @@ class ShotConfig {
     this.twistIn = 0,
     this.lengthIn = 0,
     this.losAngleRad = 0,
+    this.cantAngleRad = 0,
   });
 }
 
@@ -390,13 +397,31 @@ class BallisticsSolver {
         y += driftIn * 0.0254; // inches -> meters, +right
       }
 
+      // Rifle cant: rotate the (vertical drop, horizontal windage) pair by the
+      // cant angle. A canted rifle transfers part of the elevation correction
+      // into windage and vice-versa. drop is downward (z negative), windage +right.
+      var dropZ = z;
+      var windY = y;
+      final cant = config.cantAngleRad;
+      if (cant.abs() > 1e-9) {
+        final cc = cos(cant);
+        final sc = sin(cant);
+        // rotate: drop stays along gravity but rifle frame is rolled.
+        // newWindage = windage*cos - drop*sin ; newDrop = windage*sin + drop*cos
+        // (using z as drop, where negative = low)
+        final ny = windY * cc - dropZ * sc;
+        final nz = windY * sc + dropZ * cc;
+        windY = ny;
+        dropZ = nz;
+      }
+
       // Come-up (sight correction) to hit at this range: -drop/x, small angle.
-      final comeUp = x > 1 ? -z / x : 0.0;
+      final comeUp = x > 1 ? -dropZ / x : 0.0;
 
       pts.add(TrajectoryPoint(
         range: x,
-        drop: z, // bullet path relative to LOS (LOS is z=0)
-        windage: y,
+        drop: dropZ, // bullet path relative to LOS (LOS is z=0)
+        windage: windY,
         speed: speed,
         energy: energy,
         timeOfFlight: tof,

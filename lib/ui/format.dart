@@ -45,4 +45,12 @@ class Fmt {
     }
     return '${U.Units.radToMil(rad).toStringAsFixed(1)} MIL';
   }
+
+  /// Turret click count for an angular correction, given the scope's click
+  /// value (MOA per click).
+  static String clicks(double rad, double clickMoa) {
+    if (clickMoa <= 0) return '';
+    final n = (U.Units.radToMoa(rad.abs()) / clickMoa).round();
+    return '$n 格';
+  }
 }

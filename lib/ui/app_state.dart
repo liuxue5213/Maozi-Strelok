@@ -45,6 +45,15 @@ class AppState extends ChangeNotifier {
   double targetSpeedMph = 0; // moving-target speed for lead calc
   /// Chronograph-measured muzzle velocity (fps). 0 = use cartridge nominal MV.
   double chronoVelocityFps = 0;
+  /// Powder temperature at chrono time (°F). 0 = feature off.
+  double powderTempF = 0;
+  /// Muzzle velocity change per °F (powder temp sensitivity). 0 = off.
+  double mvTempSensitivityFpsPerF = 0;
+  /// Rifle cant (roll) angle, degrees. 0 = level.
+  double cantAngleDeg = 0;
+  /// Scope click value in MOA per click (e.g. 0.25 for 1/4 MOA). Used to show
+  /// turret click counts alongside angular corrections.
+  double clickMoa = 0.25;
   /// Optional explicit list of multiple target distances (yards). When non-empty,
   /// the results page reports per-target corrections in addition to the table.
   List<double> customTargetsYd = const [];
@@ -215,6 +224,10 @@ class AppState extends ChangeNotifier {
         'useAeroJump': useAeroJump,
         'targetSpeedMph': targetSpeedMph,
         'chronoVelocityFps': chronoVelocityFps,
+        'powderTempF': powderTempF,
+        'mvTempSensitivityFpsPerF': mvTempSensitivityFpsPerF,
+        'cantAngleDeg': cantAngleDeg,
+        'clickMoa': clickMoa,
         'customTargetsYd': customTargetsYd,
         'unitSystem': unitSystem.name,
       };
@@ -237,6 +250,11 @@ class AppState extends ChangeNotifier {
     useAeroJump = (m['useAeroJump'] as bool?) ?? false;
     targetSpeedMph = (m['targetSpeedMph'] as num?)?.toDouble() ?? 0;
     chronoVelocityFps = (m['chronoVelocityFps'] as num?)?.toDouble() ?? 0;
+    powderTempF = (m['powderTempF'] as num?)?.toDouble() ?? 0;
+    mvTempSensitivityFpsPerF =
+        (m['mvTempSensitivityFpsPerF'] as num?)?.toDouble() ?? 0;
+    cantAngleDeg = (m['cantAngleDeg'] as num?)?.toDouble() ?? 0;
+    clickMoa = (m['clickMoa'] as num?)?.toDouble() ?? 0.25;
     customTargetsYd = (m['customTargetsYd'] as List?)
             ?.map((e) => (e as num).toDouble())
             .toList() ??

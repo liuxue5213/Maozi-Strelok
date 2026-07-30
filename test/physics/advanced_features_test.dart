@@ -11,6 +11,7 @@ void main() {
   ShotConfig baseConfig({
     bool spinDrift = false,
     double losAngleDeg = 0,
+    double cantAngleRad = 0,
     double? bcOverride,
     double twistIn = 12,
     double lengthIn = 1.26,
@@ -29,6 +30,7 @@ void main() {
         twistIn: twistIn,
         lengthIn: lengthIn,
         losAngleRad: losAngleDeg * 3.141592653589793 / 180.0,
+        cantAngleRad: cantAngleRad,
       );
 
   group('Spin drift', () {
@@ -212,6 +214,38 @@ void main() {
       final cfg = baseConfig();
       final solver = BallisticsSolver(cfg);
       expect(solver.aerodynamicJump(driftRad: 0, sg: 2.0), closeTo(0, 1e-12));
+    });
+  });
+
+  group('Cant angle', () {
+    test('zero cant leaves trajectory unchanged', () {
+      final a = baseConfig(cantAngleRad: 0);
+      final b = baseConfig(cantAngleRad: 0.001); // ~0.06deg, negligible
+      final t1 = BallisticsSolver(a)
+          .solve(maxRangeM: U.Units.yardsToM(500), stepM: U.Units.yardsToM(100));
+      final t2 = BallisticsSolver(b)
+          .solve(maxRangeM: U.Units.yardsToM(500), stepM: U.Units.yardsToM(100));
+      for (int i = 0; i < t1.length; i++) {
+        expect(t2[i].drop, closeTo(t1[i].drop, 1e-3));
+        expect(t2[i].windage, closeTo(t1[i].windage, 1e-3));
+      }
+    });
+
+    test('canted shot transfers drop into windage', () {
+      final level = baseConfig(cantAngleRad: 0);
+      final canted = baseConfig(cantAngleRad: 30 * 3.14159 / 180);
+      final t1 = BallisticsSolver(level)
+          .solve(maxRangeM: U.Units.yardsToM(500), stepM: U.Units.yardsToM(100));
+      final t2 = BallisticsSolver(canted)
+          .solve(maxRangeM: U.Units.yardsToM(500), stepM: U.Units.yardsToM(100));
+      // A rightward cant should introduce positive windage (bullet drifts right)
+      // and reduce the magnitude of the drop at the same range.
+      final at4 = (t) => t.reduce((a, b) =>
+          (a.range - U.Units.yardsToM(400)).abs() <
+                  (b.range - U.Units.yardsToM(400)).abs()
+              ? a
+              : b);
+      expect(at4(t2).windage.abs(), greaterThan(at4(t1).windage.abs()));
     });
   });
 }
