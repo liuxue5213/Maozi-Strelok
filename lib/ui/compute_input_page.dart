@@ -126,6 +126,10 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
                 (v) => setState(() => s.maxRangeYd = v)),
             _slider('采样间隔', s.stepYd, 25, 500, ' yd', 25, 0,
                 (v) => setState(() => s.stepYd = v)),
+            const SizedBox(height: 8),
+            _multiTargetsEditor(s),
+            const SizedBox(height: 8),
+            _chronoField(s),
           ]),
           const SizedBox(height: 12),
           _section('改装', [
@@ -300,6 +304,81 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
           ),
         ],
       ),
+    );
+  }
+
+  /// Editor for the multi-target quick-reference list.
+  Widget _multiTargetsEditor(AppState s) {
+    final presets = [100, 200, 300, 400, 500, 600, 800, 1000];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('多目标快速修正 (可选)',
+            style: const TextStyle(fontSize: 13, color: Colors.grey)),
+        const SizedBox(height: 4),
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            for (final yd in presets)
+              FilterChip(
+                label: Text('${yd}yd'),
+                selected: s.customTargetsYd.contains(yd.toDouble()),
+                onSelected: (sel) => setState(() {
+                  final list = s.customTargetsYd.toList();
+                  if (sel) {
+                    list.add(yd.toDouble());
+                    list.sort();
+                  } else {
+                    list.remove(yd.toDouble());
+                  }
+                  s.customTargetsYd = list;
+                }),
+              ),
+          ],
+        ),
+        if (s.customTargetsYd.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Row(
+              children: [
+                Text('已选 ${s.customTargetsYd.length} 个目标',
+                    style: const TextStyle(fontSize: 11)),
+                const Spacer(),
+                TextButton(
+                  onPressed: () =>
+                      setState(() => s.customTargetsYd = const []),
+                  child: const Text('清空', style: TextStyle(fontSize: 12)),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Chronograph velocity input: overrides the cartridge nominal MV when set.
+  Widget _chronoField(AppState s) {
+    return Row(
+      children: [
+        const Icon(Icons.speed, size: 18, color: Colors.grey),
+        const SizedBox(width: 8),
+        Expanded(
+          child: TextField(
+            decoration: const InputDecoration(
+              labelText: '测速仪初速 (fps, 0=用标称)',
+              isDense: true,
+              border: OutlineInputBorder(),
+            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            controller: TextEditingController(
+                text: s.chronoVelocityFps == 0
+                    ? ''
+                    : s.chronoVelocityFps.toStringAsFixed(0)),
+            onChanged: (v) => s.chronoVelocityFps = double.tryParse(v) ?? 0,
+          ),
+        ),
+      ],
     );
   }
 

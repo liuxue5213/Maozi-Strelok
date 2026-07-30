@@ -58,8 +58,45 @@ class DatabaseService {
   // ---- App settings persistence (selections, environment, units) ----
   static const _kSettings = 'app_settings';
 
+  // ---- Profiles persistence (named full gun+ammo+env combos) ----
+  static const _kProfiles = 'saved_profiles';
+
+  /// Save the current full configuration as a named profile.
+  Future<void> saveProfile(String name, Map<String, dynamic> snapshot) async {
+    final prefs = await SharedPreferences.getInstance();
+    final profiles = _allProfiles(prefs);
+    profiles[name] = snapshot;
+    await prefs.setString(_kProfiles, jsonEncode(profiles));
+  }
+
+  Future<void> deleteProfile(String name) async {
+    final prefs = await SharedPreferences.getInstance();
+    final profiles = _allProfiles(prefs);
+    profiles.remove(name);
+    await prefs.setString(_kProfiles, jsonEncode(profiles));
+  }
+
+  Map<String, Map<String, dynamic>> loadProfiles() {
+    // synchronous wrapper using a cached read; prefs are loaded once at startup
+    return _profilesCache;
+  }
+
+  Map<String, Map<String, dynamic>> _profilesCache = {};
+  Future<void> refreshProfilesCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    _profilesCache = _allProfiles(prefs);
+  }
+
+  Map<String, Map<String, dynamic>> _allProfiles(SharedPreferences prefs) {
+    final raw = prefs.getString(_kProfiles);
+    if (raw == null) return {};
+    final m = jsonDecode(raw) as Map<String, dynamic>;
+    return m.map((k, v) => MapEntry(k, v as Map<String, dynamic>));
+  }
+
   Future<void> loadSettingsInto(state) async {
     final prefs = await SharedPreferences.getInstance();
+    await refreshProfilesCache();
     final raw = prefs.getString(_kSettings);
     if (raw == null) return;
     final m = jsonDecode(raw) as Map<String, dynamic>;

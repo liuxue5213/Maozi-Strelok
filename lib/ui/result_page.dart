@@ -28,6 +28,7 @@ class _ResultPageState extends State<ResultPage> {
   double? _maxRange;
   double? _transonicM;
   double? _leadM; // linear lead at max range for moving target
+  List<Map<String, double>> _multiTargets = const [];
   ShotConfig? _cfg;
   String? _error;
   bool _showMoa = true; // toggle MOA <-> MIL for corrections
@@ -72,6 +73,7 @@ class _ResultPageState extends State<ResultPage> {
         dragModelId: s.useG7 ? 'G7' : 'G1',
         spinDrift: s.useSpinDrift,
         losAngleDeg: s.losAngleDeg,
+        chronoVelocityFps: s.chronoVelocityFps,
       );
       final solver = BallisticsSolver(cfg);
       final traj = solver.solve(
@@ -95,6 +97,22 @@ class _ResultPageState extends State<ResultPage> {
             targetSpeedMps: targetMps,
             rangeM: U.Units.yardsToM(s.maxRangeYd));
       }
+      // Per-target corrections for the multi-target list.
+      final multiTargets = <Map<String, double>>[];
+      for (final yd in s.customTargetsYd) {
+        final m = U.Units.yardsToM(yd);
+        final pt = traj.reduce((a, b) =>
+            (a.range - m).abs() < (b.range - m).abs() ? a : b);
+        multiTargets.add({
+          'yd': yd,
+          'range': pt.range,
+          'drop': pt.drop,
+          'windage': pt.windage,
+          'comeUp': pt.comeUpRad,
+          'speed': pt.speed,
+          'tof': pt.timeOfFlight,
+        });
+      }
       setState(() {
         _cfg = cfg;
         _traj = traj;
@@ -104,6 +122,7 @@ class _ResultPageState extends State<ResultPage> {
         _maxRange = solver.maxEffectiveRange();
         _transonicM = transonic;
         _leadM = lead;
+        _multiTargets = multiTargets;
         _error = null;
       });
     } catch (e) {
@@ -184,6 +203,13 @@ class _ResultPageState extends State<ResultPage> {
           const SizedBox(height: 8),
           SizedBox(height: 160, child: _velocityChart(traj, sys)),
           const SizedBox(height: 12),
+          if (_multiTargets.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text('多目标快速修正 (${_showMoa ? 'MOA' : 'MIL'})',
+                style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 8),
+            _multiTargetsCard(sys),
+          ],
           Row(
             children: [
               Text('数据表', style: Theme.of(context).textTheme.titleSmall),
@@ -504,6 +530,76 @@ class _ResultPageState extends State<ResultPage> {
           ),
         ],
       ),
+    );
+  }
+
+  /// Multi-target quick-reference card: one row per explicit target distance
+  /// with its elevation + windage correction and remaining velocity.
+  Widget _multiTargetsCard(U.UnitSystem sys) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          children: [
+            for (final t in _multiTargets)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    SizedBox(
+                        width: 56,
+                        child: Text('${t['yd']?.toStringAsFixed(0)}yd',
+                            style:
+                                const TextStyle(fontWeight: FontWeight.bold))),
+                    Expanded(
+                      child: _multiChip(
+                          '高低',
+                          _showMoa
+                              ? '${U.Units.radToMoa((t['comeUp']!).abs()).toStringAsFixed(1)} MOA'
+                              : '${U.Units.radToMil((t['comeUp']!).abs()).toStringAsFixed(1)} MIL',
+                          t['comeUp']! >= 0 ? Colors.blue : Colors.orange),
+                    ),
+                    Expanded(
+                      child: _multiChip(
+                          '风向',
+                          _showMoa
+                              ? '${U.Units.radToMoa((t['windage']! / t['range']!).abs()).toStringAsFixed(1)} MOA'
+                              : '${U.Units.radToMil((t['windage']! / t['range']!).abs()).toStringAsFixed(1)} MIL',
+                          Colors.purple),
+                    ),
+                    SizedBox(
+                        width: 64,
+                        child: Text(
+                            sys == U.UnitSystem.imperial
+                                ? '${(t['speed']! * 3.28084).toStringAsFixed(0)}fps'
+                                : '${t['speed']!.toStringAsFixed(0)}m/s',
+                            style: const TextStyle(fontSize: 11))),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _multiChip(String label, String value, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+        const SizedBox(width: 4),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(value,
+              style: TextStyle(
+                  fontSize: 12, fontWeight: FontWeight.w600, color: color)),
+        ),
+      ],
     );
   }
 

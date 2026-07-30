@@ -5,6 +5,7 @@ import '../services/database_service.dart';
 import 'app_state.dart';
 import 'edit_custom_page.dart';
 import 'firearm_detail_page.dart';
+import 'profile_page.dart';
 import 'truing_page.dart';
 
 /// Browsing page: category chips, search, list of firearms.
@@ -44,6 +45,19 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Ballistics Calculator'),
         actions: [
+          IconButton(
+            tooltip: '配置文件 (Profiles)',
+            icon: const Icon(Icons.bookmarks_outlined),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProfilePage(state: widget.state),
+                ),
+              );
+              setState(() {});
+            },
+          ),
           IconButton(
             tooltip: '弹道校准 (Truing)',
             icon: const Icon(Icons.tune),

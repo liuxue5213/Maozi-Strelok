@@ -43,6 +43,11 @@ class AppState extends ChangeNotifier {
   double losAngleDeg = 0; // line-of-sight elevation, +uphill
   bool useAeroJump = false; // aerodynamic jump correction
   double targetSpeedMph = 0; // moving-target speed for lead calc
+  /// Chronograph-measured muzzle velocity (fps). 0 = use cartridge nominal MV.
+  double chronoVelocityFps = 0;
+  /// Optional explicit list of multiple target distances (yards). When non-empty,
+  /// the results page reports per-target corrections in addition to the table.
+  List<double> customTargetsYd = const [];
 
   U.UnitSystem unitSystem = U.UnitSystem.metric;
 
@@ -149,6 +154,44 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ---- Profile management (named full-configuration snapshots) ----
+  /// Save the entire current configuration under [name].
+  Future<void> saveProfile(String name) async {
+    final snap = toJson();
+    snap['profileName'] = name;
+    await db.saveProfile(name, snap);
+    await db.refreshProfilesCache();
+    notifyListeners();
+  }
+
+  /// Restore a named profile, then re-resolve linked objects (firearm/cart/bullet).
+  Future<void> loadProfile(String name) async {
+    final profiles = db.loadProfiles();
+    final snap = profiles[name];
+    if (snap == null) return;
+    fromJson(snap, db);
+    // ensure linked objects exist after restore
+    if (_firearm == null && snap['firearmId'] != null) {
+      _firearm = db.firearm(snap['firearmId'] as String);
+    }
+    if (_cartridge == null && snap['cartridgeId'] != null) {
+      _cartridge = db.cartridge(snap['cartridgeId'] as String);
+    }
+    if (_bullet == null && snap['bulletId'] != null) {
+      _bullet = db.bullet(snap['bulletId'] as String);
+    }
+    await _persist();
+    notifyListeners();
+  }
+
+  Future<void> deleteProfile(String name) async {
+    await db.deleteProfile(name);
+    await db.refreshProfilesCache();
+    notifyListeners();
+  }
+
+  Map<String, Map<String, dynamic>> get profiles => db.loadProfiles();
+
   // ---- Serialization for persistence ----
   Map<String, dynamic> toJson() => {
         'firearmId': _firearm?.id,
@@ -171,6 +214,8 @@ class AppState extends ChangeNotifier {
         'losAngleDeg': losAngleDeg,
         'useAeroJump': useAeroJump,
         'targetSpeedMph': targetSpeedMph,
+        'chronoVelocityFps': chronoVelocityFps,
+        'customTargetsYd': customTargetsYd,
         'unitSystem': unitSystem.name,
       };
 
@@ -191,6 +236,11 @@ class AppState extends ChangeNotifier {
     losAngleDeg = (m['losAngleDeg'] as num?)?.toDouble() ?? 0;
     useAeroJump = (m['useAeroJump'] as bool?) ?? false;
     targetSpeedMph = (m['targetSpeedMph'] as num?)?.toDouble() ?? 0;
+    chronoVelocityFps = (m['chronoVelocityFps'] as num?)?.toDouble() ?? 0;
+    customTargetsYd = (m['customTargetsYd'] as List?)
+            ?.map((e) => (e as num).toDouble())
+            .toList() ??
+        const [];
     unitSystem = U.UnitSystem.values
         .byName((m['unitSystem'] as String?) ?? 'metric');
     _mod = m['mod'] is Map

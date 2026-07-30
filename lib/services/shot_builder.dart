@@ -55,12 +55,17 @@ class ShotBuilder {
     String dragModelId = 'G1',
     bool spinDrift = true,
     double losAngleDeg = 0,
+    double chronoVelocityFps = 0,
   }) {
+    // Chronograph override takes precedence; otherwise compute from barrel
+    // length + muzzle device.
     final effBarrel = mod.effectiveBarrelLength(firearm);
-    final mvFps = effectiveMuzzleVelocity(
-      cartridge: cartridge,
-      effectiveBarrelIn: effBarrel,
-      refBarrelIn: cartridge.refBarrelLengthIn,
+    final mvFps = chronoVelocityFps > 0
+        ? chronoVelocityFps
+        : effectiveMuzzleVelocity(
+            cartridge: cartridge,
+            effectiveBarrelIn: effBarrel,
+            refBarrelIn: cartridge.refBarrelLengthIn,
       device: mod.muzzleDevice,
     );
     final drag = resolveDragModel(dragModelId);
