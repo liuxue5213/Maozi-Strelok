@@ -22,7 +22,10 @@ class _TruingPageState extends State<TruingPage> {
   final _rangeCtrl = TextEditingController(text: '500');
   final _dropCtrl = TextEditingController(text: '-40');
   String _unit = 'in'; // in or cm
+  /// 'bc' -> reverse-solve ballistic coefficient; 'mv' -> reverse-solve MV.
+  String _mode = 'mv';
   double? _truedBc;
+  double? _truedMvFps;
   double? _predictedDrop;
   String? _error;
 
@@ -41,7 +44,7 @@ class _TruingPageState extends State<TruingPage> {
         altitudeM: s.altitudeM,
       ),
       wind: Wind.calm(),
-      dragModelId: s.useG7 ? 'G7' : 'G1',
+      dragModelId: s.dragModelId,
       spinDrift: false,
     );
   }
@@ -67,11 +70,22 @@ class _TruingPageState extends State<TruingPage> {
 
     final solver = BallisticsSolver(cfg);
     _predictedDrop = solver.dropAtRange(rangeM);
-    final bc = solver.truedBc(rangeM: rangeM, observedDropM: obsM);
     setState(() {
-      _truedBc = bc;
-      if (bc == null) {
-        _error = '无法在该 BC 范围内匹配实测落点（落点超出物理范围）';
+      _truedBc = null;
+      _truedMvFps = null;
+      if (_mode == 'bc') {
+        final bc = solver.truedBc(rangeM: rangeM, observedDropM: obsM);
+        _truedBc = bc;
+        if (bc == null) {
+          _error = '无法在该 BC 范围内匹配实测落点（落点超出物理范围）';
+        }
+      } else {
+        final mv = solver.truedMv(rangeM: rangeM, observedDropM: obsM);
+        if (mv == null) {
+          _error = '无法在 ±25% 初速范围内匹配实测落点';
+        } else {
+          _truedMvFps = U.Units.mpsToFps(mv);
+        }
       }
     });
   }
@@ -89,8 +103,8 @@ class _TruingPageState extends State<TruingPage> {
       massGr: orig.massGr,
       diameterIn: orig.diameterIn,
       lengthIn: orig.lengthIn,
-      bcG1: s.useG7 ? orig.bcG1 : _truedBc!,
-      bcG7: s.useG7 ? _truedBc! : orig.bcG7,
+      bcG1: s.dragModelId == 'G7' ? orig.bcG1 : _truedBc!,
+      bcG7: s.dragModelId == 'G7' ? _truedBc! : orig.bcG7,
       type: orig.type,
     );
     await s.db.addBullet(custom);
@@ -100,11 +114,24 @@ class _TruingPageState extends State<TruingPage> {
         SnackBar(content: Text('已保存校准弹头并应用 (BC=${_truedBc!.toStringAsFixed(3)})')));
   }
 
+  /// Apply the trued muzzle velocity as the chronograph override for the
+  /// current session (and persist it), so subsequent solves use it.
+  void _applyTruedMv() async {
+    if (_truedMvFps == null) return;
+    final s = widget.state;
+    s.chronoVelocityFps = _truedMvFps!;
+    await s.persistEnvAndShooting();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('已应用校准初速 ${_truedMvFps!.toStringAsFixed(0)} fps')));
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = widget.state;
     final b = s.bullet;
-    final origBc = s.useG7 ? (b?.bcG7 ?? b?.bcG1 ?? 0) : (b?.bcG1 ?? 0);
+    final origBc =
+        s.dragModelId == 'G7' ? (b?.bcG7 ?? b?.bcG1 ?? 0) : (b?.bcG1 ?? 0);
     return Scaffold(
       appBar: AppBar(title: const Text('弹道校准 (Truing)')),
       body: ListView(
@@ -116,9 +143,34 @@ class _TruingPageState extends State<TruingPage> {
               title: Text(b == null
                   ? '未选择弹头'
                   : '${b.manufacturer} ${b.model} (${b.massGr}gr)'),
-              subtitle: Text('当前 ${s.useG7 ? 'G7' : 'G1'} BC = ${origBc.toStringAsFixed(3)}'),
+              subtitle: Text(
+                  '当前 ${s.dragModelId} BC = ${origBc.toStringAsFixed(3)}'),
             ),
           ),
+          const SizedBox(height: 12),
+          const Text('校准方式',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 4),
+          SegmentedButton<String>(
+            segments: const [
+              ButtonSegment(value: 'mv', label: Text('初速校准 (推荐)')),
+              ButtonSegment(value: 'bc', label: Text('BC 校准')),
+            ],
+            selected: {_mode},
+            onSelectionChanged: (s) => setState(() {
+              _mode = s.first;
+              _truedBc = null;
+              _truedMvFps = null;
+              _predictedDrop = null;
+              _error = null;
+            }),
+          ),
+          const SizedBox(height: 8),
+          Text(
+              _mode == 'mv'
+                  ? '初速校准：用远程实测落点反算真实初速。最常用，因标称BC/批次有差异。建议在 ≥500yd、落点≥7MIL处校准。'
+                  : 'BC校准：反算弹道系数并保存为自定义弹头。适合已确认初速、想精修阻力的场景。',
+              style: const TextStyle(fontSize: 12, color: Colors.grey)),
           const SizedBox(height: 12),
           const Text('输入实测数据',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
@@ -169,8 +221,8 @@ class _TruingPageState extends State<TruingPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('当前 BC 在该距离的预测落点: ${(_predictedDrop! * (_unit == 'in' ? 39.37 : 100)).toStringAsFixed(1)} $_unit'),
-                    const SizedBox(height: 8),
-                    if (_truedBc != null) ...[
+                      const SizedBox(height: 8),
+                      if (_mode == 'bc' && _truedBc != null) ...[
                       Text('修正后 BC: ${_truedBc!.toStringAsFixed(3)} '
                           '(${((_truedBc! - origBc) / origBc * 100).toStringAsFixed(1)}%)',
                           style: const TextStyle(
@@ -184,7 +236,20 @@ class _TruingPageState extends State<TruingPage> {
                         label: const Text('保存为校准弹头 (自定义)'),
                         onPressed: () => _applyTruedBc(b, origBc),
                       ),
-                    ],
+                      ],
+                      if (_mode == 'mv' && _truedMvFps != null) ...[
+                        Text('校准初速: ${_truedMvFps!.toStringAsFixed(0)} fps',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, color: Colors.green)),
+                        const SizedBox(height: 4),
+                        const Text('提示: 将作为测速仪初速覆盖保存，后续计算自动使用。'),
+                        const SizedBox(height: 8),
+                        OutlinedButton.icon(
+                          icon: const Icon(Icons.speed),
+                          label: const Text('应用为初速覆盖'),
+                          onPressed: _applyTruedMv,
+                        ),
+                      ],
                     if (_error != null)
                       Padding(
                         padding: const EdgeInsets.only(top: 8),

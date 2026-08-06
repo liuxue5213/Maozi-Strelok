@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 
 import '../models/firearm.dart';
 import '../models/modification.dart';
+import '../physics/drag_models.dart';
 import 'app_state.dart';
 import 'cartridge_picker_dialog.dart';
+import 'mil_ranging_dialog.dart';
 import 'modify_page.dart';
 import 'result_page.dart';
+import 'sensors_helper_dialog.dart';
 import 'wind_compass.dart';
+import 'wind_zones_page.dart';
 
 /// Environment + wind + shooting-condition input page. Lets the user pick the
 /// cartridge/bullet for the selected firearm, configure conditions, then run
@@ -65,6 +69,23 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
             _slider('风速', s.windSpeedMph, 0, 30, ' mph', 1, 0,
                 (v) => setState(() => s.windSpeedMph = v)),
             _windDial(s),
+            ListTile(
+              dense: true,
+              leading: const Icon(Icons.air, size: 20),
+              title: Text(s.windZones.isEmpty
+                  ? '多段风: 未启用 (单一风)'
+                  : '多段风: ${s.windZones.length} 段已生效'),
+              subtitle: const Text('沿弹道分段定义不同风速/风向'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => WindZonesPage(state: s)),
+                );
+                setState(() {});
+              },
+            ),
           ]),
           const SizedBox(height: 12),
           _section('射击条件', [
@@ -73,6 +94,23 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
               subtitle: const Text('需输入纬度与射击方位角'),
               value: s.useCoriolis,
               onChanged: (v) => setState(() => s.useCoriolis = v),
+            ),
+            // quick environment params helper (lat / az / incline in one place)
+            ListTile(
+              dense: true,
+              leading: const Icon(Icons.explore, size: 20),
+              title: const Text('射击环境参数 (纬度/方位角/仰俯角)'),
+              subtitle: const Text('一键设置科里奥利与仰俯角参数'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () async {
+                await showDialog(
+                  context: context,
+                  builder: (_) => SensorsHelperDialog(state: s),
+                );
+                _latCtrl.text = s.latitudeDeg.toStringAsFixed(1);
+                _azCtrl.text = s.azimuthDeg.toStringAsFixed(0);
+                setState(() {});
+              },
             ),
             if (s.useCoriolis) ...[
               Padding(
@@ -98,13 +136,34 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
                 ),
               ),
             ],
-            SwitchListTile(
-              title: const Text('使用 G7 阻力模型'),
-              subtitle: Text(s.useG7
-                  ? '当前: G7 (低阻船尾弹, 远程更准)'
-                  : '当前: G1 (通用默认)'),
-              value: s.useG7,
-              onChanged: (v) => setState(() => s.useG7 = v),
+            // Drag model selector (G1..GL)
+            Row(
+              children: [
+                const Text('阻力模型'),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: s.dragModelId,
+                    items: dragModelIds
+                        .map((id) => DropdownMenuItem(
+                              value: id,
+                              child: Text('$id 阻力函数'),
+                            ))
+                        .toList(),
+                    onChanged: (v) => setState(() {
+                      if (v != null) s.dragModelId = v;
+                    }),
+                  ),
+                ),
+              ],
+            ),
+            const Padding(
+              padding: EdgeInsets.only(top: 2, bottom: 4),
+              child: Text(
+                  'G1=通用, G7=低阻船尾(远程), G2=重型AP, G5=短船尾, '
+                  'G6/G8=平头, GI=Ingalls, GL=钝头软尖',
+                  style: TextStyle(fontSize: 10, color: Colors.grey)),
             ),
             SwitchListTile(
               title: const Text('计算自旋漂移'),
@@ -148,6 +207,76 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
                     DropdownMenuItem(value: 1.0, child: Text('1 MOA')),
                   ],
                   onChanged: (v) => setState(() => s.clickMoa = v ?? 0.25),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            // Mil-ranging calculator
+            ListTile(
+              dense: true,
+              leading: const Icon(Icons.straighten, size: 20),
+              title: const Text('分划板测距 (Mil-Ranging)'),
+              subtitle: const Text('用已知尺寸目标 + 分划板读数反算距离'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () async {
+                final r = await showDialog<double>(
+                  context: context,
+                  builder: (_) => const MilRangingDialog(),
+                );
+                if (r != null) {
+                  // add as a target
+                  final list = s.customTargetsYd.toList()..add(r);
+                  list.sort();
+                  setState(() => s.customTargetsYd = list);
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('已添加目标 ${r.toStringAsFixed(0)}yd')));
+                }
+              },
+            ),
+            // Zero Atmosphere
+            SwitchListTile(
+              title: const Text('归零大气修正'),
+              subtitle: const Text('远程归零(≥400yd)时，校正射击时与归零时空气密度差异'),
+              value: s.useZeroAtmo,
+              onChanged: (v) => setState(() => s.useZeroAtmo = v),
+            ),
+            if (s.useZeroAtmo)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Wrap(
+                  spacing: 12,
+                  runSpacing: 8,
+                  children: [
+                    _miniNumField('归零温度°C', s.zeroTempC,
+                        (v) => setState(() => s.zeroTempC = v)),
+                    _miniNumField('归零气压hPa', s.zeroPressureHpa,
+                        (v) => setState(() => s.zeroPressureHpa = v)),
+                    _miniNumField('归零湿度%', s.zeroHumidity * 100,
+                        (v) => setState(() => s.zeroHumidity = v / 100)),
+                    _miniNumField('归零海拔m', s.zeroAltitudeM.toDouble(),
+                        (v) => setState(() => s.zeroAltitudeM = v)),
+                  ],
+                ),
+              ),
+            // Scope correction factor
+            ExpansionTile(
+              dense: true,
+              title: const Text('瞄具跟踪修正 (Tall Target Test)',
+                  style: TextStyle(fontSize: 14)),
+              subtitle: const Text('实测每click值偏差，远程精度修正', style: TextStyle(fontSize: 11)),
+              childrenPadding: const EdgeInsets.symmetric(horizontal: 16),
+              children: [
+                _miniNumField('高低修正系数 (1.0=完美)', s.scopeElevCorrection,
+                    (v) => setState(() => s.scopeElevCorrection = v)),
+                _miniNumField('风向修正系数 (1.0=完美)', s.scopeWindCorrection,
+                    (v) => setState(() => s.scopeWindCorrection = v)),
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 8),
+                  child: Text(
+                      '在 tall target test 中实测: 打已知距离的MOA数，测弹着位移。'
+                      '系数 = 应打MOA / 实打MOA。<1 = 镜架移动多于标称(每click偏少)。',
+                      style: TextStyle(fontSize: 10, color: Colors.grey)),
                 ),
               ],
             ),
@@ -525,6 +654,29 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
             onChanged: onChanged,
           ),
         ],
+      ),
+    );
+  }
+
+  /// Compact numeric input field with a label, used in dense option panels
+  /// (zero atmosphere, scope correction). Parses the typed value as a double.
+  Widget _miniNumField(
+      String label, double value, ValueChanged<double> onChanged) {
+    return SizedBox(
+      width: 140,
+      child: TextField(
+        decoration: InputDecoration(
+          labelText: label,
+          isDense: true,
+          border: const OutlineInputBorder(),
+        ),
+        keyboardType:
+            const TextInputType.numberWithOptions(decimal: true, signed: true),
+        controller: TextEditingController(text: value.toStringAsFixed(2)),
+        onChanged: (v) {
+          final d = double.tryParse(v);
+          if (d != null) onChanged(d);
+        },
       ),
     );
   }

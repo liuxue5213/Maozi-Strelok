@@ -15,11 +15,14 @@ class DatabaseService {
   static const _kCartridges = 'user_cartridges';
   static const _kFirearms = 'user_firearms';
   static const _kFavorites = 'user_favorites';
+  static const _kBarrelLife = 'barrel_life';
 
   final List<Bullet> _bullets = [];
   final List<Cartridge> _cartridges = [];
   final List<Firearm> _firearms = [];
   final Set<String> _favorites = {};
+  /// Per-firearm barrel-life tracking: firearmId -> {rounds, lastCleanRounds, expectedLife}.
+  final Map<String, Map<String, int>> _barrelLife = {};
 
   List<Bullet> get bullets => List.unmodifiable(_bullets);
   List<Cartridge> get cartridges => List.unmodifiable(_cartridges);
@@ -53,7 +56,81 @@ class DatabaseService {
     _favorites
       ..clear()
       ..addAll(prefs.getStringList(_kFavorites) ?? const []);
+    _barrelLife
+      ..clear()
+      ..addAll(_loadBarrelLife(prefs));
   }
+
+  // ---- Barrel-life tracking ----
+  Map<String, Map<String, int>> _loadBarrelLife(SharedPreferences prefs) {
+    final raw = prefs.getString(_kBarrelLife);
+    if (raw == null) return {};
+    final m = jsonDecode(raw) as Map<String, dynamic>;
+    return m.map((k, v) => MapEntry(
+        k, (v as Map).map((kk, vv) => MapEntry(kk as String, (vv as num).toInt()))));
+  }
+
+  Future<void> _saveBarrelLife() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kBarrelLife, jsonEncode(_barrelLife));
+  }
+
+  /// Rounds fired through [firearmId]. 0 if untracked.
+  int roundsFor(String firearmId) => _barrelLife[firearmId]?['rounds'] ?? 0;
+
+  /// Rounds since last cleaning for [firearmId].
+  int roundsSinceClean(String firearmId) =>
+      roundsFor(firearmId) - (_barrelLife[firearmId]?['lastCleanRounds'] ?? 0);
+
+  /// Expected barrel life (rounds) for [firearmId].
+  int expectedLife(String firearmId) =>
+      _barrelLife[firearmId]?['expectedLife'] ?? 3000;
+
+  /// Record [n] more rounds through [firearmId].
+  Future<void> addRounds(String firearmId, int n) async {
+    final rec = Map<String, int>.from(_barrelLife[firearmId] ?? {});
+    rec['rounds'] = (rec['rounds'] ?? 0) + n;
+    rec['lastCleanRounds'] ??= 0;
+    rec['expectedLife'] ??= _defaultLife(firearmId);
+    _barrelLife[firearmId] = rec;
+    await _saveBarrelLife();
+  }
+
+  /// Set the expected barrel life (rounds) for [firearmId].
+  Future<void> setExpectedLife(String firearmId, int life) async {
+    final rec = Map<String, int>.from(_barrelLife[firearmId] ?? {});
+    rec['rounds'] ??= 0;
+    rec['lastCleanRounds'] ??= 0;
+    rec['expectedLife'] = life;
+    _barrelLife[firearmId] = rec;
+    await _saveBarrelLife();
+  }
+
+  /// Mark the barrel as cleaned now (resets the since-clean counter).
+  Future<void> markCleaned(String firearmId) async {
+    final rec = Map<String, int>.from(_barrelLife[firearmId] ?? {});
+    rec['rounds'] ??= 0;
+    rec['lastCleanRounds'] = rec['rounds'];
+    rec['expectedLife'] ??= _defaultLife(firearmId);
+    _barrelLife[firearmId] = rec;
+    await _saveBarrelLife();
+  }
+
+  /// Default expected life by caliber (rough industry rules of thumb).
+  int _defaultLife(String firearmId) {
+    final f = firearm(firearmId);
+    if (f == null) return 3000;
+    final c = f.compatibleCalibers.join(' ').toLowerCase();
+    if (c.contains('.50') || c.contains('12.7')) return 5000;
+    if (c.contains('.300') || c.contains('7.62') || c.contains('.308')) return 4000;
+    if (c.contains('5.56') || c.contains('.223') || c.contains('5.45')) return 8000;
+    if (c.contains('6.5') || c.contains('6.8')) return 2500;
+    if (c.contains('9') || c.contains('.45') || c.contains('9x18')) return 20000;
+    return 3000;
+  }
+
+  /// All tracked firearm ids.
+  Iterable<String> get trackedBarrels => _barrelLife.keys;
 
   // ---- App settings persistence (selections, environment, units) ----
   static const _kSettings = 'app_settings';

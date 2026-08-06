@@ -64,7 +64,7 @@ class _DsfPageState extends State<DsfPage> {
         altitudeM: s.altitudeM,
       ),
       wind: Wind.calm(),
-      dragModelId: s.useG7 ? 'G7' : 'G1',
+      dragModelId: s.dragModelId,
       spinDrift: false,
     );
     return BallisticsSolver(cfg);

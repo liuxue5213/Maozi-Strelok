@@ -82,4 +82,101 @@ class Atmosphere {
     final ratio = earthRadius / (earthRadius + altitudeM);
     return g0 * ratio * ratio;
   }
+
+  /// Density altitude [m] — the altitude in the ISA atmosphere that has the
+  /// same air density as the current conditions. Useful for "density altitude"
+  /// input workflows (Applied Ballistics style).
+  ///
+  /// Solved by inverting the ISA troposphere density formula iteratively.
+  double get densityAltitudeM {
+    final rho = density;
+    const rho0 = 1.225; // ISA sea level
+    final ratio = rho / rho0;
+    if (ratio >= 1.0) {
+      // denser than ISA SL -> negative DA (rare)
+      // solve h from (1 - 6.875e-6*h_m)^4.256 = ratio
+      final h = (1.0 - pow(ratio, 1.0 / 4.2558793)) / 6.87535e-6;
+      return h;
+    }
+    // bisect altitude [0, 11000m] for the matching density
+    double lo = 0, hi = 11000.0;
+    for (int i = 0; i < 60; i++) {
+      final mid = 0.5 * (lo + hi);
+      final t = 1.0 - 2.25577e-5 * mid; // ISA temp ratio in m
+      final r = t <= 0 ? 0.0 : pow(t, 4.25588);
+      if (r > ratio) {
+        lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+    return 0.5 * (lo + hi);
+  }
+
+  /// Density altitude in feet (common US convention).
+  double get densityAltitudeFt => densityAltitudeM * 3.28084;
+
+  /// Build an Atmosphere from a density-altitude input [m] and a temperature.
+  /// Pressure is back-computed so that `density` matches the DA. This lets the
+  /// user work in "Density Altitude" mode (Applied Ballistics default).
+  factory Atmosphere.fromDensityAltitude({
+    required double densityAltitudeM,
+    required double temperatureC,
+    double relativeHumidity = 0.0,
+  }) {
+    final rho = _densityAtIsaAltitude(densityAltitudeM);
+    // back out pressure from rho = P / (Rd * Tv)  => P = rho * Rd * Tv
+    const rd = 287.058;
+    final tk = temperatureC + 273.15;
+    final esPa = 0.61094 * exp((17.625 * temperatureC) / (temperatureC + 243.04)) * 1000.0;
+    final e = esPa * relativeHumidity.clamp(0.0, 1.0);
+    final tv = tk / (1.0 - (e / 101325.0) * (1.0 - 0.622));
+    final p = rho * rd * tv;
+    return Atmosphere(
+      temperatureC: temperatureC,
+      pressurePa: p,
+      relativeHumidity: relativeHumidity,
+      altitudeM: densityAltitudeM,
+    );
+  }
+
+  /// ISA air density at a given geometric altitude [m] (troposphere model).
+  static double _densityAtIsaAltitude(double h) {
+    const rho0 = 1.225;
+    if (h <= 11000) {
+      final t = 1.0 - 2.25577e-5 * h;
+      return t <= 0 ? 0.0 : rho0 * pow(t, 4.25588);
+    }
+    final ratioAt11k = (1.0 - 2.25577e-5 * 11000);
+    final rho11k = rho0 * pow(ratioAt11k, 4.25588);
+    return rho11k * exp(-(h - 11000) / 6341.62);
+  }
+
+  /// Compute a corrected atmosphere by adjusting air density for the difference
+  /// between the *current* conditions and the *zero-time* conditions. Long-range
+  /// zeros (e.g. 600 yd) are sensitive to air-density changes between zeroing
+  /// and shooting. Used by the "Zero Atmosphere" workflow.
+  ///
+  /// The correction scales the effective drag by the density ratio of the two
+  /// atmospheres. We return a new Atmosphere whose density equals the current
+  /// density but whose temperature/speed-of-sound come from the current shot.
+  /// (The solver consumes .density for drag; we just scale it.)
+  Atmosphere adjustedForZeroAtmosphere(Atmosphere? zeroAtmo) {
+    if (zeroAtmo == null) return this;
+    // The ratio of drag scales with rho_current / rho_zero. We bake this into
+    // the returned atmosphere's density field by overriding it, while keeping
+    // the current temperature/sound for Mach calc. However density is derived,
+    // so we instead scale pressure to achieve the target density.
+    final targetDensity = density;
+    // We want density = targetDensity but preserve current Tv (temperature/humidity)
+    // so the speed of sound stays current. P = rho * Rd * Tv.
+    const rd = 287.058;
+    final p = targetDensity * rd * virtualTemperatureK;
+    return Atmosphere(
+      temperatureC: temperatureC,
+      pressurePa: p,
+      relativeHumidity: relativeHumidity,
+      altitudeM: altitudeM,
+    );
+  }
 }

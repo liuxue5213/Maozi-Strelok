@@ -28,3 +28,4 @@ web/
 
 # ZCode plan/session files (internal)
 .zcode/
+__pycache__/

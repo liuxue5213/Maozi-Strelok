@@ -1,54 +1,1172 @@
 [
-  {"id":"ct-m80-762","designation":"M80 Ball","manufacturer":"Lake City","caliber":"7.62 NATO","muzzleVelocityFps":2800,"refBarrelLengthIn":24,"bulletId":"m80-762nato","notes":"Standard NATO ball"},
-  {"id":"ct-m118lr-762","designation":"M118LR Special Ball","manufacturer":"Lake City","caliber":"7.62 NATO","muzzleVelocityFps":2580,"refBarrelLengthIn":24,"bulletId":"m118lr-762","notes":"Sniper load, 175gr SMK"},
-  {"id":"ct-m993-762","designation":"M993 AP","manufacturer":"Lake City","caliber":"7.62 NATO","muzzleVelocityFps":3050,"refBarrelLengthIn":24,"bulletId":"m993-762","notes":"Armor piercing"},
-  {"id":"ct-mk316-762","designation":"MK316 MOD 0","manufacturer":"Federal","caliber":"7.62 NATO","muzzleVelocityFps":2550,"refBarrelLengthIn":24,"bulletId":"sierra-175smk-308","notes":"Match sniping"},
-  {"id":"ct-308win-168","designation":".308 Win Match 168gr","manufacturer":"Federal","caliber":".308 Win","muzzleVelocityFps":2620,"refBarrelLengthIn":24,"bulletId":"sierra-168smk-308"},
-  {"id":"ct-308win-175","designation":".308 Win Gold Medal 175gr","manufacturer":"Federal","caliber":".308 Win","muzzleVelocityFps":2600,"refBarrelLengthIn":24,"bulletId":"sierra-175smk-308"},
-
-  {"id":"ct-m855-556","designation":"M855 (SS109)","manufacturer":"Lake City","caliber":"5.56/.223","muzzleVelocityFps":3020,"refBarrelLengthIn":20,"bulletId":"m855-ss109-556","notes":"62gr penetrator"},
-  {"id":"ct-m193-556","designation":"M193 Ball","manufacturer":"Lake City","caliber":"5.56/.223","muzzleVelocityFps":3165,"refBarrelLengthIn":20,"bulletId":"m193-55fmj-556","notes":"55gr FMJ"},
-  {"id":"ct-mk262-556","designation":"MK262 MOD 1","manufacturer":"Black Hills","caliber":"5.56/.223","muzzleVelocityFps":2750,"refBarrelLengthIn":20,"bulletId":"mk262-77smk-556","notes":"77gr match, SOF/Sniper"},
-  {"id":"ct-mk318-556","designation":"MK318 MOD 0 SOST","manufacturer":"Federal","caliber":"5.56/.223","muzzleVelocityFps":2950,"refBarrelLengthIn":14.5,"bulletId":"mk318-556","notes":"Barrier-blind"},
-  {"id":"ct-m855a-556","designation":"M855A1 EPR","manufacturer":"Lake City","caliber":"5.56/.223","muzzleVelocityFps":3050,"refBarrelLengthIn":14.5,"bulletId":"m855-ss109-556","notes":"Enhanced performance"},
-
-  {"id":"ct-m43-762x39","designation":"M43 (57-N-231)","manufacturer":"Tula","caliber":"7.62x39","muzzleVelocityFps":2330,"refBarrelLengthIn":16.3,"bulletId":"m43-123fmj-762x39","notes":"AK standard"},
-  {"id":"ct-m43-fmj-762x39","designation":"123gr FMJ","manufacturer":"Barnaul","caliber":"7.62x39","muzzleVelocityFps":2350,"refBarrelLengthIn":16.3,"bulletId":"m43-123fmj-762x39"},
-  {"id":"ct-7n10-545","designation":"7N10","manufacturer":"Barnaul","caliber":"5.45x39","muzzleVelocityFps":2950,"refBarrelLengthIn":16.0,"bulletId":"7n10-545","notes":"AK-74 improved"},
-  {"id":"ct-7n6-545","designation":"7N6","manufacturer":"Vympel","caliber":"5.45x39","muzzleVelocityFps":2970,"refBarrelLengthIn":16.0,"bulletId":"7n6-545","notes":"AK-74 original"},
-
-  {"id":"ct-300wm-208","designation":".300 WM 208gr ELD-M","manufacturer":"Hornady","caliber":".300 Win Mag","muzzleVelocityFps":2850,"refBarrelLengthIn":26,"bulletId":"hornady-208eldm-300wm"},
-  {"id":"ct-338lm-250","designation":".338 LM 250gr Scenar","manufacturer":"Lapua","caliber":".338 Lapua Mag","muzzleVelocityFps":2950,"refBarrelLengthIn":27,"bulletId":"lapua-220scenar-338","notes":"Long-range sniper"},
-  {"id":"ct-338lm-300","designation":".338 LM 300gr Hybrid","manufacturer":"Berger","caliber":".338 Lapua Mag","muzzleVelocityFps":2750,"refBarrelLengthIn":27,"bulletId":"berger-300hyb-338"},
-
-  {"id":"ct-m33-50bmg","designation":"M33 Ball","manufacturer":"Lake City","caliber":".50 BMG","muzzleVelocityFps":2910,"refBarrelLengthIn":45,"bulletId":"m33-660fmj-50bmg","notes":"Standard .50"},
-  {"id":"ct-m2ap-50bmg","designation":"M2 AP","manufacturer":"Lake City","caliber":".50 BMG","muzzleVelocityFps":2910,"refBarrelLengthIn":45,"bulletId":"m2ap-50bmg","notes":"Armor piercing"},
-  {"id":"ct-mk211-50bmg","designation":"MK211 RAUFOSS","manufacturer":"Raufoss","caliber":".50 BMG","muzzleVelocityFps":2900,"refBarrelLengthIn":45,"bulletId":"mcmillan-mk211-50bmg","notes":"HEIAP multipurpose"},
-  {"id":"ct-amax-50bmg","designation":".50 A-MAX 750gr","manufacturer":"Hornady","caliber":".50 BMG","muzzleVelocityFps":2700,"refBarrelLengthIn":45,"bulletId":"hornady-750eldx-50bmg","notes":"Extreme LR"},
-
-  {"id":"ct-m882-9mm","designation":"M882 NATO","manufacturer":"Winchester","caliber":"9x19 NATO","muzzleVelocityFps":1200,"refBarrelLengthIn":5,"bulletId":"m882-9mm"},
-  {"id":"ct-9mm-115","designation":"9mm 115gr FMJ","manufacturer":"Fiocchi","caliber":"9x19","muzzleVelocityFps":1150,"refBarrelLengthIn":4.5,"bulletId":"m855-115fmj-9mm"},
-  {"id":"ct-golddot-9mm","designation":"9mm 124gr Gold Dot","manufacturer":"Speer","caliber":"9x19","muzzleVelocityFps":1150,"refBarrelLengthIn":4.5,"bulletId":"goldDot-124-9mm"},
-  {"id":"ct-makarov-9x18","designation":"9x18 Mak 95gr","manufacturer":"Barnaul","caliber":"9x18 Mak","muzzleVelocityFps":1020,"refBarrelLengthIn":3.9,"bulletId":"makarov-95fmj-9x18"},
-  {"id":"ct-45acp-230","designation":".45 ACP 230gr FMJ","manufacturer":"Federal","caliber":".45 ACP","muzzleVelocityFps":835,"refBarrelLengthIn":5,"bulletId":"230fmj-45acp"},
-
-  {"id":"ct-12ga-slug","designation":"12ga Rifled Slug","manufacturer":"Brenneke","caliber":"12 Gauge","muzzleVelocityFps":1550,"refBarrelLengthIn":20,"bulletId":"12ga-rifled-slug"},
-  {"id":"ct-12ga-buck","designation":"12ga 00 Buck","manufacturer":"Federal","caliber":"12 Gauge","muzzleVelocityFps":1325,"refBarrelLengthIn":18,"bulletId":"12ga-buck-00"},
-  {"id":"ct-12ga-bird","designation":"12ga #7.5 Birdshot","manufacturer":"Winchester","caliber":"12 Gauge","muzzleVelocityFps":1250,"refBarrelLengthIn":28,"bulletId":"12ga-bird-7.5"},
-
-  {"id":"ct-65cm-140eldm","designation":"6.5 CM 140gr ELD-M","manufacturer":"Hornady","caliber":"6.5 Creedmoor","muzzleVelocityFps":2700,"refBarrelLengthIn":24,"bulletId":"hornady-140eldm-65cm","notes":"Match factory load"},
-  {"id":"ct-65cm-140berger","designation":"6.5 CM 140gr Berger","manufacturer":"Berger","caliber":"6.5 Creedmoor","muzzleVelocityFps":2710,"refBarrelLengthIn":24,"bulletId":"berger-140hyb-65cm"},
-  {"id":"ct-65cm-136lapua","designation":"6.5 CM 136gr Scenar","manufacturer":"Lapua","caliber":"6.5 Creedmoor","muzzleVelocityFps":2740,"refBarrelLengthIn":24,"bulletId":"lapua-136scenar-65cm"},
-
-  {"id":"ct-7n1-762x54r","designation":"7N1 Sniper","manufacturer":"Novosibirsk","caliber":"7.62x54R","muzzleVelocityFps":2720,"refBarrelLengthIn":24.4,"bulletId":"7n1-762x54r","notes":"SVD sniper load"},
-  {"id":"ct-7n14-762x54r","designation":"7N14 AP","manufacturer":"Novosibirsk","caliber":"7.62x54R","muzzleVelocityFps":2690,"refBarrelLengthIn":24.4,"bulletId":"7n14-762x54r","notes":"SVD armor piercing"},
-  {"id":"ct-lps-762x54r","designation":"LPS Ball","manufacturer":"Barnaul","caliber":"7.62x54R","muzzleVelocityFps":2750,"refBarrelLengthIn":24.4,"bulletId":"lps-762x54r","notes":"PKM ball"},
-
-  {"id":"ct-hst-9mm","designation":"9mm 124gr HST","manufacturer":"Federal","caliber":"9x19","muzzleVelocityFps":1150,"refBarrelLengthIn":4.5,"bulletId":"goldDot-124-9mm-v2","notes":"Defense JHP"},
-  {"id":"ct-critical-9mm","designation":"9mm 135gr Critical Duty","manufacturer":"Federal","caliber":"9x19","muzzleVelocityFps":1110,"refBarrelLengthIn":4.5,"bulletId":"critical-9mm","notes":"Barrier-blind defense"},
-  {"id":"ct-9mm-147fmj","designation":"9mm 147gr FMJ","manufacturer":"Federal","caliber":"9x19","muzzleVelocityFps":1000,"refBarrelLengthIn":4.5,"bulletId":"147fmj-9mm"},
-  {"id":"ct-40sw-165","designation":".40 S&W 165gr FMJ","manufacturer":"Federal","caliber":".40 S&W","muzzleVelocityFps":1010,"refBarrelLengthIn":4,"bulletId":"40sw-165fmj"},
-  {"id":"ct-357mag-158","designation":".357 Mag 158gr JHP","manufacturer":"Speer","caliber":".357 Mag","muzzleVelocityFps":1235,"refBarrelLengthIn":4,"bulletId":"357mag-158jhp"},
-  {"id":"ct-57x28-ss190","designation":"SS190","manufacturer":"FN","caliber":"5.7x28","muzzleVelocityFps":2350,"refBarrelLengthIn":10.4,"bulletId":"57x28-ss190","notes":"P90 / Five-seven"},
-  {"id":"ct-58x21-dp","designation":"DBP88 5.8mm","manufacturer":"Norinco","caliber":"5.8x42","muzzleVelocityFps":3180,"refBarrelLengthIn":24.8,"bulletId":"58x21-58dp","notes":"QBU-88 DMR load"}
+  {
+    "id": "ct-m80-762",
+    "designation": "M80 Ball",
+    "manufacturer": "Lake City",
+    "caliber": "7.62 NATO",
+    "muzzleVelocityFps": 2800,
+    "refBarrelLengthIn": 24,
+    "bulletId": "m80-762nato",
+    "notes": "Standard NATO ball"
+  },
+  {
+    "id": "ct-m118lr-762",
+    "designation": "M118LR Special Ball",
+    "manufacturer": "Lake City",
+    "caliber": "7.62 NATO",
+    "muzzleVelocityFps": 2580,
+    "refBarrelLengthIn": 24,
+    "bulletId": "m118lr-762",
+    "notes": "Sniper load, 175gr SMK"
+  },
+  {
+    "id": "ct-m993-762",
+    "designation": "M993 AP",
+    "manufacturer": "Lake City",
+    "caliber": "7.62 NATO",
+    "muzzleVelocityFps": 3050,
+    "refBarrelLengthIn": 24,
+    "bulletId": "m993-762",
+    "notes": "Armor piercing"
+  },
+  {
+    "id": "ct-mk316-762",
+    "designation": "MK316 MOD 0",
+    "manufacturer": "Federal",
+    "caliber": "7.62 NATO",
+    "muzzleVelocityFps": 2550,
+    "refBarrelLengthIn": 24,
+    "bulletId": "sierra-175smk-308",
+    "notes": "Match sniping"
+  },
+  {
+    "id": "ct-308win-168",
+    "designation": ".308 Win Match 168gr",
+    "manufacturer": "Federal",
+    "caliber": ".308 Win",
+    "muzzleVelocityFps": 2620,
+    "refBarrelLengthIn": 24,
+    "bulletId": "sierra-168smk-308"
+  },
+  {
+    "id": "ct-308win-175",
+    "designation": ".308 Win Gold Medal 175gr",
+    "manufacturer": "Federal",
+    "caliber": ".308 Win",
+    "muzzleVelocityFps": 2600,
+    "refBarrelLengthIn": 24,
+    "bulletId": "sierra-175smk-308"
+  },
+  {
+    "id": "ct-m855-556",
+    "designation": "M855 (SS109)",
+    "manufacturer": "Lake City",
+    "caliber": "5.56/.223",
+    "muzzleVelocityFps": 3020,
+    "refBarrelLengthIn": 20,
+    "bulletId": "m855-ss109-556",
+    "notes": "62gr penetrator"
+  },
+  {
+    "id": "ct-m193-556",
+    "designation": "M193 Ball",
+    "manufacturer": "Lake City",
+    "caliber": "5.56/.223",
+    "muzzleVelocityFps": 3165,
+    "refBarrelLengthIn": 20,
+    "bulletId": "m193-55fmj-556",
+    "notes": "55gr FMJ"
+  },
+  {
+    "id": "ct-mk262-556",
+    "designation": "MK262 MOD 1",
+    "manufacturer": "Black Hills",
+    "caliber": "5.56/.223",
+    "muzzleVelocityFps": 2750,
+    "refBarrelLengthIn": 20,
+    "bulletId": "mk262-77smk-556",
+    "notes": "77gr match, SOF/Sniper"
+  },
+  {
+    "id": "ct-mk318-556",
+    "designation": "MK318 MOD 0 SOST",
+    "manufacturer": "Federal",
+    "caliber": "5.56/.223",
+    "muzzleVelocityFps": 2950,
+    "refBarrelLengthIn": 14.5,
+    "bulletId": "mk318-556",
+    "notes": "Barrier-blind"
+  },
+  {
+    "id": "ct-m855a-556",
+    "designation": "M855A1 EPR",
+    "manufacturer": "Lake City",
+    "caliber": "5.56/.223",
+    "muzzleVelocityFps": 3050,
+    "refBarrelLengthIn": 14.5,
+    "bulletId": "m855-ss109-556",
+    "notes": "Enhanced performance"
+  },
+  {
+    "id": "ct-m43-762x39",
+    "designation": "M43 (57-N-231)",
+    "manufacturer": "Tula",
+    "caliber": "7.62x39",
+    "muzzleVelocityFps": 2330,
+    "refBarrelLengthIn": 16.3,
+    "bulletId": "m43-123fmj-762x39",
+    "notes": "AK standard"
+  },
+  {
+    "id": "ct-m43-fmj-762x39",
+    "designation": "123gr FMJ",
+    "manufacturer": "Barnaul",
+    "caliber": "7.62x39",
+    "muzzleVelocityFps": 2350,
+    "refBarrelLengthIn": 16.3,
+    "bulletId": "m43-123fmj-762x39"
+  },
+  {
+    "id": "ct-7n10-545",
+    "designation": "7N10",
+    "manufacturer": "Barnaul",
+    "caliber": "5.45x39",
+    "muzzleVelocityFps": 2950,
+    "refBarrelLengthIn": 16.0,
+    "bulletId": "7n10-545",
+    "notes": "AK-74 improved"
+  },
+  {
+    "id": "ct-7n6-545",
+    "designation": "7N6",
+    "manufacturer": "Vympel",
+    "caliber": "5.45x39",
+    "muzzleVelocityFps": 2970,
+    "refBarrelLengthIn": 16.0,
+    "bulletId": "7n6-545",
+    "notes": "AK-74 original"
+  },
+  {
+    "id": "ct-300wm-208",
+    "designation": ".300 WM 208gr ELD-M",
+    "manufacturer": "Hornady",
+    "caliber": ".300 Win Mag",
+    "muzzleVelocityFps": 2850,
+    "refBarrelLengthIn": 26,
+    "bulletId": "hornady-208eldm-300wm"
+  },
+  {
+    "id": "ct-338lm-250",
+    "designation": ".338 LM 250gr Scenar",
+    "manufacturer": "Lapua",
+    "caliber": ".338 Lapua Mag",
+    "muzzleVelocityFps": 2950,
+    "refBarrelLengthIn": 27,
+    "bulletId": "lapua-220scenar-338",
+    "notes": "Long-range sniper"
+  },
+  {
+    "id": "ct-338lm-300",
+    "designation": ".338 LM 300gr Hybrid",
+    "manufacturer": "Berger",
+    "caliber": ".338 Lapua Mag",
+    "muzzleVelocityFps": 2750,
+    "refBarrelLengthIn": 27,
+    "bulletId": "berger-300hyb-338"
+  },
+  {
+    "id": "ct-m33-50bmg",
+    "designation": "M33 Ball",
+    "manufacturer": "Lake City",
+    "caliber": ".50 BMG",
+    "muzzleVelocityFps": 2910,
+    "refBarrelLengthIn": 45,
+    "bulletId": "m33-660fmj-50bmg",
+    "notes": "Standard .50"
+  },
+  {
+    "id": "ct-m2ap-50bmg",
+    "designation": "M2 AP",
+    "manufacturer": "Lake City",
+    "caliber": ".50 BMG",
+    "muzzleVelocityFps": 2910,
+    "refBarrelLengthIn": 45,
+    "bulletId": "m2ap-50bmg",
+    "notes": "Armor piercing"
+  },
+  {
+    "id": "ct-mk211-50bmg",
+    "designation": "MK211 RAUFOSS",
+    "manufacturer": "Raufoss",
+    "caliber": ".50 BMG",
+    "muzzleVelocityFps": 2900,
+    "refBarrelLengthIn": 45,
+    "bulletId": "mcmillan-mk211-50bmg",
+    "notes": "HEIAP multipurpose"
+  },
+  {
+    "id": "ct-amax-50bmg",
+    "designation": ".50 A-MAX 750gr",
+    "manufacturer": "Hornady",
+    "caliber": ".50 BMG",
+    "muzzleVelocityFps": 2700,
+    "refBarrelLengthIn": 45,
+    "bulletId": "hornady-750eldx-50bmg",
+    "notes": "Extreme LR"
+  },
+  {
+    "id": "ct-m882-9mm",
+    "designation": "M882 NATO",
+    "manufacturer": "Winchester",
+    "caliber": "9x19 NATO",
+    "muzzleVelocityFps": 1200,
+    "refBarrelLengthIn": 5,
+    "bulletId": "m882-9mm"
+  },
+  {
+    "id": "ct-9mm-115",
+    "designation": "9mm 115gr FMJ",
+    "manufacturer": "Fiocchi",
+    "caliber": "9x19",
+    "muzzleVelocityFps": 1150,
+    "refBarrelLengthIn": 4.5,
+    "bulletId": "m855-115fmj-9mm"
+  },
+  {
+    "id": "ct-golddot-9mm",
+    "designation": "9mm 124gr Gold Dot",
+    "manufacturer": "Speer",
+    "caliber": "9x19",
+    "muzzleVelocityFps": 1150,
+    "refBarrelLengthIn": 4.5,
+    "bulletId": "goldDot-124-9mm"
+  },
+  {
+    "id": "ct-makarov-9x18",
+    "designation": "9x18 Mak 95gr",
+    "manufacturer": "Barnaul",
+    "caliber": "9x18 Mak",
+    "muzzleVelocityFps": 1020,
+    "refBarrelLengthIn": 3.9,
+    "bulletId": "makarov-95fmj-9x18"
+  },
+  {
+    "id": "ct-45acp-230",
+    "designation": ".45 ACP 230gr FMJ",
+    "manufacturer": "Federal",
+    "caliber": ".45 ACP",
+    "muzzleVelocityFps": 835,
+    "refBarrelLengthIn": 5,
+    "bulletId": "230fmj-45acp"
+  },
+  {
+    "id": "ct-12ga-slug",
+    "designation": "12ga Rifled Slug",
+    "manufacturer": "Brenneke",
+    "caliber": "12 Gauge",
+    "muzzleVelocityFps": 1550,
+    "refBarrelLengthIn": 20,
+    "bulletId": "12ga-rifled-slug"
+  },
+  {
+    "id": "ct-12ga-buck",
+    "designation": "12ga 00 Buck",
+    "manufacturer": "Federal",
+    "caliber": "12 Gauge",
+    "muzzleVelocityFps": 1325,
+    "refBarrelLengthIn": 18,
+    "bulletId": "12ga-buck-00"
+  },
+  {
+    "id": "ct-12ga-bird",
+    "designation": "12ga #7.5 Birdshot",
+    "manufacturer": "Winchester",
+    "caliber": "12 Gauge",
+    "muzzleVelocityFps": 1250,
+    "refBarrelLengthIn": 28,
+    "bulletId": "12ga-bird-7.5"
+  },
+  {
+    "id": "ct-65cm-140eldm",
+    "designation": "6.5 CM 140gr ELD-M",
+    "manufacturer": "Hornady",
+    "caliber": "6.5 Creedmoor",
+    "muzzleVelocityFps": 2700,
+    "refBarrelLengthIn": 24,
+    "bulletId": "hornady-140eldm-65cm",
+    "notes": "Match factory load"
+  },
+  {
+    "id": "ct-65cm-140berger",
+    "designation": "6.5 CM 140gr Berger",
+    "manufacturer": "Berger",
+    "caliber": "6.5 Creedmoor",
+    "muzzleVelocityFps": 2710,
+    "refBarrelLengthIn": 24,
+    "bulletId": "berger-140hyb-65cm"
+  },
+  {
+    "id": "ct-65cm-136lapua",
+    "designation": "6.5 CM 136gr Scenar",
+    "manufacturer": "Lapua",
+    "caliber": "6.5 Creedmoor",
+    "muzzleVelocityFps": 2740,
+    "refBarrelLengthIn": 24,
+    "bulletId": "lapua-136scenar-65cm"
+  },
+  {
+    "id": "ct-7n1-762x54r",
+    "designation": "7N1 Sniper",
+    "manufacturer": "Novosibirsk",
+    "caliber": "7.62x54R",
+    "muzzleVelocityFps": 2720,
+    "refBarrelLengthIn": 24.4,
+    "bulletId": "7n1-762x54r",
+    "notes": "SVD sniper load"
+  },
+  {
+    "id": "ct-7n14-762x54r",
+    "designation": "7N14 AP",
+    "manufacturer": "Novosibirsk",
+    "caliber": "7.62x54R",
+    "muzzleVelocityFps": 2690,
+    "refBarrelLengthIn": 24.4,
+    "bulletId": "7n14-762x54r",
+    "notes": "SVD armor piercing"
+  },
+  {
+    "id": "ct-lps-762x54r",
+    "designation": "LPS Ball",
+    "manufacturer": "Barnaul",
+    "caliber": "7.62x54R",
+    "muzzleVelocityFps": 2750,
+    "refBarrelLengthIn": 24.4,
+    "bulletId": "lps-762x54r",
+    "notes": "PKM ball"
+  },
+  {
+    "id": "ct-hst-9mm",
+    "designation": "9mm 124gr HST",
+    "manufacturer": "Federal",
+    "caliber": "9x19",
+    "muzzleVelocityFps": 1150,
+    "refBarrelLengthIn": 4.5,
+    "bulletId": "goldDot-124-9mm-v2",
+    "notes": "Defense JHP"
+  },
+  {
+    "id": "ct-critical-9mm",
+    "designation": "9mm 135gr Critical Duty",
+    "manufacturer": "Federal",
+    "caliber": "9x19",
+    "muzzleVelocityFps": 1110,
+    "refBarrelLengthIn": 4.5,
+    "bulletId": "critical-9mm",
+    "notes": "Barrier-blind defense"
+  },
+  {
+    "id": "ct-9mm-147fmj",
+    "designation": "9mm 147gr FMJ",
+    "manufacturer": "Federal",
+    "caliber": "9x19",
+    "muzzleVelocityFps": 1000,
+    "refBarrelLengthIn": 4.5,
+    "bulletId": "147fmj-9mm"
+  },
+  {
+    "id": "ct-40sw-165",
+    "designation": ".40 S&W 165gr FMJ",
+    "manufacturer": "Federal",
+    "caliber": ".40 S&W",
+    "muzzleVelocityFps": 1010,
+    "refBarrelLengthIn": 4,
+    "bulletId": "40sw-165fmj"
+  },
+  {
+    "id": "ct-357mag-158",
+    "designation": ".357 Mag 158gr JHP",
+    "manufacturer": "Speer",
+    "caliber": ".357 Mag",
+    "muzzleVelocityFps": 1235,
+    "refBarrelLengthIn": 4,
+    "bulletId": "357mag-158jhp"
+  },
+  {
+    "id": "ct-57x28-ss190",
+    "designation": "SS190",
+    "manufacturer": "FN",
+    "caliber": "5.7x28",
+    "muzzleVelocityFps": 2350,
+    "refBarrelLengthIn": 10.4,
+    "bulletId": "57x28-ss190",
+    "notes": "P90 / Five-seven"
+  },
+  {
+    "id": "ct-58x21-dp",
+    "designation": "DBP88 5.8mm",
+    "manufacturer": "Norinco",
+    "caliber": "5.8x42",
+    "muzzleVelocityFps": 3180,
+    "refBarrelLengthIn": 24.8,
+    "bulletId": "58x21-58dp",
+    "notes": "QBU-88 DMR load"
+  },
+  {
+    "id": "ct-blackhills-77tmk-556",
+    "designation": "77gr Tipped Match (5.56)",
+    "manufacturer": "Black Hills",
+    "caliber": "5.56/.223",
+    "muzzleVelocityFps": 2750,
+    "refBarrelLengthIn": 20,
+    "bulletId": "sierra-77tmk-223",
+    "notes": "DMR/match"
+  },
+  {
+    "id": "ct-hornady-68match-556",
+    "designation": "68gr BTHP Match",
+    "manufacturer": "Hornady",
+    "caliber": "5.56/.223",
+    "muzzleVelocityFps": 2790,
+    "refBarrelLengthIn": 20,
+    "bulletId": "hornady-68bthp-223"
+  },
+  {
+    "id": "ct-hornady-73eldm-223",
+    "designation": "73gr ELD-M Match",
+    "manufacturer": "Hornady",
+    "caliber": "5.56/.223",
+    "muzzleVelocityFps": 2775,
+    "refBarrelLengthIn": 20,
+    "bulletId": "hornady-73eldm-223"
+  },
+  {
+    "id": "ct-nosler77cc-223",
+    "designation": "77gr Custom Competition",
+    "manufacturer": "Nosler",
+    "caliber": "5.56/.223",
+    "muzzleVelocityFps": 2750,
+    "refBarrelLengthIn": 20,
+    "bulletId": "nosler-77cc-223"
+  },
+  {
+    "id": "ct-berger82-223",
+    "designation": "82gr Target",
+    "manufacturer": "Berger",
+    "caliber": "5.56/.223",
+    "muzzleVelocityFps": 2650,
+    "refBarrelLengthIn": 20,
+    "bulletId": "berger-82tgt-223",
+    "notes": "Requires 1:7 twist"
+  },
+  {
+    "id": "ct-hornady-vmax50-223",
+    "designation": "50gr V-MAX Varmint",
+    "manufacturer": "Hornady",
+    "caliber": "5.56/.223",
+    "muzzleVelocityFps": 3325,
+    "refBarrelLengthIn": 24,
+    "bulletId": "hornady-50vmax-223"
+  },
+  {
+    "id": "ct-hornady-vmax60-223",
+    "designation": "60gr V-MAX Varmint",
+    "manufacturer": "Hornady",
+    "caliber": "5.56/.223",
+    "muzzleVelocityFps": 3200,
+    "refBarrelLengthIn": 24,
+    "bulletId": "hornady-60vmax-223"
+  },
+  {
+    "id": "ct-nosler55bt-223",
+    "designation": "55gr Ballistic Tip Varmint",
+    "manufacturer": "Nosler",
+    "caliber": "5.56/.223",
+    "muzzleVelocityFps": 3300,
+    "refBarrelLengthIn": 24,
+    "bulletId": "nosler-55bt-223"
+  },
+  {
+    "id": "ct-lapua-55fmj-223",
+    "designation": "55gr FMJ Service Rifle",
+    "manufacturer": "Lapua",
+    "caliber": "5.56/.223",
+    "muzzleVelocityFps": 3180,
+    "refBarrelLengthIn": 20,
+    "bulletId": "lapua-55fmj-223"
+  },
+  {
+    "id": "ct-barnes62tsx-223",
+    "designation": "62gr TSX Hunting",
+    "manufacturer": "Barnes",
+    "caliber": "5.56/.223",
+    "muzzleVelocityFps": 3000,
+    "refBarrelLengthIn": 20,
+    "bulletId": "barnes-62tsx-223"
+  },
+  {
+    "id": "ct-fed-gm-168eldm-308",
+    "designation": "Gold Medal 168gr ELD-M",
+    "manufacturer": "Federal",
+    "caliber": ".308 Win",
+    "muzzleVelocityFps": 2620,
+    "refBarrelLengthIn": 24,
+    "bulletId": "hornady-168eldm-308"
+  },
+  {
+    "id": "ct-fed-150sst-308",
+    "designation": "Superformance 150gr SST",
+    "manufacturer": "Hornady",
+    "caliber": ".308 Win",
+    "muzzleVelocityFps": 2820,
+    "refBarrelLengthIn": 24,
+    "bulletId": "hornady-150sst-308"
+  },
+  {
+    "id": "ct-fed-165sst-308",
+    "designation": "Superformance 165gr SST",
+    "manufacturer": "Hornady",
+    "caliber": ".308 Win",
+    "muzzleVelocityFps": 2700,
+    "refBarrelLengthIn": 24,
+    "bulletId": "hornady-165sst-308"
+  },
+  {
+    "id": "ct-hornady-180eldx-308",
+    "designation": "Precision Hunter 180gr ELD-X",
+    "manufacturer": "Hornady",
+    "caliber": ".308 Win",
+    "muzzleVelocityFps": 2570,
+    "refBarrelLengthIn": 24,
+    "bulletId": "hornady-180eldx-308"
+  },
+  {
+    "id": "ct-nosler-175cc-308",
+    "designation": "Match 175gr CC",
+    "manufacturer": "Nosler",
+    "caliber": ".308 Win",
+    "muzzleVelocityFps": 2600,
+    "refBarrelLengthIn": 24,
+    "bulletId": "nosler-175cc-308"
+  },
+  {
+    "id": "ct-berger-185jug-308",
+    "designation": "185gr Juggernaut",
+    "manufacturer": "Berger",
+    "caliber": ".308 Win",
+    "muzzleVelocityFps": 2550,
+    "refBarrelLengthIn": 24,
+    "bulletId": "berger-185jug-308"
+  },
+  {
+    "id": "ct-lapua-167-308",
+    "designation": "167gr Scenar",
+    "manufacturer": "Lapua",
+    "caliber": ".308 Win",
+    "muzzleVelocityFps": 2650,
+    "refBarrelLengthIn": 24,
+    "bulletId": "lapua-167scenar-308"
+  },
+  {
+    "id": "ct-nosler-180part-308",
+    "designation": "180gr Partition",
+    "manufacturer": "Nosler",
+    "caliber": ".308 Win",
+    "muzzleVelocityFps": 2560,
+    "refBarrelLengthIn": 24,
+    "bulletId": "nosler-180part-308",
+    "notes": "Premium hunting"
+  },
+  {
+    "id": "ct-fed-308-190smk",
+    "designation": "190gr MatchKing",
+    "manufacturer": "Federal",
+    "caliber": ".308 Win",
+    "muzzleVelocityFps": 2500,
+    "refBarrelLengthIn": 24,
+    "bulletId": "sierra-190smk-308",
+    "notes": "Long-range .308"
+  },
+  {
+    "id": "ct-hornady-147eldm-65cm",
+    "designation": "147gr ELD-M Match",
+    "manufacturer": "Hornady",
+    "caliber": "6.5 Creedmoor",
+    "muzzleVelocityFps": 2690,
+    "refBarrelLengthIn": 24,
+    "bulletId": "hornady-147eldm-65cm"
+  },
+  {
+    "id": "ct-hornady-143eldx-65cm",
+    "designation": "Precision Hunter 143gr ELD-X",
+    "manufacturer": "Hornady",
+    "caliber": "6.5 Creedmoor",
+    "muzzleVelocityFps": 2700,
+    "refBarrelLengthIn": 24,
+    "bulletId": "hornady-143eldx-65cm"
+  },
+  {
+    "id": "ct-hornady-120eldm-65cm",
+    "designation": "120gr ELD-M Match",
+    "manufacturer": "Hornady",
+    "caliber": "6.5 Creedmoor",
+    "muzzleVelocityFps": 2890,
+    "refBarrelLengthIn": 24,
+    "bulletId": "hornady-120eldm-65cm"
+  },
+  {
+    "id": "ct-lapua-139scenar-65cm",
+    "designation": "139gr Scenar",
+    "manufacturer": "Lapua",
+    "caliber": "6.5 Creedmoor",
+    "muzzleVelocityFps": 2730,
+    "refBarrelLengthIn": 24,
+    "bulletId": "lapua-139scenar-65cm"
+  },
+  {
+    "id": "ct-lapua-144scenarl-65cm",
+    "designation": "144gr Scenar-L",
+    "manufacturer": "Lapua",
+    "caliber": "6.5 Creedmoor",
+    "muzzleVelocityFps": 2690,
+    "refBarrelLengthIn": 24,
+    "bulletId": "lapua-144scenarl-65cm"
+  },
+  {
+    "id": "ct-berger-156eol-65cm",
+    "designation": "156gr EOL Elite Hunter",
+    "manufacturer": "Berger",
+    "caliber": "6.5 Creedmoor",
+    "muzzleVelocityFps": 2600,
+    "refBarrelLengthIn": 24,
+    "bulletId": "berger-156eol-65cm"
+  },
+  {
+    "id": "ct-nosler-140rdf-65cm",
+    "designation": "140gr RDF Match",
+    "manufacturer": "Nosler",
+    "caliber": "6.5 Creedmoor",
+    "muzzleVelocityFps": 2700,
+    "refBarrelLengthIn": 24,
+    "bulletId": "nosler-140rdf-65cm"
+  },
+  {
+    "id": "ct-sierra-140smk-65cm",
+    "designation": "140gr MatchKing",
+    "manufacturer": "Sierra",
+    "caliber": "6.5 Creedmoor",
+    "muzzleVelocityFps": 2725,
+    "refBarrelLengthIn": 24,
+    "bulletId": "sierra-140smk-65cm"
+  },
+  {
+    "id": "ct-norma-140gt-65swede",
+    "designation": "Golden Target 140gr",
+    "manufacturer": "Norma",
+    "caliber": "6.5x55 Swedish",
+    "muzzleVelocityFps": 2625,
+    "refBarrelLengthIn": 27,
+    "bulletId": "norma-140gt-65swede"
+  },
+  {
+    "id": "ct-norma-156oryx-65swede",
+    "designation": "Oryx 156gr",
+    "manufacturer": "Norma",
+    "caliber": "6.5x55 Swedish",
+    "muzzleVelocityFps": 2510,
+    "refBarrelLengthIn": 27,
+    "bulletId": "norma-156oryx-65swede",
+    "notes": "Moose/large game"
+  },
+  {
+    "id": "ct-sierra-140sp-65swede",
+    "designation": "140gr Spitzer",
+    "manufacturer": "Norma",
+    "caliber": "6.5x55 Swedish",
+    "muzzleVelocityFps": 2625,
+    "refBarrelLengthIn": 27,
+    "bulletId": "sierra-140sp-65swede"
+  },
+  {
+    "id": "ct-hornady-129sst-260",
+    "designation": ".260 Rem 129gr SST",
+    "manufacturer": "Hornady",
+    "caliber": ".260 Rem",
+    "muzzleVelocityFps": 2750,
+    "refBarrelLengthIn": 24,
+    "bulletId": "hornady-129sst-260"
+  },
+  {
+    "id": "ct-nosler-120bt-260",
+    "designation": ".260 Rem 120gr Ballistic Tip",
+    "manufacturer": "Nosler",
+    "caliber": ".260 Rem",
+    "muzzleVelocityFps": 2890,
+    "refBarrelLengthIn": 24,
+    "bulletId": "nosler-120bt-260"
+  },
+  {
+    "id": "ct-300wm-225eldm",
+    "designation": "225gr ELD-M",
+    "manufacturer": "Hornady",
+    "caliber": ".300 Win Mag",
+    "muzzleVelocityFps": 2680,
+    "refBarrelLengthIn": 26,
+    "bulletId": "hornady-225eldm-300wm"
+  },
+  {
+    "id": "ct-300wm-230berger",
+    "designation": "230gr Hybrid Target",
+    "manufacturer": "Berger",
+    "caliber": ".300 Win Mag",
+    "muzzleVelocityFps": 2650,
+    "refBarrelLengthIn": 26,
+    "bulletId": "berger-230hyb-300wm"
+  },
+  {
+    "id": "ct-300wm-200eldx",
+    "designation": "200gr ELD-X Precision Hunter",
+    "manufacturer": "Hornady",
+    "caliber": ".300 Win Mag",
+    "muzzleVelocityFps": 2900,
+    "refBarrelLengthIn": 26,
+    "bulletId": "hornady-200eldx-300wm"
+  },
+  {
+    "id": "ct-300wm-220smk",
+    "designation": "220gr MatchKing",
+    "manufacturer": "Federal",
+    "caliber": ".300 Win Mag",
+    "muzzleVelocityFps": 2670,
+    "refBarrelLengthIn": 26,
+    "bulletId": "sierra-220smk-300wm"
+  },
+  {
+    "id": "ct-300nm-250atip",
+    "designation": "250gr A-Tip",
+    "manufacturer": "Hornady",
+    "caliber": ".300 Norma Mag",
+    "muzzleVelocityFps": 2850,
+    "refBarrelLengthIn": 27,
+    "bulletId": "hornady-250atip-300wm",
+    "notes": "Sniper/Ultra LR"
+  },
+  {
+    "id": "ct-300nm-245eol",
+    "designation": "245gr EOL",
+    "manufacturer": "Berger",
+    "caliber": ".300 Norma Mag",
+    "muzzleVelocityFps": 2800,
+    "refBarrelLengthIn": 27,
+    "bulletId": "berger-245eol-300wm"
+  },
+  {
+    "id": "ct-338lm-285atip",
+    "designation": "285gr A-Tip Match",
+    "manufacturer": "Hornady",
+    "caliber": ".338 Lapua Mag",
+    "muzzleVelocityFps": 2760,
+    "refBarrelLengthIn": 27,
+    "bulletId": "hornady-285atip-338"
+  },
+  {
+    "id": "ct-338lm-300scenarl",
+    "designation": "300gr Scenar-L",
+    "manufacturer": "Lapua",
+    "caliber": ".338 Lapua Mag",
+    "muzzleVelocityFps": 2700,
+    "refBarrelLengthIn": 27,
+    "bulletId": "lapua-300scenarl-338"
+  },
+  {
+    "id": "ct-338lm-250scenarl",
+    "designation": "250gr Scenar-L",
+    "manufacturer": "Lapua",
+    "caliber": ".338 Lapua Mag",
+    "muzzleVelocityFps": 2950,
+    "refBarrelLengthIn": 27,
+    "bulletId": "lapua-250scenarl-338"
+  },
+  {
+    "id": "ct-338lm-300smk",
+    "designation": "300gr MatchKing",
+    "manufacturer": "Sierra",
+    "caliber": ".338 Lapua Mag",
+    "muzzleVelocityFps": 2700,
+    "refBarrelLengthIn": 27,
+    "bulletId": "sierra-300smk-338"
+  },
+  {
+    "id": "ct-338lm-300rdf",
+    "designation": "300gr RDF",
+    "manufacturer": "Nosler",
+    "caliber": ".338 Lapua Mag",
+    "muzzleVelocityFps": 2700,
+    "refBarrelLengthIn": 27,
+    "bulletId": "nosler-300rdf-338"
+  },
+  {
+    "id": "ct-338lm-270eldx",
+    "designation": "270gr ELD-X",
+    "manufacturer": "Hornady",
+    "caliber": ".338 Lapua Mag",
+    "muzzleVelocityFps": 2820,
+    "refBarrelLengthIn": 27,
+    "bulletId": "hornady-270eldx-338"
+  },
+  {
+    "id": "ct-m17-50bmg",
+    "designation": "M17 Tracer",
+    "manufacturer": "Lake City",
+    "caliber": ".50 BMG",
+    "muzzleVelocityFps": 2900,
+    "refBarrelLengthIn": 45,
+    "bulletId": "m17-tracer-50bmg",
+    "notes": "Red tracer"
+  },
+  {
+    "id": "ct-m20-50bmg",
+    "designation": "M20 Tracer",
+    "manufacturer": "Lake City",
+    "caliber": ".50 BMG",
+    "muzzleVelocityFps": 2910,
+    "refBarrelLengthIn": 45,
+    "bulletId": "m20-tracer-50bmg"
+  },
+  {
+    "id": "ct-m8-api-50bmg",
+    "designation": "M8 API",
+    "manufacturer": "Lake City",
+    "caliber": ".50 BMG",
+    "muzzleVelocityFps": 2910,
+    "refBarrelLengthIn": 45,
+    "bulletId": "m8-api-50bmg",
+    "notes": "Armor piercing incendiary"
+  },
+  {
+    "id": "ct-m962-slap-50bmg",
+    "designation": "M962 SLAP",
+    "manufacturer": "Lake City",
+    "caliber": ".50 BMG",
+    "muzzleVelocityFps": 4000,
+    "refBarrelLengthIn": 45,
+    "bulletId": "m962-slap-50bmg",
+    "notes": "Saboted light armor penetrator"
+  },
+  {
+    "id": "ct-m1022-50bmg",
+    "designation": "M1022 LR Match",
+    "manufacturer": "Lake City",
+    "caliber": ".50 BMG",
+    "muzzleVelocityFps": 2750,
+    "refBarrelLengthIn": 45,
+    "bulletId": "m1022-50bmg",
+    "notes": "Long-range match"
+  },
+  {
+    "id": "ct-barnes800-50bmg",
+    "designation": "800gr VLD Target",
+    "manufacturer": "Barnes",
+    "caliber": ".50 BMG",
+    "muzzleVelocityFps": 2650,
+    "refBarrelLengthIn": 45,
+    "bulletId": "barnes-800vld-50bmg"
+  },
+  {
+    "id": "ct-hornady-123sst-762x39",
+    "designation": "123gr SST",
+    "manufacturer": "Hornady",
+    "caliber": "7.62x39",
+    "muzzleVelocityFps": 2350,
+    "refBarrelLengthIn": 16.3,
+    "bulletId": "hornady-123sst-762x39",
+    "notes": "Hunting"
+  },
+  {
+    "id": "ct-hornady-110vmax-762x39",
+    "designation": "110gr V-MAX",
+    "manufacturer": "Hornady",
+    "caliber": "7.62x39",
+    "muzzleVelocityFps": 2450,
+    "refBarrelLengthIn": 16.3,
+    "bulletId": "hornady-110vmax-762x39"
+  },
+  {
+    "id": "ct-barnes-110ttsx-762x39",
+    "designation": "110gr TTSX",
+    "manufacturer": "Barnes",
+    "caliber": "7.62x39",
+    "muzzleVelocityFps": 2380,
+    "refBarrelLengthIn": 16.3,
+    "bulletId": "barnes-110ttsx-762x39"
+  },
+  {
+    "id": "ct-wolf-154sp-762x39",
+    "designation": "154gr SP",
+    "manufacturer": "Wolf",
+    "caliber": "7.62x39",
+    "muzzleVelocityFps": 2150,
+    "refBarrelLengthIn": 16.3,
+    "bulletId": "wolf-154sp-762x39"
+  },
+  {
+    "id": "ct-sig-277fury-135fmj",
+    "designation": "M80-style 135gr Ball",
+    "manufacturer": "SIG Sauer",
+    "caliber": ".277 Fury",
+    "muzzleVelocityFps": 2950,
+    "refBarrelLengthIn": 16,
+    "bulletId": "sig-135fmj-277fury",
+    "notes": "Hybrid metallic case"
+  },
+  {
+    "id": "ct-sig-277fury-130cxs",
+    "designation": "130gr CXS",
+    "manufacturer": "SIG Sauer",
+    "caliber": ".277 Fury",
+    "muzzleVelocityFps": 2950,
+    "refBarrelLengthIn": 16,
+    "bulletId": "sig-130cxs-277fury"
+  },
+  {
+    "id": "ct-hornady-110vmax-68spc",
+    "designation": "V-MAX 110gr",
+    "manufacturer": "Hornady",
+    "caliber": "6.8 SPC",
+    "muzzleVelocityFps": 2640,
+    "refBarrelLengthIn": 16,
+    "bulletId": "hornady-110vmax-68spc"
+  },
+  {
+    "id": "ct-hornady-110bthp-68spc",
+    "designation": "BTHP Match 110gr",
+    "manufacturer": "Hornady",
+    "caliber": "6.8 SPC",
+    "muzzleVelocityFps": 2600,
+    "refBarrelLengthIn": 16,
+    "bulletId": "hornady-110bthp-68spc"
+  },
+  {
+    "id": "ct-nosler-110ab-68spc",
+    "designation": "AccuBond 110gr",
+    "manufacturer": "Nosler",
+    "caliber": "6.8 SPC",
+    "muzzleVelocityFps": 2550,
+    "refBarrelLengthIn": 16,
+    "bulletId": "nosler-110ab-68spc"
+  },
+  {
+    "id": "ct-speer-90tnt-277wolv",
+    "designation": "TNT 90gr",
+    "manufacturer": "Speer",
+    "caliber": ".277 Wolverine",
+    "muzzleVelocityFps": 3100,
+    "refBarrelLengthIn": 16,
+    "bulletId": "speer-90tnt-277wolv",
+    "notes": "Varmint"
+  },
+  {
+    "id": "ct-hornady-32vmax-204",
+    "designation": "32gr V-MAX",
+    "manufacturer": "Hornady",
+    "caliber": ".204 Ruger",
+    "muzzleVelocityFps": 4150,
+    "refBarrelLengthIn": 24,
+    "bulletId": "hornady-32vmax-204ruger"
+  },
+  {
+    "id": "ct-berger-40tgt-204",
+    "designation": "40gr Match Target",
+    "manufacturer": "Berger",
+    "caliber": ".204 Ruger",
+    "muzzleVelocityFps": 3900,
+    "refBarrelLengthIn": 24,
+    "bulletId": "berger-40tgt-204ruger"
+  },
+  {
+    "id": "ct-hornady-25hp-17rem",
+    "designation": "25gr HP",
+    "manufacturer": "Hornady",
+    "caliber": ".17 Rem",
+    "muzzleVelocityFps": 4040,
+    "refBarrelLengthIn": 24,
+    "bulletId": "hornady-25hp-17rem"
+  },
+  {
+    "id": "ct-cci-17vmax-17hmr",
+    "designation": "17gr V-MAX",
+    "manufacturer": "CCI",
+    "caliber": ".17 HMR",
+    "muzzleVelocityFps": 2550,
+    "refBarrelLengthIn": 20,
+    "bulletId": "cci-17vmax-17hmr",
+    "notes": "Rimfire"
+  },
+  {
+    "id": "ct-cci-40sv-22lr",
+    "designation": "Standard Velocity 40gr",
+    "manufacturer": "CCI",
+    "caliber": ".22 LR",
+    "muzzleVelocityFps": 1070,
+    "refBarrelLengthIn": 18,
+    "bulletId": "cci-40svlr-22lr",
+    "notes": "Subsonic target"
+  },
+  {
+    "id": "ct-aguila-60sniper-22lr",
+    "designation": "Sniper SubSonic 60gr",
+    "manufacturer": "Aguila",
+    "caliber": ".22 LR",
+    "muzzleVelocityFps": 950,
+    "refBarrelLengthIn": 18,
+    "bulletId": "aguila-60sniper-22lr"
+  },
+  {
+    "id": "ct-cci-40jhp-22wmr",
+    "designation": "Maxi-Mag 40gr JHP",
+    "manufacturer": "CCI",
+    "caliber": ".22 WMR",
+    "muzzleVelocityFps": 1875,
+    "refBarrelLengthIn": 20,
+    "bulletId": "cci-40jhp-22wmr"
+  },
+  {
+    "id": "ct-federal-50jhp-22wmr",
+    "designation": "50gr JHP",
+    "manufacturer": "Federal",
+    "caliber": ".22 WMR",
+    "muzzleVelocityFps": 1650,
+    "refBarrelLengthIn": 20,
+    "bulletId": "federal-50jhp-22wmr"
+  },
+  {
+    "id": "ct-hornady-124xtp-9mm",
+    "designation": "124gr XTP",
+    "manufacturer": "Hornady",
+    "caliber": "9x19",
+    "muzzleVelocityFps": 1150,
+    "refBarrelLengthIn": 4.5,
+    "bulletId": "hornady-124xtp-9mm"
+  },
+  {
+    "id": "ct-win-147ranger-9mm",
+    "designation": "Ranger T 147gr",
+    "manufacturer": "Winchester",
+    "caliber": "9x19",
+    "muzzleVelocityFps": 990,
+    "refBarrelLengthIn": 4.5,
+    "bulletId": "win-147ranger-9mm",
+    "notes": "LE duty"
+  },
+  {
+    "id": "ct-speer-230gd-45acp",
+    "designation": "230gr Gold Dot",
+    "manufacturer": "Speer",
+    "caliber": ".45 ACP",
+    "muzzleVelocityFps": 850,
+    "refBarrelLengthIn": 5,
+    "bulletId": "speer-230gd-45acp"
+  },
+  {
+    "id": "ct-federal-230hst-45acp",
+    "designation": "230gr HST",
+    "manufacturer": "Federal",
+    "caliber": ".45 ACP",
+    "muzzleVelocityFps": 850,
+    "refBarrelLengthIn": 5,
+    "bulletId": "federal-230hst-45acp"
+  },
+  {
+    "id": "ct-hornady-185xtp-45acp",
+    "designation": "185gr XTP +P",
+    "manufacturer": "Hornady",
+    "caliber": ".45 ACP",
+    "muzzleVelocityFps": 950,
+    "refBarrelLengthIn": 5,
+    "bulletId": "hornady-185xtp-45acp"
+  },
+  {
+    "id": "ct-federal-180hst-40sw",
+    "designation": "180gr HST",
+    "manufacturer": "Federal",
+    "caliber": ".40 S&W",
+    "muzzleVelocityFps": 960,
+    "refBarrelLengthIn": 4,
+    "bulletId": "federal-180hst-40sw"
+  },
+  {
+    "id": "ct-sb-85fmj-762x25",
+    "designation": "85gr FMJ",
+    "manufacturer": "Sellier & Bellot",
+    "caliber": "7.62x25",
+    "muzzleVelocityFps": 1725,
+    "refBarrelLengthIn": 4.6,
+    "bulletId": "sb-85fmj-762x25",
+    "notes": "Tokarev"
+  },
+  {
+    "id": "ct-hornady-90xtp-380",
+    "designation": "90gr XTP",
+    "manufacturer": "Hornady",
+    "caliber": ".380 ACP",
+    "muzzleVelocityFps": 1000,
+    "refBarrelLengthIn": 3.5,
+    "bulletId": "hornady-90xtp-380"
+  },
+  {
+    "id": "ct-fiocchi-95fmj-380",
+    "designation": "95gr FMJ",
+    "manufacturer": "Fiocchi",
+    "caliber": ".380 ACP",
+    "muzzleVelocityFps": 980,
+    "refBarrelLengthIn": 3.5,
+    "bulletId": "fiocchi-95fmj-380"
+  },
+  {
+    "id": "ct-federal-90hst-380",
+    "designation": "90gr HST",
+    "manufacturer": "Federal",
+    "caliber": ".380 ACP",
+    "muzzleVelocityFps": 1000,
+    "refBarrelLengthIn": 3.5,
+    "bulletId": "federal-90hst-380"
+  },
+  {
+    "id": "ct-rem-1oz-foster-12ga",
+    "designation": "1oz Foster Slug",
+    "manufacturer": "Remington",
+    "caliber": "12 Gauge",
+    "muzzleVelocityFps": 1560,
+    "refBarrelLengthIn": 20,
+    "bulletId": "rem-1oz-foster-12ga",
+    "notes": "Smoothbore"
+  },
+  {
+    "id": "ct-hornady-300sst-12ga",
+    "designation": "SST 300gr Sabot",
+    "manufacturer": "Hornady",
+    "caliber": "12 Gauge",
+    "muzzleVelocityFps": 2000,
+    "refBarrelLengthIn": 20,
+    "bulletId": "hornady-300sst-12ga",
+    "notes": "Rifled barrel"
+  },
+  {
+    "id": "ct-brenneke-blackmagic-12ga",
+    "designation": "Black Magic Magnum",
+    "manufacturer": "Brenneke",
+    "caliber": "12 Gauge",
+    "muzzleVelocityFps": 1530,
+    "refBarrelLengthIn": 20,
+    "bulletId": "brenneke-blackmagic-12ga",
+    "notes": "3in Magnum"
+  },
+  {
+    "id": "ct-lightfield-525-12ga",
+    "designation": "Hybrid EXP 525gr",
+    "manufacturer": "Lightfield",
+    "caliber": "12 Gauge",
+    "muzzleVelocityFps": 1450,
+    "refBarrelLengthIn": 20,
+    "bulletId": "lightfield-525exp-12ga"
+  }
 ]

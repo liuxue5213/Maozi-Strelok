@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 
 import '../models/firearm.dart';
 import '../models/modification.dart';
+import '../physics/atmosphere.dart';
+import '../physics/ballistics_solver.dart' show Wind, WindZone;
 import '../physics/units.dart' as U;
 import '../services/database_service.dart';
 
@@ -31,12 +33,38 @@ class AppState extends ChangeNotifier {
   // --- Wind (imperial input, converted) ---
   double windSpeedMph = 0;
   double windDirectionDeg = 270; // default: from left
+  /// Optional multi-zone wind profile (downrange segments). When non-empty
+  /// this overrides the single wind above. Each entry: {fromYd, toYd, speedMph, dirDeg}.
+  /// Kept in user-friendly yards/degrees here; converted to SI on compute.
+  List<WindZoneInput> windZones = const [];
+
+  // --- Zero Atmosphere (for long-range zero correction) ---
+  /// When true, the solver corrects for air-density difference between zero
+  /// time and current conditions. Populated when the user saves zero atmos.
+  bool useZeroAtmo = false;
+  double zeroTempC = 15;
+  double zeroPressureHpa = 1013.25;
+  double zeroHumidity = 0.5;
+  double zeroAltitudeM = 0;
+
+  // --- Scope tracking correction factors (Tall Target Test) ---
+  /// Measured elevation click correction factor (1.0 = perfect). <1 means the
+  /// scope moves more than nominal (clicks undershoot), >1 means it moves less.
+  /// The applied come-up is divided by this factor.
+  double scopeElevCorrection = 1.0;
+  double scopeWindCorrection = 1.0;
 
   // --- Shooting params ---
   double latitudeDeg = 0;
   double azimuthDeg = 0; // bearing CW from North
   bool useCoriolis = false;
-  bool useG7 = false;
+  /// Drag model id ('G1','G2','G5','G6','G7','G8','GI','GL'). Drives which
+  /// standard drag function the solver uses. G7 is the modern default for
+  /// low-drag boat-tail bullets.
+  String dragModelId = 'G1';
+  /// Backwards-compatible G7 flag (derived). Prefer [dragModelId].
+  bool get useG7 => dragModelId == 'G7';
+  set useG7(bool v) => dragModelId = v ? 'G7' : 'G1';
   double maxRangeYd = 800;
   double stepYd = 100;
   bool useSpinDrift = true;
@@ -226,10 +254,19 @@ class AppState extends ChangeNotifier {
         'altitudeM': altitudeM,
         'windSpeedMph': windSpeedMph,
         'windDirectionDeg': windDirectionDeg,
+        'windZones': windZones.map((z) => z.toJson()).toList(),
+        'useZeroAtmo': useZeroAtmo,
+        'zeroTempC': zeroTempC,
+        'zeroPressureHpa': zeroPressureHpa,
+        'zeroHumidity': zeroHumidity,
+        'zeroAltitudeM': zeroAltitudeM,
+        'scopeElevCorrection': scopeElevCorrection,
+        'scopeWindCorrection': scopeWindCorrection,
         'latitudeDeg': latitudeDeg,
         'azimuthDeg': azimuthDeg,
         'useCoriolis': useCoriolis,
         'useG7': useG7,
+        'dragModelId': dragModelId,
         'maxRangeYd': maxRangeYd,
         'stepYd': stepYd,
         'useSpinDrift': useSpinDrift,
@@ -258,10 +295,22 @@ class AppState extends ChangeNotifier {
     altitudeM = (m['altitudeM'] as num?)?.toDouble() ?? 0;
     windSpeedMph = (m['windSpeedMph'] as num?)?.toDouble() ?? 0;
     windDirectionDeg = (m['windDirectionDeg'] as num?)?.toDouble() ?? 270;
+    windZones = (m['windZones'] as List?)
+            ?.map((e) => WindZoneInput.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
+    useZeroAtmo = (m['useZeroAtmo'] as bool?) ?? false;
+    zeroTempC = (m['zeroTempC'] as num?)?.toDouble() ?? 15;
+    zeroPressureHpa = (m['zeroPressureHpa'] as num?)?.toDouble() ?? 1013.25;
+    zeroHumidity = (m['zeroHumidity'] as num?)?.toDouble() ?? 0.5;
+    zeroAltitudeM = (m['zeroAltitudeM'] as num?)?.toDouble() ?? 0;
+    scopeElevCorrection = (m['scopeElevCorrection'] as num?)?.toDouble() ?? 1.0;
+    scopeWindCorrection = (m['scopeWindCorrection'] as num?)?.toDouble() ?? 1.0;
     latitudeDeg = (m['latitudeDeg'] as num?)?.toDouble() ?? 0;
     azimuthDeg = (m['azimuthDeg'] as num?)?.toDouble() ?? 0;
     useCoriolis = (m['useCoriolis'] as bool?) ?? false;
-    useG7 = (m['useG7'] as bool?) ?? false;
+    dragModelId = (m['dragModelId'] as String?) ??
+        ((m['useG7'] as bool?) ?? false ? 'G7' : 'G1');
     maxRangeYd = (m['maxRangeYd'] as num?)?.toDouble() ?? 800;
     stepYd = (m['stepYd'] as num?)?.toDouble() ?? 100;
     useSpinDrift = (m['useSpinDrift'] as bool?) ?? true;
@@ -308,4 +357,42 @@ class AppState extends ChangeNotifier {
       _bullet = db.bullet(bid);
     }
   }
+}
+
+/// User-facing wind-zone definition in friendly units (yards, mph, degrees).
+/// Converted to a [WindZone] in SI when building the solver config.
+class WindZoneInput {
+  final double fromYd;
+  final double toYd; // use a very large number for "to target"
+  final double speedMph;
+  final double dirDeg;
+  const WindZoneInput({
+    required this.fromYd,
+    required this.toYd,
+    required this.speedMph,
+    required this.dirDeg,
+  });
+
+  WindZone toSi() => WindZone(
+        fromM: U.Units.yardsToM(fromYd),
+        toM: U.Units.yardsToM(toYd),
+        wind: Wind(
+          speedMs: U.Units.mphToMps(speedMph),
+          directionDeg: dirDeg,
+        ),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'fromYd': fromYd,
+        'toYd': toYd,
+        'speedMph': speedMph,
+        'dirDeg': dirDeg,
+      };
+
+  factory WindZoneInput.fromJson(Map<String, dynamic> j) => WindZoneInput(
+        fromYd: (j['fromYd'] as num).toDouble(),
+        toYd: (j['toYd'] as num).toDouble(),
+        speedMph: (j['speedMph'] as num).toDouble(),
+        dirDeg: (j['dirDeg'] as num).toDouble(),
+      );
 }

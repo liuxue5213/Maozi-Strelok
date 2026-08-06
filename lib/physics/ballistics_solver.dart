@@ -75,6 +75,11 @@ class ShotConfig {
   /// Wind.
   final Wind wind;
 
+  /// Optional multi-zone wind profile. When non-empty, this overrides [wind]:
+  /// the solver samples the wind vector from the zone covering the bullet's
+  /// current downrange position. Zones past their [toM] are skipped.
+  final List<WindZone> windZones;
+
   /// Coriolis parameters (null disables the effect).
   final Coriolis? coriolis;
 
@@ -117,6 +122,7 @@ class ShotConfig {
     required this.atmosphere,
     required this.wind,
     this.coriolis,
+    this.windZones = const [],
     this.spinDrift = true,
     this.twistIn = 0,
     this.lengthIn = 0,
@@ -126,7 +132,7 @@ class ShotConfig {
   });
 }
 
-/// Wind in SI units. [directionDeg] is the bearing the wind blows FROM, measured
+  /// Wind in SI units. [directionDeg] is the bearing the wind blows FROM, measured
 /// clockwise from the downrange (x) axis (x=downrange, +y=right):
 ///   0   -> headwind (from downrange, blowing toward the shooter),
 ///   90  -> from the right, pushing the bullet to the left (-y),
@@ -148,6 +154,20 @@ class Wind {
     // Air moves toward the "to" direction = opposite of "from".
     return (vx: -speedMs * cos(r), vy: -speedMs * sin(r));
   }
+}
+
+/// A wind defined over a downrange segment [fromM, toM]. Multiple WindZone
+/// entries let the shooter model non-uniform wind along the bullet's flight
+/// (e.g. headwind at the firing point, crosswind in the valley, different wind
+/// near the target). The solver picks the active zone at the bullet's current
+/// downrange position during integration.
+class WindZone {
+  /// Start of this zone [m] (downrange).
+  final double fromM;
+  /// End of this zone [m]. Use double.infinity for "to the end".
+  final double toM;
+  final Wind wind;
+  const WindZone({required this.fromM, required this.toM, required this.wind});
 }
 
 /// Projectile state during integration.
@@ -228,7 +248,14 @@ class BallisticsSolver {
 
   /// Acceleration a = a_drag(v_rel) + a_gravity + a_coriolis, written to [out].
   void _accel(_State s, double g, double rho, double cSound, List<double> out) {
-    final w = config.wind.vector;
+    // Resolve wind: use multi-zone wind if provided, else the single wind.
+    final ({double vx, double vy}) w;
+    final zones = config.windZones;
+    if (zones.isNotEmpty) {
+      w = _windAt(s.x).vector;
+    } else {
+      w = config.wind.vector;
+    }
     final vrx = s.vx - w.vx;
     final vry = s.vy - w.vy;
     final vrz = s.vz;
@@ -446,6 +473,15 @@ class BallisticsSolver {
     return pts;
   }
 
+  /// Wind at a given downrange position [xM], from the configured wind zones.
+  /// Falls back to [config.wind] if no zone covers x.
+  Wind _windAt(double xM) {
+    for (final z in config.windZones) {
+      if (xM >= z.fromM && xM < z.toM) return z.wind;
+    }
+    return config.wind;
+  }
+
   /// Interpolate the Drop Scale Factor at [rangeM] from the (range -> factor)
   /// map. Below the smallest key the first factor is used; above the largest
   /// key the last is used.
@@ -558,9 +594,50 @@ class BallisticsSolver {
     return 0.5 * (lo + hi);
   }
 
-  /// Multi-point drop truing (Drop Scale Factors). Given a set of observed
-  /// (range, drop) pairs, compute the per-range scale factor that makes the
-  /// model drop match each observation. Returns a map range_m -> factor.
+  /// Muzzle-Velocity truing: given an observed drop [observedDropM] (relative
+  /// to LOS, negative = bullet low) at [rangeM], find the muzzle velocity [m/s]
+  /// that reproduces it. This is the most common field truing method because
+  /// BC labels are often inaccurate and vary by lot. Higher MV -> less drop.
+  /// Returns the trued MV, or null if not matchable within ±25%.
+  double? truedMv({required double rangeM, required double observedDropM}) {
+    double dropAtMv(double mvMs) {
+      final alt = ShotConfig(
+        muzzleVelocity: mvMs,
+        mass: config.mass,
+        diameter: config.diameter,
+        bc: config.bc,
+        dragModel: config.dragModel,
+        sightHeight: config.sightHeight,
+        zeroRange: config.zeroRange,
+        atmosphere: config.atmosphere,
+        wind: Wind.calm(),
+        spinDrift: false,
+        twistIn: 0,
+        lengthIn: 0,
+        losAngleRad: config.losAngleRad,
+      );
+      return BallisticsSolver(alt, dt: dt).dropAtRange(rangeM);
+    }
+
+    final base = config.muzzleVelocity;
+    double lo = base * 0.75, hi = base * 1.25;
+    double fLo = dropAtMv(lo) - observedDropM;
+    double fHi = dropAtMv(hi) - observedDropM;
+    if ((fLo > 0) == (fHi > 0)) return null; // out of band
+    for (int i = 0; i < 60; i++) {
+      final mid = 0.5 * (lo + hi);
+      final fMid = dropAtMv(mid) - observedDropM;
+      if ((fLo > 0) != (fMid > 0)) {
+        hi = mid;
+        fHi = fMid;
+      } else {
+        lo = mid;
+        fLo = fMid;
+      }
+    }
+    return 0.5 * (lo + hi);
+  }
+
   ///
   /// factor = observedDrop / modelDrop  (both relative to LOS). A factor >1
   /// means the bullet drops more than the model predicts (model underestimates
@@ -637,5 +714,41 @@ class BallisticsSolver {
       prevX = s.x;
     }
     return null;
+  }
+
+  /// Maximum Point Blank Range (MPBR): the farthest distance at which the
+  /// bullet path never rises above +[vitalRadiusM] nor falls below it, when
+  /// fired horizontally with a sight set at the muzzle. This is the "point
+  /// blank" / vital-zone range used for hunting (don't dial, just hold center).
+  ///
+  /// Returns the MPBR in meters, plus the trajectory apex (midrange height).
+  /// The integration uses a near-zero zero range so the path is measured from
+  /// the bore line (sight height ignored for the band test).
+  ({double mpbrM, double apexM, double apexAtM}) maxPointBlankRange({
+    double vitalRadiusM = 0.15, // ~6 inches
+    double scanToM = 2000,
+  }) {
+    // Fire level (elevation 0) from the bore line: solveZeroAngle with
+    // zeroRange≈0 gives elevation≈0. We then scan for where |z| first exceeds
+    // the vital radius going down, after the early rise.
+    final elev = 0.0;
+    final raw = _integrate(stopRange: scanToM, elevation: elev);
+    double apex = -1e9, apexAt = 0;
+    // find the apex (max z) along the path
+    for (final s in raw) {
+      if (s.z > apex) {
+        apex = s.z;
+        apexAt = s.x;
+      }
+    }
+    // MPBR = first x where z drops below -vitalRadiusM after the apex.
+    double mpbr = scanToM;
+    for (final s in raw) {
+      if (s.x >= apexAt && s.z <= -vitalRadiusM) {
+        mpbr = s.x;
+        break;
+      }
+    }
+    return (mpbrM: mpbr, apexM: apex, apexAtM: apexAt);
   }
 }

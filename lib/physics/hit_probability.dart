@@ -69,3 +69,113 @@ class HitProbability {
     return combinedSigmaRad([gun, shooter, windAng, rangeAng]);
   }
 }
+
+/// Weapon Employment Zone (WEZ) Monte-Carlo hit-probability analyzer.
+///
+/// Unlike the analytic [HitProbability], WEZ samples the full distribution of
+/// each error source and counts how many shots land inside the target. This is
+/// the method Applied Ballistics uses (Bryan Litz). It also identifies the
+/// dominant error source by computing single-variable sweeps.
+class Wez {
+  Wez._();
+
+  /// One Monte-Carlo shot sample: (verticalError, horizontalError) in radians
+  /// at the target plane.
+  static ({double v, double h}) _sample(
+    _Rng rng, {
+    required double gunMoa,
+    required double shooterMoa,
+    required double windErrMph,
+    required double windDriftPerMphM,
+    required double rangeErrYd,
+    required double dropPerYdM,
+    required double mvErrFps,
+    required double dropPerFpsM,
+    required double rangeM,
+  }) {
+    const radPerMoa = 0.0002908882086657216;
+    // 1-sigma angular dispersions
+    final gunV = rng.gauss() * gunMoa * radPerMoa;
+    final gunH = rng.gauss() * gunMoa * radPerMoa;
+    final shV = rng.gauss() * shooterMoa * radPerMoa;
+    final shH = rng.gauss() * shooterMoa * radPerMoa;
+    // wind estimation error -> linear -> angular
+    final windH = rng.gauss() * windErrMph * windDriftPerMphM.abs() / rangeM;
+    // range error -> drop change -> angular
+    final rangeV = rng.gauss() * rangeErrYd.abs() * dropPerYdM.abs() / rangeM;
+    // MV variation -> drop change -> angular
+    final mvV = rng.gauss() * mvErrFps.abs() * dropPerFpsM.abs() / rangeM;
+    return (v: gunV + shV + rangeV + mvV, h: gunH + shH + windH);
+  }
+
+  /// Run a WEZ simulation. Returns hit probability [0..1].
+  ///
+  /// [targetShape] 'circle' | 'rectangle' | 'ipsc'. For circle only [targetWIn]
+  /// is used (diameter); for rectangle/ipsc use width x height.
+  static double run({
+    required int shots,
+    required double rangeM,
+    required double gunMoa,
+    required double shooterMoa,
+    required double windErrMph,
+    required double windDriftPerMphM,
+    required double rangeErrYd,
+    required double dropPerYdM,
+    double mvErrFps = 0,
+    double dropPerFpsM = 0,
+    required double targetWIn,
+    double targetHIn = 0,
+    String targetShape = 'circle',
+    int? seed,
+  }) {
+    if (rangeM <= 0) return 0;
+    final rng = _Rng(seed ?? DateTime.now().microsecondsSinceEpoch);
+    final wRad = targetWIn * 0.0254 / rangeM;
+    final hRad = (targetHIn <= 0 ? targetWIn : targetHIn) * 0.0254 / rangeM;
+    final wRad2 = wRad / 2, hRad2 = hRad / 2;
+    int hits = 0;
+    for (int i = 0; i < shots; i++) {
+      final e = _sample(
+        rng,
+        gunMoa: gunMoa,
+        shooterMoa: shooterMoa,
+        windErrMph: windErrMph,
+        windDriftPerMphM: windDriftPerMphM,
+        rangeErrYd: rangeErrYd,
+        dropPerYdM: dropPerYdM,
+        mvErrFps: mvErrFps,
+        dropPerFpsM: dropPerFpsM,
+        rangeM: rangeM,
+      );
+      bool hit;
+      if (targetShape == 'circle') {
+        hit = (e.v * e.v + e.h * e.h) <= (wRad2 * wRad2);
+      } else {
+        hit = e.v.abs() <= hRad2 && e.h.abs() <= wRad2;
+      }
+      if (hit) hits++;
+    }
+    return hits / shots;
+  }
+}
+
+/// Deterministic Gaussian RNG (Box-Muller) so WEZ results are reproducible
+/// for a given seed (useful for tests and stable UI display).
+class _Rng {
+  final int _state;
+  static int _global = 1;
+  _Rng([int? seed]) : _state = seed ?? (_global = (_global * 1103515245 + 12345) & 0x7fffffff);
+
+  double _next() {
+    // simple LCG for uniforms
+    final next = (1103515245 * _state + 12345) & 0x7fffffff;
+    _global = next;
+    return next / 0x7fffffff;
+  }
+
+  double gauss() {
+    final u1 = _next().clamp(1e-10, 1.0);
+    final u2 = _next();
+    return sqrt(-2 * log(u1)) * cos(2 * pi * u2);
+  }
+}

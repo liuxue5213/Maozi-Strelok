@@ -4,7 +4,7 @@ import '../physics/atmosphere.dart';
 import '../physics/drag_models.dart';
 import '../physics/stability.dart';
 import '../physics/units.dart' as U;
-import '../physics/ballistics_solver.dart';
+import '../physics/ballistics_solver.dart' show ShotConfig, Wind, WindZone;
 
 /// Assembles a [ShotConfig] from a Firearm + Cartridge + Bullet + Modification
 /// + environment, applying the physical corrections implied by the mods.
@@ -60,6 +60,7 @@ class ShotBuilder {
     double mvTempSensitivityFpsPerF = 0, // fps change per °F
     double cantAngleDeg = 0,
     Map<double, double> dropScaleFactors = const {},
+    List<WindZone> windZones = const [],
   }) {
     // Chronograph override takes precedence; otherwise compute from barrel
     // length + muzzle device.
@@ -80,6 +81,8 @@ class ShotBuilder {
       if (mvFps < 0) mvFps = 0;
     }
     final drag = resolveDragModel(dragModelId);
+    // G7 uses the G7 BC (falling back to G1 if unpublished); all other models
+    // use the G1 BC. (G2/G5/G6/G8/GI/GL are G1-family reference shapes.)
     final bc = dragModelId == 'G7' ? (bullet.bcG7 ?? bullet.bcG1) : bullet.bcG1;
 
     return ShotConfig(
@@ -92,6 +95,7 @@ class ShotBuilder {
       zeroRange: U.Units.yardsToM(mod.zeroRangeYd),
       atmosphere: atmosphere,
       wind: wind,
+      windZones: windZones,
       coriolis: coriolis,
       spinDrift: spinDrift,
       twistIn: mod.effectiveTwistRate(firearm),

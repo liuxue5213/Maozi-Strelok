@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/firearm.dart';
 import '../services/database_service.dart';
 import 'app_state.dart';
+import 'barrel_life_page.dart';
 import 'dsf_page.dart';
 import 'edit_custom_page.dart';
 import 'firearm_detail_page.dart';
@@ -80,6 +81,19 @@ class _HomePageState extends State<HomePage> {
                 context,
                 MaterialPageRoute(
                   builder: (_) => DsfPage(state: widget.state),
+                ),
+              );
+              setState(() {});
+            },
+          ),
+          IconButton(
+            tooltip: '枪管寿命追踪',
+            icon: const Icon(Icons.history),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BarrelLifePage(state: widget.state),
                 ),
               );
               setState(() {});

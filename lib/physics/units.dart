@@ -1,3 +1,5 @@
+import 'dart:math';
+
 /// Unit conversions between metric and imperial systems, and angular units.
 ///
 /// All internal ballistics computations are done in SI units:
@@ -43,7 +45,42 @@ class Units {
   static const double paPerHpa = 100;
 
   static double inHgToPa(double inhg) => inhg * paPerInHg;
+  static double paToInHg(double pa) => pa / paPerInHg;
   static double hpaToPa(double hpa) => hpa * paPerHpa;
+  static double paToHpa(double pa) => pa / paPerHpa;
+  static double mmHgToPa(double mmhg) => mmhg * paPerMmHg;
+  static double psiToPa(double psi) => psi * 6894.757293168; // PSI -> pascals
+
+  // --- Angular: IPHY (inches per hundred yards) ---
+  // 1 IPHY = 1 MOA exactly (1 MOA ≈ 1.047" at 100yd, but IPHY is defined as
+  // 1.000" at 100yd). Many US scopes are graduated in IPHY/"shooter's MOA".
+  static const double radPerIphy = 0.0002908882086657216; // = 1 MOA for practical use
+  static double iphyToRad(double iphy) => iphy * radPerIphy;
+  static double radToIphy(double rad) => rad / radPerIphy;
+
+  // --- Density Altitude (DA) utilities ---
+  // Convert a density altitude (feet, ISA-relative) to an air density ratio
+  // (rho/rho0) using the ISA troposphere model. rho0 = sea-level ISA density.
+  static const double isaTropopauseFt = 36089.0; // ~11000 m
+  static const double rho0KgM3 = 1.225;
+
+  /// ISA air-density ratio for a given density altitude [ft].
+  /// Below the tropopause DA decreases density by ~2.54e-6 per ft (exponential).
+  static double densityRatioFromDaFt(double daFt) {
+    if (daFt <= isaTropopauseFt) {
+      // Troposphere: rho/rho0 = (1 - 6.875e-6 * h)^4.256
+      final t = 1.0 - 6.87535e-6 * daFt;
+      return t <= 0 ? 0.0 : pow(t, 4.2558793);
+    }
+    // Stratosphere (isothermal): exponential decay above tropopause.
+    final ratioAtTrop = densityRatioFromDaFt(isaTropopauseFt);
+    final extraFt = daFt - isaTropopauseFt;
+    return ratioAtTrop * exp(-extraFt / 10417.0); // scale height ~10417 ft
+  }
+
+  /// Air density [kg/m^3] from a density altitude [ft].
+  static double densityFromDaFt(double daFt) =>
+      rho0KgM3 * densityRatioFromDaFt(daFt);
 
   // --- Temperature ---
   static double fToC(double f) => (f - 32) / 1.8;

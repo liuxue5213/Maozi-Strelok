@@ -10,6 +10,7 @@ import '../physics/units.dart' as U;
 import '../services/shot_builder.dart';
 import '../services/dope_card.dart';
 import 'app_state.dart';
+import 'cartridge_picker_dialog.dart';
 import 'format.dart';
 import 'reticle_page.dart';
 
@@ -28,12 +29,18 @@ class _ResultPageState extends State<ResultPage> {
   double? _farZero;
   double? _maxRange;
   double? _transonicM;
+  double? _mpbrM; // max point blank range (vital-zone)
   double? _leadM; // linear lead at max range for moving target
   List<Map<String, double>> _multiTargets = const [];
   double? _hitProb; // hit probability at max range target
   ShotConfig? _cfg;
   String? _error;
   bool _showMoa = true; // toggle MOA <-> MIL for corrections
+  bool _useWez = false; // analytic hit-prob vs Monte-Carlo WEZ
+  /// Multi-load comparison: each entry is (label, trajectory) for overlay.
+  List<({String label, List<TrajectoryPoint> traj, int color})> _compare = const [];
+  /// Bullet ids selected for comparison (excludes the current bullet).
+  final Set<String> _compareBulletIds = {};
 
   @override
   void initState() {
@@ -47,12 +54,34 @@ class _ResultPageState extends State<ResultPage> {
       final f = s.firearm!;
       final ct = s.cartridge!;
       final b = s.bullet!;
-      final atmo = Atmosphere(
+      final atmoBase = Atmosphere(
         temperatureC: s.temperatureC,
         pressurePa: U.Units.hpaToPa(s.pressureHpa),
         relativeHumidity: s.relativeHumidity,
         altitudeM: s.altitudeM,
       );
+      // Zero-atmosphere correction: scale current density vs zero-time density.
+      final atmo = s.useZeroAtmo
+          ? (() {
+              final zero = Atmosphere(
+                temperatureC: s.zeroTempC,
+                pressurePa: U.Units.hpaToPa(s.zeroPressureHpa),
+                relativeHumidity: s.zeroHumidity,
+                altitudeM: s.zeroAltitudeM,
+              );
+              // Adjust drag by the density ratio zero->current so a long-range
+              // zero taken at different density is corrected. We scale the
+              // current atmosphere's density to reflect the effective change.
+              final ratio = atmoBase.density / zero.density;
+              // Bake the ratio into the pressure so density scales accordingly.
+              return Atmosphere(
+                temperatureC: atmoBase.temperatureC,
+                pressurePa: atmoBase.pressurePa * ratio,
+                relativeHumidity: atmoBase.relativeHumidity,
+                altitudeM: atmoBase.altitudeM,
+              );
+            })()
+          : atmoBase;
       final wind = Wind(
         speedMs: U.Units.mphToMps(s.windSpeedMph),
         directionDeg: s.windDirectionDeg,
@@ -72,7 +101,7 @@ class _ResultPageState extends State<ResultPage> {
         atmosphere: atmo,
         wind: wind,
         coriolis: cor,
-        dragModelId: s.useG7 ? 'G7' : 'G1',
+        dragModelId: s.dragModelId,
         spinDrift: s.useSpinDrift,
         losAngleDeg: s.losAngleDeg,
         chronoVelocityFps: s.chronoVelocityFps,
@@ -80,6 +109,7 @@ class _ResultPageState extends State<ResultPage> {
         mvTempSensitivityFpsPerF: s.mvTempSensitivityFpsPerF,
         cantAngleDeg: s.cantAngleDeg,
         dropScaleFactors: s.dsf,
+        windZones: s.windZones.map((z) => z.toSi()).toList(),
       );
       final solver = BallisticsSolver(cfg);
       final traj = solver.solve(
@@ -95,6 +125,8 @@ class _ResultPageState extends State<ResultPage> {
       );
       final zeros = solver.zeroCrossings();
       final transonic = solver.transonicRange();
+      final mpbr = solver.maxPointBlankRange(
+          vitalRadiusM: U.Units.inchToM(s.targetSizeIn) / 2);
       // Lead at the max range for the moving-target speed.
       double? lead;
       if (s.targetSpeedMph > 0) {
@@ -139,21 +171,37 @@ class _ResultPageState extends State<ResultPage> {
         } else {
           driftPerMph = (last.range * 0.0005); // nominal sensitivity
         }
-        final sigma = HitProbability.sigmaRadFromBudget(
-          gunMoa: s.gunAccuracyMoa,
-          shooterMoa: s.shooterErrorMoa,
-          windErrMph: s.windErrorMph,
-          rangeErrYd: s.rangeErrorYd,
-          windDriftPerMphM: driftPerMph,
-          dropPerYdM: dropPerYd,
-          rangeM: last.range,
-        );
         final targetRadiusM = U.Units.inchToM(s.targetSizeIn) / 2;
-        hitProb = HitProbability.circularP(
-          targetRadiusM: targetRadiusM,
-          rangeM: last.range,
-          sigmaRad: sigma,
-        );
+        if (_useWez) {
+          // Monte-Carlo WEZ (Applied Ballistics method).
+          hitProb = Wez.run(
+            shots: 2000,
+            rangeM: last.range,
+            gunMoa: s.gunAccuracyMoa,
+            shooterMoa: s.shooterErrorMoa,
+            windErrMph: s.windErrorMph,
+            windDriftPerMphM: driftPerMph,
+            rangeErrYd: s.rangeErrorYd,
+            dropPerYdM: dropPerYd,
+            targetWIn: s.targetSizeIn,
+            seed: 42, // deterministic for stable display
+          );
+        } else {
+          final sigma = HitProbability.sigmaRadFromBudget(
+            gunMoa: s.gunAccuracyMoa,
+            shooterMoa: s.shooterErrorMoa,
+            windErrMph: s.windErrorMph,
+            rangeErrYd: s.rangeErrorYd,
+            windDriftPerMphM: driftPerMph,
+            dropPerYdM: dropPerYd,
+            rangeM: last.range,
+          );
+          hitProb = HitProbability.circularP(
+            targetRadiusM: targetRadiusM,
+            rangeM: last.range,
+            sigmaRad: sigma,
+          );
+        }
       }
       setState(() {
         _cfg = cfg;
@@ -163,6 +211,7 @@ class _ResultPageState extends State<ResultPage> {
         _farZero = zeros.farZero;
         _maxRange = solver.maxEffectiveRange();
         _transonicM = transonic;
+        _mpbrM = mpbr.mpbrM;
         _leadM = lead;
         _multiTargets = multiTargets;
         _hitProb = hitProb;
@@ -171,6 +220,53 @@ class _ResultPageState extends State<ResultPage> {
     } catch (e) {
       setState(() => _error = e.toString());
     }
+  }
+
+  /// Recompute comparison trajectories for the selected extra bullets.
+  /// Each runs the full solver with the same conditions but a different bullet,
+  /// so the shooter can see how drop differs across loads at a glance.
+  void _recomputeCompare() {
+    final s = widget.state;
+    if (_compareBulletIds.isEmpty) {
+      setState(() => _compare = const []);
+      return;
+    }
+    final f = s.firearm!;
+    final ct = s.cartridge!;
+    final atmoBase = Atmosphere(
+      temperatureC: s.temperatureC,
+      pressurePa: U.Units.hpaToPa(s.pressureHpa),
+      relativeHumidity: s.relativeHumidity,
+      altitudeM: s.altitudeM,
+    );
+    const colors = [0xFFE53935, 0xFF8E24AA, 0xFF1E88E5, 0xFFF4511E];
+    final out = <({String label, List<TrajectoryPoint> traj, int color})>[];
+    var ci = 0;
+    for (final bid in _compareBulletIds) {
+      final b = s.db.bullet(bid);
+      if (b == null) continue;
+      final cfg = ShotBuilder.build(
+        firearm: f,
+        cartridge: ct,
+        bullet: b,
+        mod: s.mod,
+        atmosphere: atmoBase,
+        wind: Wind.calm(),
+        dragModelId: s.dragModelId,
+        spinDrift: false,
+      );
+      final traj = BallisticsSolver(cfg).solve(
+        maxRangeM: U.Units.yardsToM(s.maxRangeYd),
+        stepM: U.Units.yardsToM(s.stepYd),
+      );
+      out.add((
+        label: '${b.manufacturer} ${b.model} ${b.massGr}gr',
+        traj: traj,
+        color: colors[ci % colors.length],
+      ));
+      ci++;
+    }
+    setState(() => _compare = out);
   }
 
   @override
@@ -224,6 +320,11 @@ class _ResultPageState extends State<ResultPage> {
             onPressed: () => setState(() => _showMoa = !_showMoa),
             icon: Icon(_showMoa ? Icons.architecture : Icons.straighten),
           ),
+          IconButton(
+            tooltip: _useWez ? 'WEZ蒙特卡洛 (点击切解析法)' : '解析法 (点击切WEZ蒙特卡洛)',
+            onPressed: () { setState(() => _useWez = !_useWez); _compute(); },
+            icon: const Icon(Icons.casino),
+          ),
         ],
       ),
       body: ListView(
@@ -235,7 +336,7 @@ class _ResultPageState extends State<ResultPage> {
               leading: const Icon(Icons.gps_fixed),
               title: Text('${widget.state.firearm!.name} · ${ct.designation}'),
               subtitle: Text(
-                  '${bullet.manufacturer} ${bullet.model} · ${bullet.massGr}gr · BC ${widget.state.useG7 ? (bullet.bcG7 ?? bullet.bcG1).toStringAsFixed(3) : bullet.bcG1.toStringAsFixed(3)} (${widget.state.useG7 ? 'G7' : 'G1'})'),
+                  '${bullet.manufacturer} ${bullet.model} · ${bullet.massGr}gr · BC ${s.dragModelId == 'G7' ? (bullet.bcG7 ?? bullet.bcG1).toStringAsFixed(3) : bullet.bcG1.toStringAsFixed(3)} (${s.dragModelId})'),
             ),
           ),
           // Stability + key results grid
@@ -246,11 +347,18 @@ class _ResultPageState extends State<ResultPage> {
           const SizedBox(height: 8),
           SizedBox(height: 220, child: _dropChart(traj, sys)),
           const SizedBox(height: 8),
+          Text('风偏曲线（vs 距离）',
+              style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 8),
+          SizedBox(height: 160, child: _windageChart(traj, sys)),
+          const SizedBox(height: 8),
           Text('剩余速度（vs 距离）',
               style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
           SizedBox(height: 160, child: _velocityChart(traj, sys)),
           const SizedBox(height: 12),
+          // Multi-load comparison overlay
+          _compareSection(sys),
           if (_multiTargets.isNotEmpty) ...[
             const SizedBox(height: 12),
             Text('多目标快速修正 (${_showMoa ? 'MOA' : 'MIL'})',
@@ -342,7 +450,8 @@ class _ResultPageState extends State<ResultPage> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                    '🎯 命中率 @${widget.state.maxRangeYd.toStringAsFixed(0)}yd '
+                    '🎯 命中率 ${_useWez ? '(WEZ蒙特卡洛)' : '(解析法)'} '
+                    '@${widget.state.maxRangeYd.toStringAsFixed(0)}yd '
                     '(目标 ${widget.state.targetSizeIn.toStringAsFixed(0)}"): '
                     '${(_hitProb! * 100).toStringAsFixed(0)}%',
                     textAlign: TextAlign.center,
@@ -371,6 +480,9 @@ class _ResultPageState extends State<ResultPage> {
                 _stat('最大有效射程', _maxRange == null
                     ? '-'
                     : '${(_maxRange! * 1.09361).toStringAsFixed(0)} yd'),
+                _stat('直射距离(MPBR)', _mpbrM == null
+                    ? '-'
+                    : '${(_mpbrM! * 1.09361).toStringAsFixed(0)} yd'),
                 _stat('末速', Fmt.velocity(_traj!.last.speed, sys)),
               ],
             ),
@@ -520,6 +632,185 @@ class _ResultPageState extends State<ResultPage> {
     ));
   }
 
+  /// Wind-deflection curve (inches or cm vs distance).
+  Widget _windageChart(List<TrajectoryPoint> traj, U.UnitSystem sys) {
+    final toX = (double m) =>
+        sys == U.UnitSystem.imperial ? m * 1.09361 : m;
+    final toY = (double m) =>
+        sys == U.UnitSystem.imperial ? m * 39.37 : m * 100;
+    final spots = traj.map((p) => FlSpot(toX(p.range), toY(p.windage))).toList();
+    final xs = spots.map((e) => e.x).toList()..sort();
+    double minX = 0, maxX = xs.last * 1.05;
+    return LineChart(LineChartData(
+      minY: 0,
+      minX: minX,
+      maxX: maxX,
+      gridData: FlGridData(
+        show: true,
+        drawVerticalLine: false,
+        getDrawingHorizontalLine: (v) => FlLine(
+          color: v == 0 ? Colors.grey : Colors.grey.withValues(alpha: 0.3),
+          strokeWidth: v == 0 ? 1.5 : 1,
+        ),
+        checkToShowHorizontalLine: (v) => v == 0,
+      ),
+      extraLinesData: ExtraLinesData(horizontalLines: [
+        HorizontalLine(y: 0, color: Colors.green, strokeWidth: 1.5),
+      ]),
+      titlesData: FlTitlesData(
+        bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 28,
+                getTitlesWidget: (v, _) => Text('${v.toStringAsFixed(0)}'))),
+        leftTitles: AxisTitles(
+          axisNameWidget:
+              Text(sys == U.UnitSystem.imperial ? 'in' : 'cm'),
+          sideTitles: SideTitles(showTitles: true, reservedSize: 36),
+        ),
+        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        rightTitles:
+            const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      ),
+      lineBarsData: [
+        LineChartBarData(
+          spots: spots,
+          isCurved: true,
+          color: Colors.purple,
+          dotData: const FlDotData(show: false),
+          belowBarData: BarAreaData(show: false),
+        ),
+      ],
+    ));
+  }
+
+  /// Multi-load comparison section: pick extra bullets, overlay their drop
+  /// curves against the current bullet. Lets the shooter compare loads.
+  Widget _compareSection(U.UnitSystem sys) {
+    final s = widget.state;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text('多弹种对比 (Drop)',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                const Spacer(),
+                TextButton.icon(
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('添加对比弹头', style: TextStyle(fontSize: 12)),
+                  onPressed: () async {
+                    final picked = await showDialog<Bullet>(
+                      context: context,
+                      builder: (_) => BulletPickerDialog(
+                        state: s,
+                        caliber: s.cartridge?.caliber ??
+                            s.firearm!.compatibleCalibers.first,
+                      ),
+                    );
+                    if (picked != null && picked.id != s.bullet?.id) {
+                      _compareBulletIds.add(picked.id);
+                      _recomputeCompare();
+                    }
+                  },
+                ),
+              ],
+            ),
+            if (_compareBulletIds.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: Text('选择其它弹头叠加落点曲线进行对比。',
+                    style: TextStyle(fontSize: 12, color: Colors.grey)),
+              )
+            else ...[
+              Wrap(
+                spacing: 6,
+                children: _compare.map((c) => Chip(
+                      label: Text(c.label, style: const TextStyle(fontSize: 11)),
+                      deleteIcon: const Icon(Icons.close, size: 16),
+                      onDeleted: () {
+                        // remove by label match
+                        final bid = s.db.bullets
+                            .where((b) =>
+                                '${b.manufacturer} ${b.model} ${b.massGr}gr' ==
+                                c.label)
+                            .firstOrNull
+                            ?.id;
+                        if (bid != null) _compareBulletIds.remove(bid);
+                        _recomputeCompare();
+                      },
+                      avatar: CircleAvatar(
+                          backgroundColor: Color(c.color), radius: 6),
+                    )).toList(),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                  height: 200, child: _compareChart(_traj!, _compare, sys)),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Overlay drop chart: current bullet (blue) + comparison loads.
+  Widget _compareChart(
+      List<TrajectoryPoint> base,
+      List<({String label, List<TrajectoryPoint> traj, int color})> compare,
+      U.UnitSystem sys) {
+    final toX = (double m) =>
+        sys == U.UnitSystem.imperial ? m * 1.09361 : m;
+    final toY = (double m) =>
+        sys == U.UnitSystem.imperial ? m * 39.37 : m * 100;
+    final bars = <LineChartBarData>[];
+    final baseSpots =
+        base.map((p) => FlSpot(toX(p.range), toY(p.drop))).toList();
+    bars.add(LineChartBarData(
+      spots: baseSpots,
+      isCurved: true,
+      color: Colors.blue,
+      barWidth: 2.5,
+      dotData: const FlDotData(show: false),
+    ));
+    for (final c in compare) {
+      bars.add(LineChartBarData(
+        spots: c.traj.map((p) => FlSpot(toX(p.range), toY(p.drop))).toList(),
+        isCurved: true,
+        color: Color(c.color),
+        barWidth: 1.8,
+        dotData: const FlDotData(show: false),
+        dashArray: [5, 3],
+      ));
+    }
+    final xs = baseSpots.map((e) => e.x).toList()..sort();
+    double minX = 0, maxX = xs.last * 1.05;
+    return LineChart(LineChartData(
+      minY: 0,
+      minX: minX,
+      maxX: maxX,
+      gridData: const FlGridData(show: true, drawVerticalLine: false),
+      titlesData: FlTitlesData(
+        bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 28,
+                getTitlesWidget: (v, _) => Text('${v.toStringAsFixed(0)}'))),
+        leftTitles: AxisTitles(
+          axisNameWidget:
+              Text(sys == U.UnitSystem.imperial ? 'in' : 'cm'),
+          sideTitles: SideTitles(showTitles: true, reservedSize: 36),
+        ),
+        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        rightTitles:
+            const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      ),
+      lineBarsData: bars,
+    ));
+  }
+
   Widget _dataTable(List<TrajectoryPoint> traj, U.UnitSystem sys) {
     return Card(
       child: SingleChildScrollView(
@@ -534,11 +825,19 @@ class _ResultPageState extends State<ResultPage> {
             DataColumn(label: Text(sys == U.UnitSystem.imperial ? '风偏(in)' : '风偏(cm)')),
             DataColumn(label: Text('风向修正')),
             DataColumn(label: Text(sys == U.UnitSystem.imperial ? 'vel(fps)' : 'vel(m/s)')),
+            DataColumn(label: const Text('Mach')),
             DataColumn(label: Text(sys == U.UnitSystem.imperial ? 'E(ftlb)' : 'E(J)')),
             DataColumn(label: const Text('t(s)')),
           ],
           rows: traj
-              .map((p) => DataRow(cells: [
+              .map((p) {
+                final mach = p.speed / _cfg!.atmosphere.speedOfSound;
+                final machColor = mach > 1.2
+                    ? null
+                    : (mach > 1.0
+                        ? Colors.orange
+                        : Colors.red);
+                return DataRow(cells: [
                     DataCell(Text(Fmt.dist(p.range, sys))),
                     DataCell(Text(Fmt.shortLen(p.drop, sys))),
                     DataCell(Text(p.range > 1
@@ -551,10 +850,18 @@ class _ResultPageState extends State<ResultPage> {
                     DataCell(Text(p.range > 1
                         ? _windageCorrection(p, sys)
                         : '-')),
-                    DataCell(Text(Fmt.velocity(p.speed, sys))),
+                    DataCell(Text(Fmt.velocity(p.speed, sys),
+                        style: machColor != null
+                            ? TextStyle(color: machColor, fontWeight: FontWeight.w600)
+                            : null)),
+                    DataCell(Text('${mach.toStringAsFixed(2)}',
+                        style: TextStyle(
+                            fontSize: 11,
+                            color: machColor ?? Colors.grey))),
                     DataCell(Text(Fmt.energy(p.energy, sys))),
                     DataCell(Text(Fmt.time(p.timeOfFlight))),
-                  ]))
+                  ]);
+              })
               .toList(),
         ),
       ),
@@ -576,7 +883,7 @@ class _ResultPageState extends State<ResultPage> {
     final s = widget.state;
     final loadout = '${s.firearm!.name} | ${ct.designation} | '
         '${bullet.manufacturer} ${bullet.model} ${bullet.massGr}gr | '
-        'BC ${s.useG7 ? (bullet.bcG7 ?? bullet.bcG1) : bullet.bcG1} (${s.useG7 ? 'G7' : 'G1'}) | '
+        'BC ${s.dragModelId == 'G7' ? (bullet.bcG7 ?? bullet.bcG1) : bullet.bcG1} (${s.dragModelId}) | '
         '归零 ${s.mod.zeroRangeYd.toStringAsFixed(0)}yd';
     final conditions =
         '${s.temperatureC.toStringAsFixed(0)}°C / ${s.pressureHpa.toStringAsFixed(0)}hPa / '
