@@ -54,34 +54,24 @@ class _ResultPageState extends State<ResultPage> {
       final f = s.firearm!;
       final ct = s.cartridge!;
       final b = s.bullet!;
-      final atmoBase = Atmosphere(
+      final atmo = Atmosphere(
         temperatureC: s.temperatureC,
         pressurePa: U.Units.hpaToPa(s.pressureHpa),
         relativeHumidity: s.relativeHumidity,
         altitudeM: s.altitudeM,
       );
-      // Zero-atmosphere correction: scale current density vs zero-time density.
-      final atmo = s.useZeroAtmo
-          ? (() {
-              final zero = Atmosphere(
-                temperatureC: s.zeroTempC,
-                pressurePa: U.Units.hpaToPa(s.zeroPressureHpa),
-                relativeHumidity: s.zeroHumidity,
-                altitudeM: s.zeroAltitudeM,
-              );
-              // Adjust drag by the density ratio zero->current so a long-range
-              // zero taken at different density is corrected. We scale the
-              // current atmosphere's density to reflect the effective change.
-              final ratio = atmoBase.density / zero.density;
-              // Bake the ratio into the pressure so density scales accordingly.
-              return Atmosphere(
-                temperatureC: atmoBase.temperatureC,
-                pressurePa: atmoBase.pressurePa * ratio,
-                relativeHumidity: atmoBase.relativeHumidity,
-                altitudeM: atmoBase.altitudeM,
-              );
-            })()
-          : atmoBase;
+      // Zero-atmosphere: when enabled, the zero angle is solved under the
+      // conditions present when the rifle was zeroed, and the trajectory is
+      // integrated at current conditions. Long-range zeros taken at a
+      // different air density are then honored without re-zeroing.
+      final zeroAtmo = s.useZeroAtmo
+          ? Atmosphere(
+              temperatureC: s.zeroTempC,
+              pressurePa: U.Units.hpaToPa(s.zeroPressureHpa),
+              relativeHumidity: s.zeroHumidity,
+              altitudeM: s.zeroAltitudeM,
+            )
+          : null;
       final wind = Wind(
         speedMs: U.Units.mphToMps(s.windSpeedMph),
         directionDeg: s.windDirectionDeg,
@@ -99,6 +89,7 @@ class _ResultPageState extends State<ResultPage> {
         bullet: b,
         mod: s.mod,
         atmosphere: atmo,
+        zeroAtmosphere: zeroAtmo,
         wind: wind,
         coriolis: cor,
         dragModelId: s.dragModelId,

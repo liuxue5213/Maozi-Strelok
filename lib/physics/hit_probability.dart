@@ -161,21 +161,30 @@ class Wez {
 
 /// Deterministic Gaussian RNG (Box-Muller) so WEZ results are reproducible
 /// for a given seed (useful for tests and stable UI display).
+///
+/// Uses a 31-bit LCG (glibc constants) whose state advances on every draw, so
+/// the sequence is a proper pseudo-random stream (not a fixed value).
 class _Rng {
-  final int _state;
-  static int _global = 1;
-  _Rng([int? seed]) : _state = seed ?? (_global = (_global * 1103515245 + 12345) & 0x7fffffff);
+  /// LCG modulus 2^31.
+  static const int _mod = 0x7fffffff;
+  /// LCG multiplier.
+  static const int _a = 1103515245;
+  /// LCG increment.
+  static const int _c = 12345;
+  int _state;
 
+  _Rng(int seed) : _state = (seed == 0 ? 1 : seed) & _mod;
+
+  /// Next uniform in (0,1). State advances each call.
   double _next() {
-    // simple LCG for uniforms
-    final next = (1103515245 * _state + 12345) & 0x7fffffff;
-    _global = next;
-    return next / 0x7fffffff;
+    _state = (_a * _state + _c) & _mod;
+    return (_state & 0xffff) / 65536.0 + 0.5 / 65536.0;
   }
 
+  /// Standard normal via Box-Muller.
   double gauss() {
-    final u1 = _next().clamp(1e-10, 1.0);
-    final u2 = _next();
+    final u1 = _next().clamp(1e-12, 1.0);
+    final u2 = _next().clamp(0.0, 1.0);
     return sqrt(-2 * log(u1)) * cos(2 * pi * u2);
   }
 }

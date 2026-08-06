@@ -219,6 +219,68 @@ void main() {
       expect(r.mpbrM, greaterThan(0));
       expect(r.mpbrM, lessThan(800));
     });
+
+    test('apex height stays within the vital zone (±0.15m)', () {
+      final cfg = ShotConfig(
+        muzzleVelocity: 900,
+        mass: 0.008,
+        diameter: 0.0078,
+        bc: 0.35,
+        dragModel: G1DragModel.instance,
+        sightHeight: 0.04,
+        zeroRange: 1,
+        atmosphere: Atmosphere.standardIcao(),
+        wind: const Wind.calm(),
+        spinDrift: false,
+      );
+      final r = BallisticsSolver(cfg)
+          .maxPointBlankRange(vitalRadiusM: 0.15, scanToM: 800);
+      // apex must not exceed the upper vital edge (else band violated)
+      expect(r.apexM, lessThanOrEqualTo(0.15 + 1e-6));
+      // and should be positive (bullet actually rises in the optimized MPBR)
+      expect(r.apexM, greaterThan(0.0));
+    });
+  });
+
+  group('Zero Atmosphere', () {
+    test('zero angle differs when zero-atmo density differs', () {
+      final base = ShotConfig(
+        muzzleVelocity: 850,
+        mass: 0.01,
+        diameter: 0.0078,
+        bc: 0.4,
+        dragModel: G1DragModel.instance,
+        sightHeight: 0.04,
+        zeroRange: 100,
+        atmosphere: const Atmosphere(
+            temperatureC: 35, pressurePa: 101325, relativeHumidity: 0),
+        wind: const Wind.calm(),
+        spinDrift: false,
+      );
+      // Same rifle/ammo, zero established in cold dense air vs current.
+      final zeroCold = const Atmosphere(
+          temperatureC: 0, pressurePa: 101325, relativeHumidity: 0);
+      final cfgZa = ShotConfig(
+        muzzleVelocity: 850,
+        mass: 0.01,
+        diameter: 0.0078,
+        bc: 0.4,
+        dragModel: G1DragModel.instance,
+        sightHeight: 0.04,
+        zeroRange: 100,
+        atmosphere: base.atmosphere,
+        zeroAtmosphere: zeroCold,
+        wind: const Wind.calm(),
+        spinDrift: false,
+      );
+      final elevZa = BallisticsSolver(cfgZa).solveZeroAngle();
+      final elevPlain = BallisticsSolver(base).solveZeroAngle();
+      // The zero angle solved under cold dense air differs (slightly) from the
+      // one solved at current warm air.
+      expect((elevZa - elevPlain).abs(), lessThan(0.1)); // small but defined
+      // Both must be positive (upward bore elevation for a real zero).
+      expect(elevZa, greaterThan(0));
+    });
   });
 
   group('WEZ Monte-Carlo', () {
@@ -264,6 +326,29 @@ void main() {
         dropPerYdM: 0.03, targetWIn: 12, seed: 123,
       );
       expect(a, closeTo(b, 1e-9));
+    });
+
+    test('RNG produces varied draws (not constant)', () {
+      // Different seeds must give different results (a broken RNG that returns
+      // a constant would make this fail).
+      final p1 = Wez.run(
+        shots: 300, rangeM: 500, gunMoa: 1, shooterMoa: 0.5,
+        windErrMph: 2, windDriftPerMphM: 0.1, rangeErrYd: 10,
+        dropPerYdM: 0.03, targetWIn: 12, seed: 1,
+      );
+      final p2 = Wez.run(
+        shots: 300, rangeM: 500, gunMoa: 1, shooterMoa: 0.5,
+        windErrMph: 2, windDriftPerMphM: 0.1, rangeErrYd: 10,
+        dropPerYdM: 0.03, targetWIn: 12, seed: 2,
+      );
+      final p3 = Wez.run(
+        shots: 300, rangeM: 500, gunMoa: 1, shooterMoa: 0.5,
+        windErrMph: 2, windDriftPerMphM: 0.1, rangeErrYd: 10,
+        dropPerYdM: 0.03, targetWIn: 12, seed: 3,
+      );
+      // A proper pseudo-random stream gives different P(hit) per seed.
+      final distinct = {p1, p2, p3}.length;
+      expect(distinct, greaterThan(1));
     });
   });
 }

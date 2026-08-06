@@ -72,6 +72,14 @@ class ShotConfig {
   /// Atmosphere at the firing point.
   final Atmosphere atmosphere;
 
+  /// Optional atmosphere present when the rifle was zeroed. When provided, the
+  /// zero angle is solved under THIS atmosphere (matching the conditions where
+  /// the zero was actually established), while the trajectory itself is
+  /// integrated under [atmosphere]. This is the "Zero Atmosphere" feature of
+  /// Applied Ballistics: a long-range zero taken at a different air density is
+  /// corrected without re-zeroing. Null = zero solved at current atmosphere.
+  final Atmosphere? zeroAtmosphere;
+
   /// Wind.
   final Wind wind;
 
@@ -120,6 +128,7 @@ class ShotConfig {
     required this.zeroRange,
     this.elevationOverride,
     required this.atmosphere,
+    this.zeroAtmosphere,
     required this.wind,
     this.coriolis,
     this.windZones = const [],
@@ -208,12 +217,23 @@ class BallisticsSolver {
 
   /// Solve the bore elevation angle [rad] that zeros the trajectory at the
   /// configured zero range (bisection on bullet height at zero range).
+  ///
+  /// If [ShotConfig.zeroAtmosphere] is set, the zero angle is solved under the
+  /// zero-time atmosphere (a long-range zero established at different density
+  /// is honored), while trajectory integration still uses [config.atmosphere].
   double solveZeroAngle() {
     if (config.elevationOverride != null) return config.elevationOverride!;
     final zr = config.zeroRange;
     if (zr <= 0) return 0;
 
-    double zAt(double theta) => _zAtRange(zr, theta);
+    // Zero-angle solver that integrates under the given atmosphere.
+    double zAtUnder(Atmosphere atmo, double theta) {
+      final cfg = _withAtmosphere(atmo);
+      return BallisticsSolver(cfg, dt: dt)._zAtRange(zr, theta);
+    }
+
+    final atmo = config.zeroAtmosphere ?? config.atmosphere;
+    double zAt(double theta) => zAtUnder(atmo, theta);
 
     // We want z(zr) = 0 (bullet on the LOS at the zero range).
     double lo = -0.02, hi = 0.3;
@@ -245,6 +265,29 @@ class BallisticsSolver {
     if (states.isEmpty) return 0;
     return states.last.z;
   }
+
+  /// Copy of this config with a different atmosphere (keeps everything else,
+  /// and drops any zeroAtmosphere so zero-solve doesn't recurse).
+  ShotConfig _withAtmosphere(Atmosphere atmo) => ShotConfig(
+        muzzleVelocity: config.muzzleVelocity,
+        mass: config.mass,
+        diameter: config.diameter,
+        bc: config.bc,
+        dragModel: config.dragModel,
+        sightHeight: config.sightHeight,
+        zeroRange: config.zeroRange,
+        elevationOverride: config.elevationOverride,
+        atmosphere: atmo,
+        wind: config.wind,
+        windZones: config.windZones,
+        coriolis: config.coriolis,
+        spinDrift: false,
+        twistIn: 0,
+        lengthIn: 0,
+        losAngleRad: config.losAngleRad,
+        cantAngleRad: config.cantAngleRad,
+        dropScaleFactors: const {},
+      );
 
   /// Acceleration a = a_drag(v_rel) + a_gravity + a_coriolis, written to [out].
   void _accel(_State s, double g, double rho, double cSound, List<double> out) {
@@ -716,39 +759,87 @@ class BallisticsSolver {
     return null;
   }
 
-  /// Maximum Point Blank Range (MPBR): the farthest distance at which the
-  /// bullet path never rises above +[vitalRadiusM] nor falls below it, when
-  /// fired horizontally with a sight set at the muzzle. This is the "point
-  /// blank" / vital-zone range used for hunting (don't dial, just hold center).
+  /// Maximum Point Blank Range (MPBR): the farthest distance at which a hunter
+  /// can aim dead-center and stay within ±[vitalRadiusM] of the point of aim,
+  /// with no elevation knob dialing. Standard definition: fire the bullet with
+  /// the smallest elevation that makes the trajectory apex just touch
+  /// +vitalRadiusM (the high edge of the vital zone); MPBR ends where the
+  /// bullet falls below -vitalRadiusM (the low edge).
   ///
-  /// Returns the MPBR in meters, plus the trajectory apex (midrange height).
-  /// The integration uses a near-zero zero range so the path is measured from
-  /// the bore line (sight height ignored for the band test).
+  /// We integrate from the bore line (z = 0, sight height ignored) since MPBR
+  /// is a bore-referenced concept. The optimal elevation is found by bisection:
+  /// too low -> apex < +vital (more range possible); too high -> apex exceeds
+  /// +vital (band violated). Returns the MPBR in meters, the apex height and
+  /// its downrange position.
   ({double mpbrM, double apexM, double apexAtM}) maxPointBlankRange({
     double vitalRadiusM = 0.15, // ~6 inches
     double scanToM = 2000,
   }) {
-    // Fire level (elevation 0) from the bore line: solveZeroAngle with
-    // zeroRange≈0 gives elevation≈0. We then scan for where |z| first exceeds
-    // the vital radius going down, after the early rise.
-    final elev = 0.0;
-    final raw = _integrate(stopRange: scanToM, elevation: elev);
-    double apex = -1e9, apexAt = 0;
-    // find the apex (max z) along the path
-    for (final s in raw) {
-      if (s.z > apex) {
-        apex = s.z;
-        apexAt = s.x;
+    if (scanToM <= 0 || vitalRadiusM <= 0) {
+      return (mpbrM: 0, apexM: 0, apexAtM: 0);
+    }
+    // Solver with bore-line reference, elevation controlled externally.
+    BallisticsSolver altSolver() => BallisticsSolver(
+          ShotConfig(
+            muzzleVelocity: config.muzzleVelocity,
+            mass: config.mass,
+            diameter: config.diameter,
+            bc: config.bc,
+            dragModel: config.dragModel,
+            sightHeight: 0, // bore-line reference
+            zeroRange: 0,
+            elevationOverride: 0, // always fire at explicit elevation below
+            atmosphere: config.atmosphere,
+            wind: Wind.calm(),
+            spinDrift: false,
+            losAngleRad: 0,
+          ),
+          dt: dt,
+        );
+
+    // Given elevation, compute apex height and the range where z falls below
+    // -vital after the apex.
+    (double apex, double apexAt, double mpbr) sim(double elev) {
+      final raw =
+          altSolver()._integrate(stopRange: scanToM, elevation: elev);
+      double apex = -1e18, apexAt = 0;
+      for (final s in raw) {
+        if (s.z > apex) {
+          apex = s.z;
+          apexAt = s.x;
+        }
+      }
+      double mpbr = scanToM;
+      for (final s in raw) {
+        if (s.x >= apexAt && s.z <= -vitalRadiusM) {
+          mpbr = s.x;
+          break;
+        }
+      }
+      return (apex, apexAt, mpbr);
+    }
+
+    // Bisect elevation so apex == +vitalRadiusM (maximize MPBR).
+    double lo = 0.0, hi = 0.15; // ~8.6 degrees upper bound
+    var loRes = sim(lo);
+    var hiRes = sim(hi);
+    if (hiRes.$1 < vitalRadiusM) {
+      // Even max elevation can't reach the band top; use max elevation.
+      return (mpbrM: hiRes.$3, apexM: hiRes.$1, apexAtM: hiRes.$2);
+    }
+    for (int i = 0; i < 60; i++) {
+      final mid = 0.5 * (lo + hi);
+      final midRes = sim(mid);
+      if (midRes.$1 < vitalRadiusM) {
+        lo = mid;
+        loRes = midRes;
+      } else {
+        hi = mid;
+        hiRes = midRes;
       }
     }
-    // MPBR = first x where z drops below -vitalRadiusM after the apex.
-    double mpbr = scanToM;
-    for (final s in raw) {
-      if (s.x >= apexAt && s.z <= -vitalRadiusM) {
-        mpbr = s.x;
-        break;
-      }
-    }
-    return (mpbrM: mpbr, apexM: apex, apexAtM: apexAt);
+    final best = 0.5 * (lo + hi);
+    final res = sim(best);
+    return (mpbrM: res.$3, apexM: res.$1, apexAtM: res.$2);
   }
 }
