@@ -70,7 +70,7 @@ class Units {
     if (daFt <= isaTropopauseFt) {
       // Troposphere: rho/rho0 = (1 - 6.875e-6 * h)^4.256
       final t = 1.0 - 6.87535e-6 * daFt;
-      return t <= 0 ? 0.0 : pow(t, 4.2558793);
+      return t <= 0 ? 0.0 : pow(t, 4.2558793).toDouble();
     }
     // Stratosphere (isothermal): exponential decay above tropopause.
     final ratioAtTrop = densityRatioFromDaFt(isaTropopauseFt);

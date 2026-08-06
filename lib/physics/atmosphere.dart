@@ -95,7 +95,7 @@ class Atmosphere {
     if (ratio >= 1.0) {
       // denser than ISA SL -> negative DA (rare)
       // solve h from (1 - 6.875e-6*h_m)^4.256 = ratio
-      final h = (1.0 - pow(ratio, 1.0 / 4.2558793)) / 6.87535e-6;
+      final h = (1.0 - pow(ratio, 1.0 / 4.2558793).toDouble()) / 6.87535e-6;
       return h;
     }
     // bisect altitude [0, 11000m] for the matching density
@@ -103,7 +103,7 @@ class Atmosphere {
     for (int i = 0; i < 60; i++) {
       final mid = 0.5 * (lo + hi);
       final t = 1.0 - 2.25577e-5 * mid; // ISA temp ratio in m
-      final r = t <= 0 ? 0.0 : pow(t, 4.25588);
+      final r = t <= 0 ? 0.0 : pow(t, 4.25588).toDouble();
       if (r > ratio) {
         lo = mid;
       } else {
@@ -145,10 +145,10 @@ class Atmosphere {
     const rho0 = 1.225;
     if (h <= 11000) {
       final t = 1.0 - 2.25577e-5 * h;
-      return t <= 0 ? 0.0 : rho0 * pow(t, 4.25588);
+      return t <= 0 ? 0.0 : rho0 * pow(t, 4.25588).toDouble();
     }
     final ratioAt11k = (1.0 - 2.25577e-5 * 11000);
-    final rho11k = rho0 * pow(ratioAt11k, 4.25588);
+    final rho11k = rho0 * pow(ratioAt11k, 4.25588).toDouble();
     return rho11k * exp(-(h - 11000) / 6341.62);
   }
 

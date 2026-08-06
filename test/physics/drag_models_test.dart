@@ -59,9 +59,9 @@ void main() {
   group('form factor / actual Cd', () {
     test('actual Cd scales with form factor (SD/BC)', () {
       final g1 = G1DragModel.instance;
-      // 175gr .308: SD ~ 0.196
+      // 175gr .308: SD = (175/7000 lb) / (0.308 in)^2 = 0.2635
       final sd = DragModel.sectionalDensity(175, 0.308);
-      expect(sd, closeTo(0.196, 0.002));
+      expect(sd, closeTo(0.2635, 0.002));
       // Cd_actual = Cd_ref * SD / BC
       final cd = g1.cd(2.5, 0.505, 175, 0.308);
       final cdRef = g1.cdRef(2.5);

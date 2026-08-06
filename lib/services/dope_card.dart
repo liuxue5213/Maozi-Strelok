@@ -86,10 +86,10 @@ class DopeCard {
       final e = sys == U.UnitSystem.imperial
           ? (p.energy / 1.3558179483314)
           : p.energy;
-      final comeMoa = p.range > 1 ? U.Units.radToMoa(p.comeUpRad.abs()) : 0;
+      final comeMoa = p.range > 1 ? U.Units.radToMoa(p.comeUpRad.abs()) : 0.0;
       final windMoa = p.range > 1
           ? U.Units.radToMoa((p.windage / p.range).abs())
-          : 0;
+          : 0.0;
       b.writeln('${_fmt(dist)},${_fmt(drop)},${_fmt(comeMoa)},'
           '${_fmt(wind)},${_fmt(windMoa)},${_fmt(vel)},${_fmt(e)},'
           '${p.timeOfFlight.toStringAsFixed(3)}');

@@ -252,13 +252,13 @@ void main() {
         dragModel: G1DragModel.instance,
         sightHeight: 0.04,
         zeroRange: 100,
-        atmosphere: const Atmosphere(
+        atmosphere: Atmosphere(
             temperatureC: 35, pressurePa: 101325, relativeHumidity: 0),
         wind: const Wind.calm(),
         spinDrift: false,
       );
       // Same rifle/ammo, zero established in cold dense air vs current.
-      final zeroCold = const Atmosphere(
+      final zeroCold = Atmosphere(
           temperatureC: 0, pressurePa: 101325, relativeHumidity: 0);
       final cfgZa = ShotConfig(
         muzzleVelocity: 850,

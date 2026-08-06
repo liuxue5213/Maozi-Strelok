@@ -305,7 +305,7 @@ class BallisticsSolver {
     final vr2 = vrx * vrx + vry * vry + vrz * vrz;
     final vr = sqrt(vr2);
 
-    final mach = cSound > 0 ? vr / cSound : 0;
+    final mach = cSound > 0 ? vr / cSound : 0.0;
     final cd = config.dragModel.cd(mach, config.bc, _massGr, _diaIn);
     final dragMag = rho * cd * _crossArea * vr2 / (2.0 * config.mass);
 
@@ -470,7 +470,7 @@ class BallisticsSolver {
 
       // Spin (gyroscopic) drift, additive to windage.
       if (useSpin) {
-        final driftIn = 1.25 * (sg + 1.2) * pow(tof, 1.83);
+        final driftIn = 1.25 * (sg + 1.2) * pow(tof, 1.83).toDouble();
         y += driftIn * 0.0254; // inches -> meters, +right
       }
 
@@ -715,7 +715,7 @@ class BallisticsSolver {
 
   /// Convert a linear lead (meters) to an angular hold-off (radians) at range.
   static double leadToAngle(double leadM, double rangeM) =>
-      rangeM > 0 ? leadM / rangeM : 0;
+      rangeM > 0 ? leadM / rangeM : 0.0;
 
   /// Aerodynamic jump: the vertical deflection caused by a crosswind as the
   /// bullet transitions through transonic flow. Litz approximate form:
