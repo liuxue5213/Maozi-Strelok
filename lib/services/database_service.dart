@@ -110,7 +110,7 @@ class DatabaseService {
   Future<void> markCleaned(String firearmId) async {
     final rec = Map<String, int>.from(_barrelLife[firearmId] ?? {});
     rec['rounds'] ??= 0;
-    rec['lastCleanRounds'] = rec['rounds'];
+    rec['lastCleanRounds'] = rec['rounds']!;
     rec['expectedLife'] ??= _defaultLife(firearmId);
     _barrelLife[firearmId] = rec;
     await _saveBarrelLife();

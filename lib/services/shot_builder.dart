@@ -5,6 +5,7 @@ import '../physics/drag_models.dart';
 import '../physics/stability.dart';
 import '../physics/units.dart' as U;
 import '../physics/ballistics_solver.dart' show ShotConfig, Wind, WindZone;
+import '../physics/coriolis.dart' show Coriolis;
 
 /// Assembles a [ShotConfig] from a Firearm + Cartridge + Bullet + Modification
 /// + environment, applying the physical corrections implied by the mods.

@@ -327,7 +327,7 @@ class _ResultPageState extends State<ResultPage> {
               leading: const Icon(Icons.gps_fixed),
               title: Text('${widget.state.firearm!.name} · ${ct.designation}'),
               subtitle: Text(
-                  '${bullet.manufacturer} ${bullet.model} · ${bullet.massGr}gr · BC ${s.dragModelId == 'G7' ? (bullet.bcG7 ?? bullet.bcG1).toStringAsFixed(3) : bullet.bcG1.toStringAsFixed(3)} (${s.dragModelId})'),
+                  '${bullet.manufacturer} ${bullet.model} · ${bullet.massGr}gr · BC ${widget.state.dragModelId == 'G7' ? (bullet.bcG7 ?? bullet.bcG1).toStringAsFixed(3) : bullet.bcG1.toStringAsFixed(3)} (${widget.state.dragModelId})'),
             ),
           ),
           // Stability + key results grid
