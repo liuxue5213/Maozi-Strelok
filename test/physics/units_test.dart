@@ -17,8 +17,9 @@ void main() {
 
     test('velocity: fps <-> m/s', () {
       expect(Units.fpsToMps(Units.mpsToFps(900)), closeTo(900, 1e-6));
-      // 1 fps = 0.3048 m/s exactly
-      expect(Units.fpsToMps(1), closeTo(0.3048, 1e-9));
+      // 1 fps = 0.3048 m/s; the feet-per-meter constant is a finite-precision
+      // approximation (3.28084), so tolerance is 1e-7 not 1e-9.
+      expect(Units.fpsToMps(1), closeTo(0.3048, 1e-7));
     });
 
     test('energy: joule <-> ft-lbf', () {

@@ -41,7 +41,7 @@ void main() {
           .solve(maxRangeM: U.Units.yardsToM(800), stepM: U.Units.yardsToM(100));
       final t2 = BallisticsSolver(withSpin)
           .solve(maxRangeM: U.Units.yardsToM(800), stepM: U.Units.yardsToM(100));
-      final at700 = (t) => t.reduce((a, b) =>
+      final at700 = (List<TrajectoryPoint> t) => t.reduce((TrajectoryPoint a, TrajectoryPoint b) =>
           (a.range - U.Units.yardsToM(700)).abs() <
                   (b.range - U.Units.yardsToM(700)).abs()
               ? a
@@ -75,7 +75,7 @@ void main() {
           .solve(maxRangeM: U.Units.yardsToM(600), stepM: U.Units.yardsToM(100));
       final t2 = BallisticsSolver(uphill)
           .solve(maxRangeM: U.Units.yardsToM(600), stepM: U.Units.yardsToM(100));
-      final at5 = (t) => t.reduce((a, b) =>
+      final at5 = (List<TrajectoryPoint> t) => t.reduce((TrajectoryPoint a, TrajectoryPoint b) =>
           (a.range - U.Units.yardsToM(500)).abs() <
                   (b.range - U.Units.yardsToM(500)).abs()
               ? a
@@ -91,7 +91,7 @@ void main() {
           .solve(maxRangeM: U.Units.yardsToM(500), stepM: U.Units.yardsToM(100));
       final t2 = BallisticsSolver(downhill)
           .solve(maxRangeM: U.Units.yardsToM(500), stepM: U.Units.yardsToM(100));
-      final at4 = (t) => t.reduce((a, b) =>
+      final at4 = (List<TrajectoryPoint> t) => t.reduce((TrajectoryPoint a, TrajectoryPoint b) =>
           (a.range - U.Units.yardsToM(400)).abs() <
                   (b.range - U.Units.yardsToM(400)).abs()
               ? a
@@ -118,8 +118,9 @@ void main() {
       final rangeM = U.Units.yardsToM(500);
       final base = solver.dropAtRange(rangeM);
       // A less-negative observed drop (bullet hitting higher) implies higher BC.
-      final truedHi = solver.truedBc(rangeM: rangeM, observedDropM: base * 0.85);
-      final truedLo = solver.truedBc(rangeM: rangeM, observedDropM: base * 1.15);
+      // Use ±5% so both observations stay inside the solver's [0.4x, 2x] band.
+      final truedHi = solver.truedBc(rangeM: rangeM, observedDropM: base * 0.95);
+      final truedLo = solver.truedBc(rangeM: rangeM, observedDropM: base * 1.05);
       expect(truedHi, isNotNull);
       expect(truedLo, isNotNull);
       expect(truedHi!, greaterThan(truedLo!));
@@ -240,7 +241,7 @@ void main() {
           .solve(maxRangeM: U.Units.yardsToM(500), stepM: U.Units.yardsToM(100));
       // A rightward cant should introduce positive windage (bullet drifts right)
       // and reduce the magnitude of the drop at the same range.
-      final at4 = (t) => t.reduce((a, b) =>
+      final at4 = (List<TrajectoryPoint> t) => t.reduce((TrajectoryPoint a, TrajectoryPoint b) =>
           (a.range - U.Units.yardsToM(400)).abs() <
                   (b.range - U.Units.yardsToM(400)).abs()
               ? a
