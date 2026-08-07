@@ -42,13 +42,27 @@ class _ResultPageState extends State<ResultPage> {
   /// Bullet ids selected for comparison (excludes the current bullet).
   final Set<String> _compareBulletIds = {};
 
+  bool _computing = true; // loading guard so the heavy solve doesn't block UI
+
   @override
   void initState() {
     super.initState();
-    _compute();
+    // Defer the heavy RK4 + WEZ computation one frame so the route transition
+    // / loading indicator can paint first. Without this the whole solve runs
+    // synchronously inside initState and the screen freezes on entry.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _compute());
   }
 
   void _compute() {
+    setState(() => _computing = true);
+    // Yield to the event loop so the loading spinner renders before the
+    // (CPU-bound) integration starts.
+    Future.microtask(() {
+      _runCompute();
+    });
+  }
+
+  void _runCompute() {
     try {
       final s = widget.state;
       final f = s.firearm!;
@@ -166,7 +180,7 @@ class _ResultPageState extends State<ResultPage> {
         if (_useWez) {
           // Monte-Carlo WEZ (Applied Ballistics method).
           hitProb = Wez.run(
-            shots: 2000,
+            shots: 1000,
             rangeM: last.range,
             gunMoa: s.gunAccuracyMoa,
             shooterMoa: s.shooterErrorMoa,
@@ -207,9 +221,13 @@ class _ResultPageState extends State<ResultPage> {
         _multiTargets = multiTargets;
         _hitProb = hitProb;
         _error = null;
+        _computing = false;
       });
     } catch (e) {
-      setState(() => _error = e.toString());
+      setState(() {
+        _error = e.toString();
+        _computing = false;
+      });
     }
   }
 
@@ -267,6 +285,21 @@ class _ResultPageState extends State<ResultPage> {
       return Scaffold(
         appBar: AppBar(title: const Text('结果')),
         body: Center(child: Text('计算出错：$_error')),
+      );
+    }
+    if (_computing) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('弹道结果')),
+        body: const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('正在计算弹道…'),
+            ],
+          ),
+        ),
       );
     }
     final traj = _traj;

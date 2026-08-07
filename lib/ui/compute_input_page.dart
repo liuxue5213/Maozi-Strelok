@@ -55,18 +55,18 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
           _loadoutCard(s),
           const SizedBox(height: 12),
           _section('环境条件', [
-            _slider('温度', s.temperatureC, -30, 50, ' °C', 1, 1,
+            _slider('温度', s.temperatureC, -40, 55, ' °C', 0.5, 1,
                 (v) => setState(() => s.temperatureC = v)),
-            _slider('气压', s.pressureHpa, 800, 1080, ' hPa', 5, 1,
+            _slider('气压', s.pressureHpa, 800, 1080, ' hPa', 1, 1,
                 (v) => setState(() => s.pressureHpa = v)),
-            _slider('相对湿度', s.relativeHumidity * 100, 0, 100, ' %', 5, 0,
+            _slider('相对湿度', s.relativeHumidity * 100, 0, 100, ' %', 1, 0,
                 (v) => setState(() => s.relativeHumidity = v / 100)),
-            _slider('海拔', s.altitudeM, 0, 4000, ' m', 100, 0,
-                (v) => setState(() => s.altitudeM = v)),
+            _slider('海拔', s.altitudeM, 0, 4000, ' m', 10, 0,
+                (v) => setState(() => s.altitudeM = v.roundToDouble())),
           ]),
           const SizedBox(height: 12),
           _section('风', [
-            _slider('风速', s.windSpeedMph, 0, 30, ' mph', 1, 0,
+            _slider('风速', s.windSpeedMph, 0, 30, ' mph', 0.5, 1,
                 (v) => setState(() => s.windSpeedMph = v)),
             _windDial(s),
             ListTile(
@@ -177,13 +177,13 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
               value: s.useAeroJump,
               onChanged: (v) => setState(() => s.useAeroJump = v),
             ),
-            _slider('射击仰俯角', s.losAngleDeg, -45, 45, '°', 1, 0,
+            _slider('射击仰俯角', s.losAngleDeg, -45, 45, '°', 1, 1,
                 (v) => setState(() => s.losAngleDeg = v)),
-            _slider('移动目标速度', s.targetSpeedMph, 0, 30, ' mph', 1, 0,
+            _slider('移动目标速度', s.targetSpeedMph, 0, 30, ' mph', 0.5, 1,
                 (v) => setState(() => s.targetSpeedMph = v)),
-            _slider('最大射程', s.maxRangeYd, 100, 2500, ' yd', 50, 0,
+            _slider('最大射程', s.maxRangeYd, 100, 2500, ' yd', 10, 0,
                 (v) => setState(() => s.maxRangeYd = v)),
-            _slider('采样间隔', s.stepYd, 25, 500, ' yd', 25, 0,
+            _slider('采样间隔', s.stepYd, 10, 500, ' yd', 5, 0,
                 (v) => setState(() => s.stepYd = v)),
             const SizedBox(height: 8),
             _multiTargetsEditor(s),
@@ -637,6 +637,10 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
         ),
       );
 
+  /// Slider + tappable value field. The value text is tappable to open a
+  /// numeric input dialog, so the shooter can enter precise decimal values
+  /// (e.g. altitude 1234 m, temperature 21.5 °C) instead of being limited to
+  /// the slider's coarse steps — matching Strelok's editable inputs.
   Widget _slider(String label, double value, double min, double max, String unit,
       double step, int decimals, ValueChanged<double> onChanged) {
     final divisions = ((max - min) / step).round();
@@ -645,13 +649,69 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('$label: ${value.toStringAsFixed(decimals)}$unit'),
+          InkWell(
+            onTap: () => _editValueDialog(label, value, min, max, unit,
+                decimals, onChanged),
+            child: Row(
+              children: [
+                Text('$label: '),
+                Text('${value.toStringAsFixed(decimals)}$unit',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, color: Colors.blue)),
+                const SizedBox(width: 4),
+                const Icon(Icons.edit, size: 14, color: Colors.blue),
+              ],
+            ),
+          ),
           Slider(
-            value: value,
+            value: value.clamp(min, max),
             min: min,
             max: max,
             divisions: divisions > 0 ? divisions : 1,
             onChanged: onChanged,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Numeric edit dialog: lets the user type an exact value (with decimals),
+  /// validated against [min]/[max]. Replaces the slider-only limitation.
+  void _editValueDialog(String label, double current, double min, double max,
+      String unit, int decimals, ValueChanged<double> onChanged) {
+    final ctrl =
+        TextEditingController(text: current.toStringAsFixed(decimals));
+    showDialog(
+      context: context,
+      builder: (dctx) => AlertDialog(
+        title: Text('输入 $label'),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          keyboardType:
+              const TextInputType.numberWithOptions(decimal: true, signed: true),
+          decoration: InputDecoration(
+            labelText: '$label ($min ~ $max$unit)',
+            suffixText: unit,
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(dctx), child: const Text('取消')),
+          FilledButton(
+            onPressed: () {
+              final v = double.tryParse(ctrl.text);
+              if (v == null) {
+                ScaffoldMessenger.of(dctx).showSnackBar(
+                    const SnackBar(content: Text('请输入有效数字')));
+                return;
+              }
+              final clamped = v.clamp(min, max);
+              onChanged(clamped);
+              Navigator.pop(dctx);
+            },
+            child: const Text('确定'),
           ),
         ],
       ),

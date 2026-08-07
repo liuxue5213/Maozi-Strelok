@@ -86,14 +86,18 @@ class _ReticlePageState extends State<ReticlePage> {
                   child: Slider(
                     min: 25,
                     max: (widget.state.maxRangeYd).clamp(25.0, 2000.0),
-                    divisions: (((widget.state.maxRangeYd).clamp(25.0, 2000.0) - 25) / 25).round(),
+                    divisions: (((widget.state.maxRangeYd).clamp(25.0, 2000.0) - 25) / 5).round(),
                     value: _targetYd.clamp(25.0, widget.state.maxRangeYd),
                     label: '${_targetYd.toStringAsFixed(0)} yd',
                     onChanged: (v) => setState(() => _targetYd = v),
                   ),
                 ),
-                Text('${_targetYd.toStringAsFixed(0)}yd',
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                InkWell(
+                  onTap: () => _editTargetYd(),
+                  child: Text('${_targetYd.toStringAsFixed(0)}yd ✎',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, color: Colors.blue)),
+                ),
               ],
             ),
           ),
@@ -155,6 +159,42 @@ class _ReticlePageState extends State<ReticlePage> {
       sys == U.UnitSystem.imperial
           ? '${(mps * 3.28084).toStringAsFixed(0)} fps'
           : '${mps.toStringAsFixed(0)} m/s';
+
+  /// Numeric input for the target distance (precise yards, decimals allowed).
+  void _editTargetYd() {
+    final ctrl = TextEditingController(text: _targetYd.toStringAsFixed(0));
+    showDialog(
+      context: context,
+      builder: (dctx) => AlertDialog(
+        title: const Text('输入目标距离'),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          keyboardType:
+              const TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(
+            labelText: '距离 (yd)',
+            suffixText: 'yd',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(dctx), child: const Text('取消')),
+          FilledButton(
+            onPressed: () {
+              final v = double.tryParse(ctrl.text);
+              if (v != null && v >= 1) {
+                setState(() => _targetYd = v.clamp(1.0, widget.state.maxRangeYd));
+              }
+              if (dctx.mounted) Navigator.pop(dctx);
+            },
+            child: const Text('确定'),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _readout(String label, String value, String hint) {
     return Column(
@@ -246,6 +286,18 @@ class _ReticlePainter extends CustomPainter {
     canvas.drawCircle(Offset(holdX, holdY), 4, holdPaint);
     // dashed line from center to hold
     _dashedLine(canvas, Offset(cx, cy), Offset(holdX, holdY), holdPaint);
+
+    // Numeric annotation next to the hold point: shows the exact hold in the
+    // current reticle unit (MOA/MIL), e.g. "↑6.4  →1.2". This is the "effect
+    // preview" of the MOA adjustment — the shooter sees both where to hold and
+    // the precise value.
+    final eTxt =
+        '${elevUnits >= 0 ? '↑' : '↓'}${elevUnits.abs().toStringAsFixed(1)}';
+    final wTxt =
+        '${windUnits >= 0 ? '→' : '←'}${windUnits.abs().toStringAsFixed(1)}';
+    _label(canvas, '$eTxt  $wTxt $unitLabel',
+        Offset(holdX + 12, holdY - 6),
+        color: Colors.red);
 
     // labels
     _label(canvas, '$unitLabel',
