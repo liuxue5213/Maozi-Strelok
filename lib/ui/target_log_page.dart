@@ -82,7 +82,7 @@ class _TargetLogPageState extends State<TargetLogPage> {
     final f = db.firearm(e.firearmId);
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dctx) => AlertDialog(
         title: Text('${f?.name ?? e.firearmId} @ ${e.rangeYd.toStringAsFixed(0)}yd'),
         content: SingleChildScrollView(
           child: Column(
@@ -102,16 +102,16 @@ class _TargetLogPageState extends State<TargetLogPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dctx),
             child: const Text('关闭'),
           ),
           TextButton(
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             onPressed: () async {
               await widget.state.db.removeTargetLog(e.id);
-              if (mounted) {
-                Navigator.pop(context);
-                setState(() {});
+              if (dctx.mounted) {
+                Navigator.pop(dctx);
+                if (mounted) setState(() {});
               }
             },
             child: const Text('删除'),
@@ -145,17 +145,17 @@ class _TargetLogPageState extends State<TargetLogPage> {
   void _confirmClear() {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dctx) => AlertDialog(
         title: const Text('清空所有记录?'),
         content: const Text('此操作不可撤销。'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
+          TextButton(onPressed: () => Navigator.pop(dctx), child: const Text('取消')),
           FilledButton(
             onPressed: () async {
               await widget.state.db.clearTargetLog();
-              if (mounted) {
-                Navigator.pop(context);
-                setState(() {});
+              if (dctx.mounted) {
+                Navigator.pop(dctx);
+                if (mounted) setState(() {});
               }
             },
             child: const Text('清空'),

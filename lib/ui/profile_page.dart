@@ -101,7 +101,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final ctrl = TextEditingController();
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dctx) => AlertDialog(
         title: const Text('保存配置文件'),
         content: TextField(
           controller: ctrl,
@@ -112,15 +112,15 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dctx),
               child: const Text('取消')),
           FilledButton(
             onPressed: () async {
               final name = ctrl.text.trim();
               if (name.isEmpty) return;
               await s.saveProfile(name);
-              if (mounted) {
-                Navigator.pop(context);
+              if (dctx.mounted) {
+                Navigator.pop(dctx);
                 ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('已保存配置: $name')));
                 setState(() {});

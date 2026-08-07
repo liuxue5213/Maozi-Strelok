@@ -57,9 +57,12 @@ class _ResultPageState extends State<ResultPage> {
 
   void _compute() {
     setState(() => _computing = true);
-    // Yield to the event loop so the loading spinner renders before the
-    // (CPU-bound) integration starts.
-    Future.microtask(() {
+    // Yield to the event loop for at least one frame so the loading spinner
+    // actually paints before the (CPU-bound) integration starts. A microtask
+    // runs before the next frame, so it would complete the solve without ever
+    // showing the "正在计算" state; a short timer guarantees the spinner shows.
+    Future.delayed(const Duration(milliseconds: 80), () {
+      if (!mounted) return;
       _runCompute();
     });
   }
@@ -1082,7 +1085,7 @@ class _ResultPageState extends State<ResultPage> {
     );
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dctx) => AlertDialog(
         title: const Text('DOPE 卡'),
         content: SizedBox(
           width: double.maxFinite,
@@ -1094,7 +1097,7 @@ class _ResultPageState extends State<ResultPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dctx),
             child: const Text('关闭'),
           ),
         ],
@@ -1107,7 +1110,7 @@ class _ResultPageState extends State<ResultPage> {
     final csv = DopeCard.toCsv(traj: traj, sys: sys);
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dctx) => AlertDialog(
         title: const Text('CSV 轨迹数据'),
         content: SizedBox(
           width: double.maxFinite,
@@ -1119,7 +1122,7 @@ class _ResultPageState extends State<ResultPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dctx),
             child: const Text('关闭'),
           ),
         ],

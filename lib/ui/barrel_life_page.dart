@@ -181,7 +181,7 @@ class _BarrelLifePageState extends State<BarrelLifePage> {
     final ctrl = TextEditingController(text: widget.state.db.expectedLife(f.id).toString());
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dctx) => AlertDialog(
         title: Text('${f.name} 预期寿命'),
         content: TextField(
           controller: ctrl,
@@ -191,14 +191,14 @@ class _BarrelLifePageState extends State<BarrelLifePage> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context), child: const Text('取消')),
+              onPressed: () => Navigator.pop(dctx), child: const Text('取消')),
           FilledButton(
             onPressed: () async {
               final v = int.tryParse(ctrl.text);
               if (v != null && v > 0) {
                 await widget.state.db.setExpectedLife(f.id, v);
-                if (mounted) {
-                  Navigator.pop(context);
+                if (dctx.mounted) {
+                  Navigator.pop(dctx);
                   setState(() {});
                 }
               }
