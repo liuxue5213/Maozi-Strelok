@@ -28,6 +28,29 @@ jobs:
           channel: stable
           cache: true
 
+      # Capture the resolved Flutter version so the Gradle cache key auto-busts
+      # when Flutter stable upgrades and brings a new Gradle version (otherwise
+      # the cache key would be constant since android/ is regenerated each run
+      # and not in the repo, and a stale incompatible cache would keep hitting).
+      - name: Export Flutter version for Gradle cache key
+        run: echo "FLUTTER_VERSION=$(flutter --version | head -1 | awk '{print $2}')" >> $GITHUB_ENV
+
+      # Cache the Gradle dependency caches + wrapper downloads. Without this
+      # every run re-downloads the full Android dependency tree, which is slow
+      # and quickly burns through the Actions minutes quota. save-always makes
+      # the cache self-heal when the Flutter/Gradle version drifts.
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ env.FLUTTER_VERSION }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-${{ env.FLUTTER_VERSION }}-
+            ${{ runner.os }}-gradle-
+          save-always: true
+
       - name: Flutter doctor
         run: flutter doctor -v
 
