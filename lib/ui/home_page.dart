@@ -7,6 +7,7 @@ import 'barrel_life_page.dart';
 import 'dsf_page.dart';
 import 'edit_custom_page.dart';
 import 'firearm_detail_page.dart';
+import 'my_gear_page.dart';
 import 'profile_page.dart';
 import 'target_log_page.dart';
 import 'truing_page.dart';
@@ -48,6 +49,19 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Ballistics Calculator'),
         actions: [
+          IconButton(
+            tooltip: '我的装备 (快速载入常用配置)',
+            icon: const Icon(Icons.shield_outlined),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MyGearPage(state: widget.state),
+                ),
+              );
+              setState(() {});
+            },
+          ),
           IconButton(
             tooltip: '配置文件 (Profiles)',
             icon: const Icon(Icons.bookmarks_outlined),

@@ -317,15 +317,7 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
             icon: const Icon(Icons.play_arrow),
             label: const Text('计算弹道'),
             onPressed: s.canCompute
-                ? () {
-                    s.persistEnvAndShooting();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ResultPage(state: s),
-                      ),
-                    );
-                  }
+                ? () => _startCompute()
                 : null,
           ),
         ],
@@ -715,6 +707,19 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
           ),
         ],
       ),
+    );
+  }
+
+  /// Start ballistic computation. Pushes the result page immediately — the
+  /// ResultPage itself shows a prominent "正在计算弹道…" loading screen while
+  /// the RK4 + WEZ solve runs (it was made async so the UI stays responsive),
+  /// so the user never mistakes computation for a freeze.
+  void _startCompute() {
+    final s = widget.state;
+    s.persistEnvAndShooting();
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ResultPage(state: s)),
     );
   }
 

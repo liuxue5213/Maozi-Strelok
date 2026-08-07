@@ -9,6 +9,7 @@ import '../physics/hit_probability.dart';
 import '../physics/units.dart' as U;
 import '../services/shot_builder.dart';
 import '../services/dope_card.dart';
+import 'aim_demo_page.dart';
 import 'app_state.dart';
 import 'cartridge_picker_dialog.dart';
 import 'format.dart';
@@ -333,9 +334,22 @@ class _ResultPageState extends State<ResultPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(),
+              SizedBox(
+                width: 64,
+                height: 64,
+                child: CircularProgressIndicator(strokeWidth: 5),
+              ),
+              SizedBox(height: 24),
+              Text('正在计算弹道…', style: TextStyle(fontSize: 17)),
+              SizedBox(height: 8),
+              Text('RK4 弹道积分 · 大气密度 · 风修正 · 稳定性',
+                  style: TextStyle(fontSize: 12, color: Colors.grey)),
               SizedBox(height: 16),
-              Text('正在计算弹道…'),
+              // indeterminate progress bar for extra "working" feedback
+              SizedBox(
+                width: 200,
+                child: LinearProgressIndicator(),
+              ),
             ],
           ),
         ),
@@ -377,6 +391,16 @@ class _ResultPageState extends State<ResultPage> {
               ),
             ),
             icon: const Icon(Icons.visibility),
+          ),
+          IconButton(
+            tooltip: '瞄准演示 (不同距离瞄准哪里)',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => AimDemoPage(state: widget.state, traj: traj),
+              ),
+            ),
+            icon: const Icon(Icons.ads_click),
           ),
           IconButton(
             tooltip: '导出 DOPE 卡',
