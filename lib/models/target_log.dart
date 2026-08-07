@@ -26,8 +26,6 @@ class TargetLogEntry {
   final bool coldBarrel; // first shot from clean/cold bore
   final String? notes;
 
-  final double pressureHpa;
-
   const TargetLogEntry({
     required this.id,
     required this.timestamp,
