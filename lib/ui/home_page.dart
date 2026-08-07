@@ -8,6 +8,7 @@ import 'dsf_page.dart';
 import 'edit_custom_page.dart';
 import 'firearm_detail_page.dart';
 import 'profile_page.dart';
+import 'target_log_page.dart';
 import 'truing_page.dart';
 
 /// Browsing page: category chips, search, list of firearms.
@@ -55,6 +56,19 @@ class _HomePageState extends State<HomePage> {
                 context,
                 MaterialPageRoute(
                   builder: (_) => ProfilePage(state: widget.state),
+                ),
+              );
+              setState(() {});
+            },
+          ),
+          IconButton(
+            tooltip: '目标日志',
+            icon: const Icon(Icons.fact_check),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TargetLogPage(state: widget.state),
                 ),
               );
               setState(() {});

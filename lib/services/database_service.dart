@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/firearm.dart';
 import '../models/reticle.dart';
+import '../models/target_log.dart';
 
 /// Loads built-in data from assets and merges user-defined (custom) records
 /// stored in SharedPreferences. Provides unified query APIs.
@@ -17,11 +18,13 @@ class DatabaseService {
   static const _kFirearms = 'user_firearms';
   static const _kFavorites = 'user_favorites';
   static const _kBarrelLife = 'barrel_life';
+  static const _kTargetLog = 'target_log';
 
   final List<Bullet> _bullets = [];
   final List<Cartridge> _cartridges = [];
   final List<Firearm> _firearms = [];
   final List<ReticleSpec> _reticles = [];
+  final List<TargetLogEntry> _targetLog = [];
   final Set<String> _favorites = {};
   /// Per-firearm barrel-life tracking: firearmId -> {rounds, lastCleanRounds, expectedLife}.
   final Map<String, Map<String, int>> _barrelLife = {};
@@ -30,7 +33,40 @@ class DatabaseService {
   List<Cartridge> get cartridges => List.unmodifiable(_cartridges);
   List<Firearm> get firearms => List.unmodifiable(_firearms);
   List<ReticleSpec> get reticles => List.unmodifiable(_reticles);
+  List<TargetLogEntry> get targetLog => List.unmodifiable(_targetLog);
   bool get isLoaded => _firearms.isNotEmpty;
+
+  // ---- Target Log (shooting session records) ----
+  Future<void> _saveTargetLog() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kTargetLog, jsonEncode(_targetLog.map((e) => e.toJson()).toList()));
+  }
+
+  Future<void> _loadTargetLog() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_kTargetLog);
+    if (raw == null) return;
+    _targetLog
+      ..clear()
+      ..addAll((jsonDecode(raw) as List)
+          .map((e) => TargetLogEntry.fromJson(e as Map<String, dynamic>)));
+  }
+
+  /// Add a new shot record and persist.
+  Future<void> addTargetLog(TargetLogEntry entry) async {
+    _targetLog.insert(0, entry); // newest first
+    await _saveTargetLog();
+  }
+
+  Future<void> removeTargetLog(String id) async {
+    _targetLog.removeWhere((e) => e.id == id);
+    await _saveTargetLog();
+  }
+
+  Future<void> clearTargetLog() async {
+    _targetLog.clear();
+    await _saveTargetLog();
+  }
 
   /// Look up a reticle by id.
   ReticleSpec? reticle(String id) =>
@@ -55,6 +91,8 @@ class DatabaseService {
           .map((e) => Firearm.fromJson(e as Map<String, dynamic>)));
     // Reticle library (real-world scope reticles).
     final rJson = await rootBundle.loadString('assets/data/reticles.json');
+    // Target log (shooting session records).
+    await _loadTargetLog();
     _reticles
       ..clear()
       ..addAll((jsonDecode(rJson) as List)
