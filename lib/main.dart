@@ -27,6 +27,16 @@ class BallisticsApp extends StatelessWidget {
         useMaterial3: true,
         brightness: Brightness.dark,
       ),
+      // Global SafeArea so app content never overlaps the Android virtual
+      // navigation bar (back/home/recents) or the status bar on notched /
+      // gesture-nav devices. Applied once here instead of on every Scaffold.
+      // top:false — AppBar already handles the status-bar inset; we only need
+      // to protect the bottom (virtual nav keys).
+      builder: (context, child) => SafeArea(
+        top: false,
+        bottom: true,
+        child: child ?? const SizedBox.shrink(),
+      ),
       home: const Splash(),
     );
   }
@@ -91,6 +101,11 @@ class _SplashState extends State<Splash> {
               colorSchemeSeed: const Color(0xFF1B5E20),
               useMaterial3: true,
               brightness: Brightness.dark,
+            ),
+            builder: (context, child) => SafeArea(
+              top: false,
+              bottom: true,
+              child: child ?? const SizedBox.shrink(),
             ),
             home: HomePage(state: snap.data!),
           ),

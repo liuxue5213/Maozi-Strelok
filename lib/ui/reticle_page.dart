@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 
+import '../models/reticle.dart';
 import '../physics/ballistics_solver.dart';
 import '../physics/units.dart' as U;
 import 'app_state.dart';
+import 'reticle_painter.dart';
+import 'reticle_picker_dialog.dart';
 
-/// Reticle simulation page. Draws a generic reticle (choice of crosshair /
-/// MIL-dot / MOA grid) and overlays the elevation + windage hold points for a
-/// user-selected target range, computed from the solved trajectory.
-///
-/// This mirrors the headline feature of Strelok: "see holdovers on the reticle
-/// without turning knobs".
+/// Reticle simulation page. Renders ANY reticle from the real-scope reticle
+/// library (Mil-Dot, ACOG, EBR-2C, TMR, MOAR, Horus, PSO-1, ...), honors FFP vs
+/// SFP magnification scaling, and overlays the ballistic hold point computed
+/// from the solved trajectory — Strelok's headline "see holdovers on the
+/// reticle without turning knobs" feature, now with a real reticle library.
 class ReticlePage extends StatefulWidget {
   final AppState state;
   final List<TrajectoryPoint> traj;
@@ -19,74 +21,118 @@ class ReticlePage extends StatefulWidget {
   State<ReticlePage> createState() => _ReticlePageState();
 }
 
-enum ReticleType { crosshair, milDot, moaGrid }
-
 class _ReticlePageState extends State<ReticlePage> {
-  ReticleType _reticle = ReticleType.milDot;
+  /// Selected reticle (defaults to USMC Mil-Dot).
+  ReticleSpec? _reticle;
   double _targetYd = 500;
-  bool _showMoa = false; // false => MIL
+  double _magnification = 10; // scope zoom (affects SFP reticles)
+  /// If true, hold values are shown in the reticle's native unit; else toggle.
+  bool _useReticleUnit = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _reticle = widget.state.db.reticle('usmc-mildot') ??
+        (widget.state.db.reticles.isNotEmpty
+            ? widget.state.db.reticles.first
+            : null);
+  }
 
   @override
   Widget build(BuildContext context) {
     final traj = widget.traj;
     final sys = widget.state.unitSystem;
-    // find the trajectory point nearest the chosen target range
     final targetM = U.Units.yardsToM(_targetYd);
     final pt = traj.isEmpty
         ? null
-        : traj.reduce((a, b) =>
+        : traj.reduce((TrajectoryPoint a, TrajectoryPoint b) =>
             (a.range - targetM).abs() < (b.range - targetM).abs() ? a : b);
 
-    // hold-off angles (radians) -> reticle units
     double elevRad = 0, windRad = 0;
     if (pt != null && pt.range > 1) {
-      elevRad = pt.comeUpRad; // positive = aim higher (bullet low)
-      windRad = pt.windage / pt.range; // +right
+      elevRad = pt.comeUpRad;
+      windRad = pt.windage / pt.range;
     }
-    final elevUnits = _showMoa
-        ? U.Units.radToMoa(elevRad)
-        : U.Units.radToMil(elevRad);
-    final windUnits = _showMoa
-        ? U.Units.radToMoa(windRad)
-        : U.Units.radToMil(windRad);
+
+    // Convert hold to the reticle's native unit (MIL or MOA).
+    final reticle = _reticle;
+    final useMoa = reticle?.unit == 'MOA';
+    final elevUnits = useMoa ? U.Units.radToMoa(elevRad) : U.Units.radToMil(elevRad);
+    final windUnits = useMoa ? U.Units.radToMoa(windRad) : U.Units.radToMil(windRad);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('分划板模拟'),
         actions: [
           IconButton(
-            tooltip: _showMoa ? '切换 MIL' : '切换 MOA',
-            onPressed: () => setState(() => _showMoa = !_showMoa),
-            icon: const Icon(Icons.swap_horiz),
+            tooltip: '从分划板库选择',
+            icon: const Icon(Icons.library_books),
+            onPressed: () async {
+              final picked = await showDialog<ReticleSpec>(
+                context: context,
+                builder: (_) => ReticlePickerDialog(
+                  state: widget.state,
+                  currentId: _reticle?.id,
+                ),
+              );
+              if (picked != null) setState(() => _reticle = picked);
+            },
           ),
         ],
       ),
       body: Column(
         children: [
+          // Reticle name + focal plane info bar
+          if (reticle != null)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              color: Colors.blue.withValues(alpha: 0.08),
+              child: Text(
+                '${reticle.name} · ${reticle.manufacturer} · ${reticle.unit} · ${reticle.focalPlane}'
+                '${reticle.focalPlane == 'SFP' ? ' (@${reticle.sfpRefMag}x)' : ''}',
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          // Magnification slider (matters for SFP)
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             child: Row(
               children: [
-                const Text('分划板: '),
-                DropdownButton<ReticleType>(
-                  value: _reticle,
-                  items: const [
-                    DropdownMenuItem(
-                        value: ReticleType.crosshair, child: Text('十字线')),
-                    DropdownMenuItem(
-                        value: ReticleType.milDot, child: Text('密位点')),
-                    DropdownMenuItem(
-                        value: ReticleType.moaGrid, child: Text('MOA 网格')),
-                  ],
-                  onChanged: (v) => setState(() => _reticle = v ?? ReticleType.milDot),
+                const Text('放大倍率: ', style: TextStyle(fontSize: 12)),
+                Expanded(
+                  child: Slider(
+                    min: 1,
+                    max: 25,
+                    divisions: 24,
+                    value: _magnification.clamp(1.0, 25.0),
+                    label: '${_magnification.round()}x',
+                    onChanged: (v) => setState(() => _magnification = v),
+                  ),
                 ),
-                const SizedBox(width: 16),
-                const Text('目标距离: '),
+                Text('${_magnification.round()}x',
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                if (reticle?.focalPlane == 'FFP')
+                  const Padding(
+                    padding: EdgeInsets.only(left: 4),
+                    child: Text('(FFP)', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                  ),
+              ],
+            ),
+          ),
+          // Target distance
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: Row(
+              children: [
+                const Text('目标距离: ', style: TextStyle(fontSize: 12)),
                 Expanded(
                   child: Slider(
                     min: 25,
                     max: (widget.state.maxRangeYd).clamp(25.0, 2000.0),
-                    divisions: (((widget.state.maxRangeYd).clamp(25.0, 2000.0) - 25) / 5).round(),
+                    divisions:
+                        (((widget.state.maxRangeYd).clamp(25.0, 2000.0) - 25) / 5).round(),
                     value: _targetYd.clamp(25.0, widget.state.maxRangeYd),
                     label: '${_targetYd.toStringAsFixed(0)} yd',
                     onChanged: (v) => setState(() => _targetYd = v),
@@ -101,27 +147,29 @@ class _ReticlePageState extends State<ReticlePage> {
               ],
             ),
           ),
+          // Reticle rendering
           Expanded(
             child: Center(
               child: AspectRatio(
                 aspectRatio: 1,
                 child: Padding(
                   padding: const EdgeInsets.all(8),
-                  child: CustomPaint(
-                    painter: _ReticlePainter(
-                      type: _reticle,
-                      elevUnits: elevUnits,
-                      windUnits: windUnits,
-                      unitName: _showMoa ? 'MOA' : 'MIL',
-                      unitLabel: _showMoa ? 'MOA' : 'MIL',
-                    ),
-                  ),
+                  child: reticle == null
+                      ? const Center(child: Text('无分划板'))
+                      : CustomPaint(
+                          painter: ReticleLibraryPainter(
+                            spec: reticle,
+                            elevUnits: elevUnits,
+                            windUnits: windUnits,
+                            magnification: _magnification,
+                          ),
+                        ),
                 ),
               ),
             ),
           ),
           // readout card
-          if (pt != null)
+          if (pt != null && reticle != null)
             Padding(
               padding: const EdgeInsets.all(12),
               child: Card(
@@ -130,21 +178,28 @@ class _ReticlePageState extends State<ReticlePage> {
                   child: Column(
                     children: [
                       Text(
-                          '目标 ${_targetYd.toStringAsFixed(0)}yd  修正点',
+                          '目标 ${_targetYd.toStringAsFixed(0)}yd  修正点 (${reticle.unit})',
                           style: const TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _readout('高低', '${elevUnits.toStringAsFixed(1)} ${_showMoa ? 'MOA' : 'MIL'}',
-                              pt.comeUpRad > 0 ? '↑ 抬高' : '↓ 压低'),
-                          _readout('风向', '${windUnits.toStringAsFixed(1)} ${_showMoa ? 'MOA' : 'MIL'}',
+                          _readout('高低',
+                              '${elevUnits.toStringAsFixed(1)} ${reticle.unit}',
+                              elevRad > 0 ? '↑ 抬高' : '↓ 压低'),
+                          _readout('风向',
+                              '${windUnits.toStringAsFixed(1)} ${reticle.unit}',
                               windRad >= 0 ? '→ 向右' : '← 向左'),
-                          _readout('剩余速度',
-                              Fmt_velocity(pt.speed, sys), ''),
+                          _readout('剩余速度', Fmt_velocity(pt.speed, sys), ''),
                           _readout('飞行时间', '${pt.timeOfFlight.toStringAsFixed(2)}s', ''),
                         ],
                       ),
+                      if (reticle.notes != null) ...[
+                        const SizedBox(height: 6),
+                        Text(reticle.notes!,
+                            style: const TextStyle(fontSize: 10, color: Colors.grey),
+                            textAlign: TextAlign.center),
+                      ],
                     ],
                   ),
                 ),
@@ -155,12 +210,10 @@ class _ReticlePageState extends State<ReticlePage> {
     );
   }
 
-  String Fmt_velocity(double mps, U.UnitSystem sys) =>
-      sys == U.UnitSystem.imperial
-          ? '${(mps * 3.28084).toStringAsFixed(0)} fps'
-          : '${mps.toStringAsFixed(0)} m/s';
+  String Fmt_velocity(double mps, U.UnitSystem sys) => sys == U.UnitSystem.imperial
+      ? '${(mps * 3.28084).toStringAsFixed(0)} fps'
+      : '${mps.toStringAsFixed(0)} m/s';
 
-  /// Numeric input for the target distance (precise yards, decimals allowed).
   void _editTargetYd() {
     final ctrl = TextEditingController(text: _targetYd.toStringAsFixed(0));
     showDialog(
@@ -170,8 +223,7 @@ class _ReticlePageState extends State<ReticlePage> {
         content: TextField(
           controller: ctrl,
           autofocus: true,
-          keyboardType:
-              const TextInputType.numberWithOptions(decimal: true),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
           decoration: const InputDecoration(
             labelText: '距离 (yd)',
             suffixText: 'yd',
@@ -207,134 +259,4 @@ class _ReticlePageState extends State<ReticlePage> {
       ],
     );
   }
-}
-
-/// Paints a reticle with an overlaid hold point.
-class _ReticlePainter extends CustomPainter {
-  final ReticleType type;
-  final double elevUnits; // units to hold UP (positive)
-  final double windUnits; // units to hold RIGHT (positive)
-  final String unitName;
-  final String unitLabel;
-
-  _ReticlePainter({
-    required this.type,
-    required this.elevUnits,
-    required this.windUnits,
-    required this.unitName,
-    required this.unitLabel,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final cx = size.width / 2;
-    final cy = size.height / 2;
-    // 1 reticle unit = this many pixels. Field of view ~ 20 MIL or 30 MOA.
-    final unitPx = type == ReticleType.moaGrid
-        ? size.width / 30 // 30 MOA wide
-        : size.width / 20; // 20 MIL wide
-
-    final linePaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2
-      ..color = Colors.black87;
-    final dotPaint = Paint()..color = Colors.black87;
-    final holdPaint = Paint()
-      ..style = PaintingStyle.fill
-      ..color = Colors.red;
-
-    // main crosshair
-    canvas.drawLine(Offset(0, cy), Offset(size.width, cy), linePaint);
-    canvas.drawLine(Offset(cx, 0), Offset(cx, size.height), linePaint);
-    // thick center post
-    canvas.drawCircle(Offset(cx, cy), 2, dotPaint);
-
-    // reticle-specific tick marks / dots
-    if (type == ReticleType.milDot) {
-      for (int i = -8; i <= 8; i++) {
-        if (i == 0) continue;
-        final off = i * unitPx;
-        // vertical dots
-        canvas.drawCircle(Offset(cx, cy - off), 2.5, dotPaint);
-        canvas.drawCircle(Offset(cx, cy + off), 2.5, dotPaint);
-        // horizontal dots
-        canvas.drawCircle(Offset(cx + off, cy), 2.5, dotPaint);
-        canvas.drawCircle(Offset(cx - off, cy), 2.5, dotPaint);
-      }
-    } else if (type == ReticleType.moaGrid || type == ReticleType.crosshair) {
-      for (int i = -10; i <= 10; i++) {
-        if (i == 0) continue;
-        final off = i * unitPx;
-        // short ticks
-        canvas.drawLine(Offset(cx - 4, cy - off), Offset(cx + 4, cy - off),
-            linePaint);
-        canvas.drawLine(Offset(cx - off, cy - 4), Offset(cx - off, cy + 4),
-            linePaint);
-      }
-    }
-
-    // hold point: screen down = bullet low = aim up (positive elevUnits).
-    // On the reticle, holding UP means placing the point BELOW the target on
-    // the reticle, so the hold marker is drawn at (cx + wind, cy + elev).
-    final holdX = cx + windUnits * unitPx;
-    final holdY = cy + elevUnits * unitPx;
-    // hold cross
-    canvas.drawLine(
-        Offset(holdX - 10, holdY), Offset(holdX + 10, holdY), holdPaint);
-    canvas.drawLine(
-        Offset(holdX, holdY - 10), Offset(holdX, holdY + 10), holdPaint);
-    canvas.drawCircle(Offset(holdX, holdY), 4, holdPaint);
-    // dashed line from center to hold
-    _dashedLine(canvas, Offset(cx, cy), Offset(holdX, holdY), holdPaint);
-
-    // Numeric annotation next to the hold point: shows the exact hold in the
-    // current reticle unit (MOA/MIL), e.g. "↑6.4  →1.2". This is the "effect
-    // preview" of the MOA adjustment — the shooter sees both where to hold and
-    // the precise value.
-    final eTxt =
-        '${elevUnits >= 0 ? '↑' : '↓'}${elevUnits.abs().toStringAsFixed(1)}';
-    final wTxt =
-        '${windUnits >= 0 ? '→' : '←'}${windUnits.abs().toStringAsFixed(1)}';
-    _label(canvas, '$eTxt  $wTxt $unitLabel',
-        Offset(holdX + 12, holdY - 6),
-        color: Colors.red);
-
-    // labels
-    _label(canvas, '$unitLabel',
-        Offset(cx + 6, 12));
-    _label(canvas, '↑', Offset(cx + size.width / 2 - 14, 4),
-        color: Colors.black54);
-  }
-
-  void _dashedLine(Canvas c, Offset a, Offset b, Paint p) {
-    const dash = 6.0;
-    const gap = 4.0;
-    final d = b - a;
-    final len = d.distance;
-    if (len < 1) return;
-    final ux = d.dx / len;
-    final uy = d.dy / len;
-    double t = 0;
-    while (t < len) {
-      final e = (t + dash).clamp(0.0, len);
-      c.drawLine(Offset(a.dx + ux * t, a.dy + uy * t),
-          Offset(a.dx + ux * e, a.dy + uy * e), p);
-      t += dash + gap;
-    }
-  }
-
-  void _label(Canvas c, String text, Offset pos, {Color color = Colors.black87}) {
-    final tp = TextPainter(
-      text: TextSpan(
-          text: text, style: TextStyle(fontSize: 10, color: color)),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    tp.paint(c, pos);
-  }
-
-  @override
-  bool shouldRepaint(covariant _ReticlePainter old) =>
-      old.elevUnits != elevUnits ||
-      old.windUnits != windUnits ||
-      old.type != type;
 }

@@ -1,0 +1,2536 @@
+[
+  {
+    "id": "usmc-mildot",
+    "name": "USMC Mil-Dot",
+    "manufacturer": "Generic",
+    "unit": "MIL",
+    "fieldHalf": 8,
+    "focalPlane": "FFP",
+    "sfpRefMag": 1,
+    "lines": [
+      {
+        "x1": -8,
+        "y1": 0,
+        "x2": 8,
+        "y2": 0,
+        "width": 0.8
+      },
+      {
+        "x1": 0,
+        "y1": -8,
+        "x2": 0,
+        "y2": 8,
+        "width": 0.8
+      }
+    ],
+    "dots": [
+      {
+        "x": 0,
+        "y": -1,
+        "r": 0.2
+      },
+      {
+        "x": 0,
+        "y": 1,
+        "r": 0.2
+      },
+      {
+        "x": -1,
+        "y": 0,
+        "r": 0.2
+      },
+      {
+        "x": 1,
+        "y": 0,
+        "r": 0.2
+      },
+      {
+        "x": 0,
+        "y": -2,
+        "r": 0.2
+      },
+      {
+        "x": 0,
+        "y": 2,
+        "r": 0.2
+      },
+      {
+        "x": -2,
+        "y": 0,
+        "r": 0.2
+      },
+      {
+        "x": 2,
+        "y": 0,
+        "r": 0.2
+      },
+      {
+        "x": 0,
+        "y": -3,
+        "r": 0.2
+      },
+      {
+        "x": 0,
+        "y": 3,
+        "r": 0.2
+      },
+      {
+        "x": -3,
+        "y": 0,
+        "r": 0.2
+      },
+      {
+        "x": 3,
+        "y": 0,
+        "r": 0.2
+      },
+      {
+        "x": 0,
+        "y": -4,
+        "r": 0.2
+      },
+      {
+        "x": 0,
+        "y": 4,
+        "r": 0.2
+      },
+      {
+        "x": -4,
+        "y": 0,
+        "r": 0.2
+      },
+      {
+        "x": 4,
+        "y": 0,
+        "r": 0.2
+      },
+      {
+        "x": 0,
+        "y": -5,
+        "r": 0.2
+      },
+      {
+        "x": 0,
+        "y": 5,
+        "r": 0.2
+      },
+      {
+        "x": -5,
+        "y": 0,
+        "r": 0.2
+      },
+      {
+        "x": 5,
+        "y": 0,
+        "r": 0.2
+      },
+      {
+        "x": 0,
+        "y": -6,
+        "r": 0.2
+      },
+      {
+        "x": 0,
+        "y": 6,
+        "r": 0.2
+      },
+      {
+        "x": -6,
+        "y": 0,
+        "r": 0.2
+      },
+      {
+        "x": 6,
+        "y": 0,
+        "r": 0.2
+      },
+      {
+        "x": 0,
+        "y": -7,
+        "r": 0.2
+      },
+      {
+        "x": 0,
+        "y": 7,
+        "r": 0.2
+      },
+      {
+        "x": -7,
+        "y": 0,
+        "r": 0.2
+      },
+      {
+        "x": 7,
+        "y": 0,
+        "r": 0.2
+      },
+      {
+        "x": 0,
+        "y": -8,
+        "r": 0.2
+      },
+      {
+        "x": 0,
+        "y": 8,
+        "r": 0.2
+      },
+      {
+        "x": -8,
+        "y": 0,
+        "r": 0.2
+      },
+      {
+        "x": 8,
+        "y": 0,
+        "r": 0.2
+      }
+    ],
+    "notes": "USMC标准密位点,圆点间距1密位(实际0.85mil间距修正)"
+  },
+  {
+    "id": "army-mildot",
+    "name": "Army Mil-Dot (Round)",
+    "manufacturer": "Generic",
+    "unit": "MIL",
+    "fieldHalf": 8,
+    "focalPlane": "FFP",
+    "lines": [
+      {
+        "x1": -8,
+        "y1": 0,
+        "x2": 8,
+        "y2": 0,
+        "width": 0.8
+      },
+      {
+        "x1": 0,
+        "y1": -8,
+        "x2": 0,
+        "y2": 8,
+        "width": 0.8
+      }
+    ],
+    "dots": [
+      {
+        "x": 0,
+        "y": -1,
+        "r": 0.18
+      },
+      {
+        "x": 0,
+        "y": 1,
+        "r": 0.18
+      },
+      {
+        "x": 0,
+        "y": -2,
+        "r": 0.18
+      },
+      {
+        "x": 0,
+        "y": 2,
+        "r": 0.18
+      },
+      {
+        "x": 0,
+        "y": -3,
+        "r": 0.18
+      },
+      {
+        "x": 0,
+        "y": 3,
+        "r": 0.18
+      },
+      {
+        "x": 0,
+        "y": -4,
+        "r": 0.18
+      },
+      {
+        "x": 0,
+        "y": 4,
+        "r": 0.18
+      },
+      {
+        "x": 0,
+        "y": -5,
+        "r": 0.18
+      },
+      {
+        "x": 0,
+        "y": 5,
+        "r": 0.18
+      },
+      {
+        "x": 0,
+        "y": -6,
+        "r": 0.18
+      },
+      {
+        "x": 0,
+        "y": 6,
+        "r": 0.18
+      },
+      {
+        "x": 0,
+        "y": -7,
+        "r": 0.18
+      },
+      {
+        "x": 0,
+        "y": 7,
+        "r": 0.18
+      },
+      {
+        "x": 0,
+        "y": -8,
+        "r": 0.18
+      },
+      {
+        "x": 0,
+        "y": 8,
+        "r": 0.18
+      }
+    ],
+    "notes": "陆军圆密位点,仅垂直方向,1密位间距"
+  },
+  {
+    "id": "duplex",
+    "name": "Duplex (Leupold)",
+    "manufacturer": "Leupold",
+    "unit": "MOA",
+    "fieldHalf": 15,
+    "focalPlane": "SFP",
+    "sfpRefMag": 10,
+    "posts": [
+      {
+        "x1": -15,
+        "y1": 0,
+        "x2": -4,
+        "y2": 0,
+        "width": 4
+      },
+      {
+        "x1": 4,
+        "y1": 0,
+        "x2": 15,
+        "y2": 0,
+        "width": 4
+      },
+      {
+        "x1": 0,
+        "y1": -15,
+        "x2": 0,
+        "y2": -4,
+        "width": 4
+      },
+      {
+        "x1": 0,
+        "y1": 4,
+        "x2": 0,
+        "y2": 15,
+        "width": 4
+      }
+    ],
+    "lines": [
+      {
+        "x1": -4,
+        "y1": 0,
+        "x2": 4,
+        "y2": 0,
+        "width": 0.6
+      },
+      {
+        "x1": 0,
+        "y1": -4,
+        "x2": 0,
+        "y2": 4,
+        "width": 0.6
+      }
+    ],
+    "notes": "Leupold Duplex:粗桩+细十字,经典狩猎分划"
+  },
+  {
+    "id": "german-4",
+    "name": "German #4",
+    "manufacturer": "Generic",
+    "unit": "MOA",
+    "fieldHalf": 15,
+    "focalPlane": "SFP",
+    "sfpRefMag": 8,
+    "posts": [
+      {
+        "x1": -15,
+        "y1": 0,
+        "x2": -2,
+        "y2": 0,
+        "width": 5
+      },
+      {
+        "x1": 2,
+        "y1": 0,
+        "x2": 15,
+        "y2": 0,
+        "width": 5
+      },
+      {
+        "x1": 0,
+        "y1": 3,
+        "x2": 0,
+        "y2": 15,
+        "width": 5
+      }
+    ],
+    "lines": [
+      {
+        "x1": 0,
+        "y1": -15,
+        "x2": 0,
+        "y2": 3,
+        "width": 0.6
+      }
+    ],
+    "notes": "德国4号:三粗桩(左/右/下)+细上十字,快速近战"
+  },
+  {
+    "id": "acog-ta31",
+    "name": "ACOG TA31 Horseshoe",
+    "manufacturer": "Trijicon",
+    "unit": "MIL",
+    "fieldHalf": 9,
+    "focalPlane": "FFP",
+    "circles": [
+      {
+        "x": 0,
+        "y": 0,
+        "r": 2.5,
+        "width": 2.5
+      }
+    ],
+    "ticks": [
+      {
+        "axis": "v",
+        "pos": 2,
+        "halfLen": 1.2,
+        "width": 1.5
+      },
+      {
+        "axis": "v",
+        "pos": 4,
+        "halfLen": 1.2,
+        "width": 1.5
+      },
+      {
+        "axis": "v",
+        "pos": 6,
+        "halfLen": 1.2,
+        "width": 1.5
+      },
+      {
+        "axis": "v",
+        "pos": 8,
+        "halfLen": 1.2,
+        "width": 1.5
+      },
+      {
+        "axis": "v",
+        "pos": 10,
+        "halfLen": 1.2,
+        "width": 1.5
+      },
+      {
+        "axis": "v",
+        "pos": 12,
+        "halfLen": 1.2,
+        "width": 1.5
+      }
+    ],
+    "lines": [
+      {
+        "x1": 0,
+        "y1": 2.5,
+        "x2": 0,
+        "y2": 14,
+        "width": 0.8
+      }
+    ],
+    "notes": "Trijicon ACOG TA31:马蹄环+子弹下落补偿(BDC)刻度"
+  },
+  {
+    "id": "vortex-ebr2c",
+    "name": "Vortex EBR-2C (MIL)",
+    "manufacturer": "Vortex",
+    "unit": "MIL",
+    "fieldHalf": 10,
+    "focalPlane": "FFP",
+    "lines": [
+      {
+        "x1": -10,
+        "y1": 0,
+        "x2": 10,
+        "y2": 0,
+        "width": 0.6
+      },
+      {
+        "x1": 0,
+        "y1": -10,
+        "x2": 0,
+        "y2": 10,
+        "width": 0.6
+      }
+    ],
+    "ticks": [
+      {
+        "axis": "v",
+        "pos": 1,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "v",
+        "pos": -1,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "v",
+        "pos": 2,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "v",
+        "pos": -2,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "v",
+        "pos": 3,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "v",
+        "pos": -3,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "v",
+        "pos": 4,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "v",
+        "pos": -4,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "v",
+        "pos": 5,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "v",
+        "pos": -5,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "v",
+        "pos": 6,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "v",
+        "pos": -6,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "v",
+        "pos": 7,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "v",
+        "pos": -7,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "v",
+        "pos": 8,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "v",
+        "pos": -8,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "v",
+        "pos": 9,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "v",
+        "pos": -9,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "v",
+        "pos": 10,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "v",
+        "pos": -10,
+        "halfLen": 0.8,
+        "width": 1.0
+      },
+      {
+        "axis": "h",
+        "pos": 1,
+        "halfLen": 0.6,
+        "width": 1.0
+      },
+      {
+        "axis": "h",
+        "pos": 2,
+        "halfLen": 0.6,
+        "width": 1.0
+      },
+      {
+        "axis": "h",
+        "pos": 3,
+        "halfLen": 0.6,
+        "width": 1.0
+      },
+      {
+        "axis": "h",
+        "pos": 4,
+        "halfLen": 0.6,
+        "width": 1.0
+      },
+      {
+        "axis": "h",
+        "pos": 5,
+        "halfLen": 0.6,
+        "width": 1.0
+      },
+      {
+        "axis": "h",
+        "pos": 6,
+        "halfLen": 0.6,
+        "width": 1.0
+      },
+      {
+        "axis": "h",
+        "pos": 7,
+        "halfLen": 0.6,
+        "width": 1.0
+      },
+      {
+        "axis": "h",
+        "pos": 8,
+        "halfLen": 0.6,
+        "width": 1.0
+      },
+      {
+        "axis": "h",
+        "pos": -1,
+        "halfLen": 0.6,
+        "width": 1.0
+      },
+      {
+        "axis": "h",
+        "pos": -2,
+        "halfLen": 0.6,
+        "width": 1.0
+      },
+      {
+        "axis": "h",
+        "pos": -3,
+        "halfLen": 0.6,
+        "width": 1.0
+      },
+      {
+        "axis": "h",
+        "pos": -4,
+        "halfLen": 0.6,
+        "width": 1.0
+      },
+      {
+        "axis": "h",
+        "pos": -5,
+        "halfLen": 0.6,
+        "width": 1.0
+      },
+      {
+        "axis": "h",
+        "pos": -6,
+        "halfLen": 0.6,
+        "width": 1.0
+      },
+      {
+        "axis": "h",
+        "pos": -7,
+        "halfLen": 0.6,
+        "width": 1.0
+      },
+      {
+        "axis": "h",
+        "pos": -8,
+        "halfLen": 0.6,
+        "width": 1.0
+      }
+    ],
+    "notes": "Vortex EBR-2C:密位刻度网格,远程射击主流分划"
+  },
+  {
+    "id": "leupold-tmr",
+    "name": "Leupold TMR",
+    "manufacturer": "Leupold",
+    "unit": "MIL",
+    "fieldHalf": 10,
+    "focalPlane": "FFP",
+    "lines": [
+      {
+        "x1": -10,
+        "y1": 0,
+        "x2": 10,
+        "y2": 0,
+        "width": 0.5
+      },
+      {
+        "x1": 0,
+        "y1": -10,
+        "x2": 0,
+        "y2": 10,
+        "width": 0.5
+      }
+    ],
+    "ticks": [
+      {
+        "axis": "v",
+        "pos": 1,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -1,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 1,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -1,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 2,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -2,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 2,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -2,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 3,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -3,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 3,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -3,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 4,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -4,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 4,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -4,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 5,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -5,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 5,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -5,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 6,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -6,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 6,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -6,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 7,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -7,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 7,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -7,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 8,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -8,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 8,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -8,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 9,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -9,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 9,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -9,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 10,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -10,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 10,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -10,
+        "halfLen": 0.5,
+        "width": 0.8
+      }
+    ],
+    "notes": "Leupold战术密位(TMR):0.5密位刻度网格"
+  },
+  {
+    "id": "sb-p3f",
+    "name": "S&B P3F (Fine)",
+    "manufacturer": "Schmidt & Bender",
+    "unit": "MIL",
+    "fieldHalf": 9,
+    "focalPlane": "FFP",
+    "lines": [
+      {
+        "x1": -9,
+        "y1": 0,
+        "x2": 9,
+        "y2": 0,
+        "width": 0.4
+      },
+      {
+        "x1": 0,
+        "y1": -9,
+        "x2": 0,
+        "y2": 9,
+        "width": 0.4
+      }
+    ],
+    "dots": [
+      {
+        "x": 0,
+        "y": 1,
+        "r": 0.12
+      },
+      {
+        "x": 0,
+        "y": -1,
+        "r": 0.12
+      },
+      {
+        "x": 1,
+        "y": 0,
+        "r": 0.12
+      },
+      {
+        "x": -1,
+        "y": 0,
+        "r": 0.12
+      },
+      {
+        "x": 0,
+        "y": 2,
+        "r": 0.12
+      },
+      {
+        "x": 0,
+        "y": -2,
+        "r": 0.12
+      },
+      {
+        "x": 2,
+        "y": 0,
+        "r": 0.12
+      },
+      {
+        "x": -2,
+        "y": 0,
+        "r": 0.12
+      },
+      {
+        "x": 0,
+        "y": 3,
+        "r": 0.12
+      },
+      {
+        "x": 0,
+        "y": -3,
+        "r": 0.12
+      },
+      {
+        "x": 3,
+        "y": 0,
+        "r": 0.12
+      },
+      {
+        "x": -3,
+        "y": 0,
+        "r": 0.12
+      },
+      {
+        "x": 0,
+        "y": 4,
+        "r": 0.12
+      },
+      {
+        "x": 0,
+        "y": -4,
+        "r": 0.12
+      },
+      {
+        "x": 4,
+        "y": 0,
+        "r": 0.12
+      },
+      {
+        "x": -4,
+        "y": 0,
+        "r": 0.12
+      },
+      {
+        "x": 0,
+        "y": 5,
+        "r": 0.12
+      },
+      {
+        "x": 0,
+        "y": -5,
+        "r": 0.12
+      },
+      {
+        "x": 5,
+        "y": 0,
+        "r": 0.12
+      },
+      {
+        "x": -5,
+        "y": 0,
+        "r": 0.12
+      },
+      {
+        "x": 0,
+        "y": 6,
+        "r": 0.12
+      },
+      {
+        "x": 0,
+        "y": -6,
+        "r": 0.12
+      },
+      {
+        "x": 6,
+        "y": 0,
+        "r": 0.12
+      },
+      {
+        "x": -6,
+        "y": 0,
+        "r": 0.12
+      },
+      {
+        "x": 0,
+        "y": 7,
+        "r": 0.12
+      },
+      {
+        "x": 0,
+        "y": -7,
+        "r": 0.12
+      },
+      {
+        "x": 7,
+        "y": 0,
+        "r": 0.12
+      },
+      {
+        "x": -7,
+        "y": 0,
+        "r": 0.12
+      },
+      {
+        "x": 0,
+        "y": 8,
+        "r": 0.12
+      },
+      {
+        "x": 0,
+        "y": -8,
+        "r": 0.12
+      },
+      {
+        "x": 8,
+        "y": 0,
+        "r": 0.12
+      },
+      {
+        "x": -8,
+        "y": 0,
+        "r": 0.12
+      }
+    ],
+    "notes": "Schmidt&Bender P3F细密位点,精密远程"
+  },
+  {
+    "id": "nightforce-moar",
+    "name": "Nightforce MOAR",
+    "manufacturer": "Nightforce",
+    "unit": "MOA",
+    "fieldHalf": 16,
+    "focalPlane": "FFP",
+    "lines": [
+      {
+        "x1": -16,
+        "y1": 0,
+        "x2": 16,
+        "y2": 0,
+        "width": 0.5
+      },
+      {
+        "x1": 0,
+        "y1": -16,
+        "x2": 0,
+        "y2": 16,
+        "width": 0.5
+      }
+    ],
+    "ticks": [
+      {
+        "axis": "v",
+        "pos": 1,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -1,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 1,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -1,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 2,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -2,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 2,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -2,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 3,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -3,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 3,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -3,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 4,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -4,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 4,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -4,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 5,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -5,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 5,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -5,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 6,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -6,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 6,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -6,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 7,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -7,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 7,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -7,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 8,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -8,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 8,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -8,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 9,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -9,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 9,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -9,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 10,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -10,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 10,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -10,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 11,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -11,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 11,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -11,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 12,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -12,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 12,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -12,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 13,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -13,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 13,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -13,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 14,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -14,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 14,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -14,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 15,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": -15,
+        "halfLen": 1.0,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 15,
+        "halfLen": 0.7,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -15,
+        "halfLen": 0.7,
+        "width": 0.8
+      }
+    ],
+    "notes": "Nightforce MOAR:1 MOA刻度网格,远程精准"
+  },
+  {
+    "id": "horus-h58",
+    "name": "Horus H58 (Grid)",
+    "manufacturer": "Horus Vision",
+    "unit": "MIL",
+    "fieldHalf": 10,
+    "focalPlane": "FFP",
+    "lines": [
+      {
+        "x1": -10,
+        "y1": -10,
+        "x2": 10,
+        "y2": -10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": -10,
+        "x2": -10,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": -9,
+        "x2": 10,
+        "y2": -9,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -9,
+        "y1": -10,
+        "x2": -9,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": -8,
+        "x2": 10,
+        "y2": -8,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -8,
+        "y1": -10,
+        "x2": -8,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": -7,
+        "x2": 10,
+        "y2": -7,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -7,
+        "y1": -10,
+        "x2": -7,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": -6,
+        "x2": 10,
+        "y2": -6,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -6,
+        "y1": -10,
+        "x2": -6,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": -5,
+        "x2": 10,
+        "y2": -5,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -5,
+        "y1": -10,
+        "x2": -5,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": -4,
+        "x2": 10,
+        "y2": -4,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -4,
+        "y1": -10,
+        "x2": -4,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": -3,
+        "x2": 10,
+        "y2": -3,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -3,
+        "y1": -10,
+        "x2": -3,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": -2,
+        "x2": 10,
+        "y2": -2,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -2,
+        "y1": -10,
+        "x2": -2,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": -1,
+        "x2": 10,
+        "y2": -1,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -1,
+        "y1": -10,
+        "x2": -1,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": 0,
+        "x2": 10,
+        "y2": 0,
+        "width": 0.3,
+        "dashed": false
+      },
+      {
+        "x1": 0,
+        "y1": -10,
+        "x2": 0,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": false
+      },
+      {
+        "x1": -10,
+        "y1": 1,
+        "x2": 10,
+        "y2": 1,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": 1,
+        "y1": -10,
+        "x2": 1,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": 2,
+        "x2": 10,
+        "y2": 2,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": 2,
+        "y1": -10,
+        "x2": 2,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": 3,
+        "x2": 10,
+        "y2": 3,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": 3,
+        "y1": -10,
+        "x2": 3,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": 4,
+        "x2": 10,
+        "y2": 4,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": 4,
+        "y1": -10,
+        "x2": 4,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": 5,
+        "x2": 10,
+        "y2": 5,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": 5,
+        "y1": -10,
+        "x2": 5,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": 6,
+        "x2": 10,
+        "y2": 6,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": 6,
+        "y1": -10,
+        "x2": 6,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": 7,
+        "x2": 10,
+        "y2": 7,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": 7,
+        "y1": -10,
+        "x2": 7,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": 8,
+        "x2": 10,
+        "y2": 8,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": 8,
+        "y1": -10,
+        "x2": 8,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": 9,
+        "x2": 10,
+        "y2": 9,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": 9,
+        "y1": -10,
+        "x2": 9,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": 10,
+        "x2": 10,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": 10,
+        "y1": -10,
+        "x2": 10,
+        "y2": 10,
+        "width": 0.3,
+        "dashed": true
+      },
+      {
+        "x1": -10,
+        "y1": 0,
+        "x2": 10,
+        "y2": 0,
+        "width": 0.8,
+        "dashed": false
+      },
+      {
+        "x1": 0,
+        "y1": -10,
+        "x2": 0,
+        "y2": 10,
+        "width": 0.8,
+        "dashed": false
+      }
+    ],
+    "notes": "Horus H58:1密位网格,超远程无需数格子直接读取"
+  },
+  {
+    "id": "nikon-bdc",
+    "name": "Nikon BDC",
+    "manufacturer": "Nikon",
+    "unit": "MOA",
+    "fieldHalf": 16,
+    "focalPlane": "SFP",
+    "sfpRefMag": 8,
+    "circles": [
+      {
+        "x": 0,
+        "y": 3,
+        "r": 1.2,
+        "width": 1.5
+      },
+      {
+        "x": 0,
+        "y": 6,
+        "r": 1.2,
+        "width": 1.5
+      },
+      {
+        "x": 0,
+        "y": 9,
+        "r": 1.2,
+        "width": 1.5
+      },
+      {
+        "x": 0,
+        "y": 12,
+        "r": 1.2,
+        "width": 1.5
+      },
+      {
+        "x": 0,
+        "y": 15,
+        "r": 1.2,
+        "width": 1.5
+      }
+    ],
+    "lines": [
+      {
+        "x1": -16,
+        "y1": 0,
+        "x2": 16,
+        "y2": 0,
+        "width": 0.6
+      },
+      {
+        "x1": 0,
+        "y1": -16,
+        "x2": 0,
+        "y2": 16,
+        "width": 0.6
+      }
+    ],
+    "notes": "Nikon BDC:圆形子弹下落标记,对应不同射程"
+  },
+  {
+    "id": "pso-1",
+    "name": "PSO-1 (Dragunov)",
+    "manufacturer": "RPK/Zenit",
+    "unit": "MIL",
+    "fieldHalf": 9,
+    "focalPlane": "FFP",
+    "lines": [
+      {
+        "x1": -9,
+        "y1": 0,
+        "x2": 9,
+        "y2": 0,
+        "width": 0.6
+      },
+      {
+        "x1": -1,
+        "y1": -1,
+        "x2": 1,
+        "y2": 1,
+        "width": 1.5
+      },
+      {
+        "x1": -3,
+        "y1": 5,
+        "x2": 3,
+        "y2": 5,
+        "width": 1.0
+      },
+      {
+        "x1": -3,
+        "y1": 7,
+        "x2": 3,
+        "y2": 7,
+        "width": 1.0
+      },
+      {
+        "x1": -3,
+        "y1": 5,
+        "x2": -3,
+        "y2": 7,
+        "width": 1.0
+      },
+      {
+        "x1": 3,
+        "y1": 5,
+        "x2": 3,
+        "y2": 7,
+        "width": 1.0
+      }
+    ],
+    "ticks": [
+      {
+        "axis": "v",
+        "pos": 2,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 4,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 6,
+        "halfLen": 0.5,
+        "width": 0.8
+      },
+      {
+        "axis": "v",
+        "pos": 8,
+        "halfLen": 0.5,
+        "width": 0.8
+      }
+    ],
+    "notes": "PSO-1:SVD狙击镜,V形瞄准点+测距框+刻度"
+  },
+  {
+    "id": "elcan-cqb",
+    "name": "ELCAN Specter CQB",
+    "manufacturer": "Armament Tech",
+    "unit": "MIL",
+    "fieldHalf": 9,
+    "focalPlane": "FFP",
+    "circles": [
+      {
+        "x": 0,
+        "y": 0,
+        "r": 3,
+        "width": 1.5
+      }
+    ],
+    "lines": [
+      {
+        "x1": -2,
+        "y1": -2,
+        "x2": 0,
+        "y2": 0,
+        "width": 2.0
+      },
+      {
+        "x1": 2,
+        "y1": -2,
+        "x2": 0,
+        "y2": 0,
+        "width": 2.0
+      },
+      {
+        "x1": -1,
+        "y1": 1,
+        "x2": 1,
+        "y2": 1,
+        "width": 2.0
+      },
+      {
+        "x1": 0,
+        "y1": 0,
+        "x2": 0,
+        "y2": 6,
+        "width": 0.8
+      }
+    ],
+    "notes": "ELCAN SpecterDR CQB:圆环+V形快速瞄准"
+  },
+  {
+    "id": "ipsc",
+    "name": "IPSC Target",
+    "manufacturer": "Generic",
+    "unit": "MOA",
+    "fieldHalf": 12,
+    "focalPlane": "SFP",
+    "sfpRefMag": 12,
+    "circles": [
+      {
+        "x": 0,
+        "y": 0,
+        "r": 2,
+        "width": 1.0
+      }
+    ],
+    "lines": [
+      {
+        "x1": -12,
+        "y1": 0,
+        "x2": 12,
+        "y2": 0,
+        "width": 0.5
+      },
+      {
+        "x1": 0,
+        "y1": -12,
+        "x2": 0,
+        "y2": 12,
+        "width": 0.5
+      }
+    ],
+    "notes": "IPSC竞技:中心圆+十字,实用射击"
+  },
+  {
+    "id": "kahles-skmr3",
+    "name": "Kahles SKMR3",
+    "manufacturer": "Kahles",
+    "unit": "MIL",
+    "fieldHalf": 10,
+    "focalPlane": "FFP",
+    "lines": [
+      {
+        "x1": -10,
+        "y1": 0,
+        "x2": 10,
+        "y2": 0,
+        "width": 0.5
+      },
+      {
+        "x1": 0,
+        "y1": -10,
+        "x2": 0,
+        "y2": 10,
+        "width": 0.5
+      }
+    ],
+    "ticks": [
+      {
+        "axis": "v",
+        "pos": 1,
+        "halfLen": 0.5,
+        "width": 0.9
+      },
+      {
+        "axis": "v",
+        "pos": -1,
+        "halfLen": 0.5,
+        "width": 0.9
+      },
+      {
+        "axis": "v",
+        "pos": 2,
+        "halfLen": 1.0,
+        "width": 0.9
+      },
+      {
+        "axis": "v",
+        "pos": -2,
+        "halfLen": 1.0,
+        "width": 0.9
+      },
+      {
+        "axis": "v",
+        "pos": 3,
+        "halfLen": 0.5,
+        "width": 0.9
+      },
+      {
+        "axis": "v",
+        "pos": -3,
+        "halfLen": 0.5,
+        "width": 0.9
+      },
+      {
+        "axis": "v",
+        "pos": 4,
+        "halfLen": 1.0,
+        "width": 0.9
+      },
+      {
+        "axis": "v",
+        "pos": -4,
+        "halfLen": 1.0,
+        "width": 0.9
+      },
+      {
+        "axis": "v",
+        "pos": 5,
+        "halfLen": 0.5,
+        "width": 0.9
+      },
+      {
+        "axis": "v",
+        "pos": -5,
+        "halfLen": 0.5,
+        "width": 0.9
+      },
+      {
+        "axis": "v",
+        "pos": 6,
+        "halfLen": 1.0,
+        "width": 0.9
+      },
+      {
+        "axis": "v",
+        "pos": -6,
+        "halfLen": 1.0,
+        "width": 0.9
+      },
+      {
+        "axis": "v",
+        "pos": 7,
+        "halfLen": 0.5,
+        "width": 0.9
+      },
+      {
+        "axis": "v",
+        "pos": -7,
+        "halfLen": 0.5,
+        "width": 0.9
+      },
+      {
+        "axis": "v",
+        "pos": 8,
+        "halfLen": 1.0,
+        "width": 0.9
+      },
+      {
+        "axis": "v",
+        "pos": -8,
+        "halfLen": 1.0,
+        "width": 0.9
+      },
+      {
+        "axis": "v",
+        "pos": 9,
+        "halfLen": 0.5,
+        "width": 0.9
+      },
+      {
+        "axis": "v",
+        "pos": -9,
+        "halfLen": 0.5,
+        "width": 0.9
+      },
+      {
+        "axis": "v",
+        "pos": 10,
+        "halfLen": 1.0,
+        "width": 0.9
+      },
+      {
+        "axis": "v",
+        "pos": -10,
+        "halfLen": 1.0,
+        "width": 0.9
+      },
+      {
+        "axis": "h",
+        "pos": 1,
+        "halfLen": 0.6,
+        "width": 0.9
+      },
+      {
+        "axis": "h",
+        "pos": -1,
+        "halfLen": 0.6,
+        "width": 0.9
+      },
+      {
+        "axis": "h",
+        "pos": 2,
+        "halfLen": 0.6,
+        "width": 0.9
+      },
+      {
+        "axis": "h",
+        "pos": -2,
+        "halfLen": 0.6,
+        "width": 0.9
+      },
+      {
+        "axis": "h",
+        "pos": 3,
+        "halfLen": 0.6,
+        "width": 0.9
+      },
+      {
+        "axis": "h",
+        "pos": -3,
+        "halfLen": 0.6,
+        "width": 0.9
+      },
+      {
+        "axis": "h",
+        "pos": 4,
+        "halfLen": 0.6,
+        "width": 0.9
+      },
+      {
+        "axis": "h",
+        "pos": -4,
+        "halfLen": 0.6,
+        "width": 0.9
+      },
+      {
+        "axis": "h",
+        "pos": 5,
+        "halfLen": 0.6,
+        "width": 0.9
+      },
+      {
+        "axis": "h",
+        "pos": -5,
+        "halfLen": 0.6,
+        "width": 0.9
+      }
+    ],
+    "notes": "Kahles SKMR3:现代远程竞技分划,2密位主刻度+1密位副刻度"
+  },
+  {
+    "id": "steiner-msr",
+    "name": "Steiner MSR",
+    "manufacturer": "Steiner",
+    "unit": "MIL",
+    "fieldHalf": 9,
+    "focalPlane": "FFP",
+    "lines": [
+      {
+        "x1": -9,
+        "y1": 0,
+        "x2": 9,
+        "y2": 0,
+        "width": 0.5
+      },
+      {
+        "x1": 0,
+        "y1": -9,
+        "x2": 0,
+        "y2": 9,
+        "width": 0.5
+      }
+    ],
+    "dots": [
+      {
+        "x": 0,
+        "y": 1,
+        "r": 0.15
+      },
+      {
+        "x": 0,
+        "y": 2,
+        "r": 0.15
+      },
+      {
+        "x": 0,
+        "y": 3,
+        "r": 0.15
+      },
+      {
+        "x": 0,
+        "y": 4,
+        "r": 0.15
+      },
+      {
+        "x": 0,
+        "y": 5,
+        "r": 0.15
+      },
+      {
+        "x": 0,
+        "y": 6,
+        "r": 0.15
+      },
+      {
+        "x": 0,
+        "y": 7,
+        "r": 0.15
+      },
+      {
+        "x": 0,
+        "y": 8,
+        "r": 0.15
+      },
+      {
+        "x": 0,
+        "y": -1,
+        "r": 0.15
+      },
+      {
+        "x": 0,
+        "y": -2,
+        "r": 0.15
+      },
+      {
+        "x": 0,
+        "y": -3,
+        "r": 0.15
+      },
+      {
+        "x": 0,
+        "y": -4,
+        "r": 0.15
+      },
+      {
+        "x": 0,
+        "y": -5,
+        "r": 0.15
+      },
+      {
+        "x": 0,
+        "y": -6,
+        "r": 0.15
+      },
+      {
+        "x": 0,
+        "y": -7,
+        "r": 0.15
+      },
+      {
+        "x": 0,
+        "y": -8,
+        "r": 0.15
+      }
+    ],
+    "ticks": [
+      {
+        "axis": "h",
+        "pos": 1,
+        "halfLen": 0.4,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 2,
+        "halfLen": 0.4,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 3,
+        "halfLen": 0.4,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 4,
+        "halfLen": 0.4,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 5,
+        "halfLen": 0.4,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 6,
+        "halfLen": 0.4,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 7,
+        "halfLen": 0.4,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": 8,
+        "halfLen": 0.4,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -1,
+        "halfLen": 0.4,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -2,
+        "halfLen": 0.4,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -3,
+        "halfLen": 0.4,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -4,
+        "halfLen": 0.4,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -5,
+        "halfLen": 0.4,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -6,
+        "halfLen": 0.4,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -7,
+        "halfLen": 0.4,
+        "width": 0.8
+      },
+      {
+        "axis": "h",
+        "pos": -8,
+        "halfLen": 0.4,
+        "width": 0.8
+      }
+    ],
+    "notes": "Steiner MSR:垂直密位点+水平刻度"
+  }
+]

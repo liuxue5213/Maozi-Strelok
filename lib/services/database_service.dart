@@ -4,6 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/firearm.dart';
+import '../models/reticle.dart';
 
 /// Loads built-in data from assets and merges user-defined (custom) records
 /// stored in SharedPreferences. Provides unified query APIs.
@@ -20,6 +21,7 @@ class DatabaseService {
   final List<Bullet> _bullets = [];
   final List<Cartridge> _cartridges = [];
   final List<Firearm> _firearms = [];
+  final List<ReticleSpec> _reticles = [];
   final Set<String> _favorites = {};
   /// Per-firearm barrel-life tracking: firearmId -> {rounds, lastCleanRounds, expectedLife}.
   final Map<String, Map<String, int>> _barrelLife = {};
@@ -27,7 +29,12 @@ class DatabaseService {
   List<Bullet> get bullets => List.unmodifiable(_bullets);
   List<Cartridge> get cartridges => List.unmodifiable(_cartridges);
   List<Firearm> get firearms => List.unmodifiable(_firearms);
+  List<ReticleSpec> get reticles => List.unmodifiable(_reticles);
   bool get isLoaded => _firearms.isNotEmpty;
+
+  /// Look up a reticle by id.
+  ReticleSpec? reticle(String id) =>
+      _reticles.where((r) => r.id == id).firstOrNull;
 
   /// Load built-in + user data. Call once at app start.
   Future<void> load() async {
@@ -46,6 +53,12 @@ class DatabaseService {
       ..clear()
       ..addAll((jsonDecode(fJson) as List)
           .map((e) => Firearm.fromJson(e as Map<String, dynamic>)));
+    // Reticle library (real-world scope reticles).
+    final rJson = await rootBundle.loadString('assets/data/reticles.json');
+    _reticles
+      ..clear()
+      ..addAll((jsonDecode(rJson) as List)
+          .map((e) => ReticleSpec.fromJson(e as Map<String, dynamic>)));
 
     final prefs = await SharedPreferences.getInstance();
     _bullets.addAll(_loadUser<Bullet>(prefs, _kBullets, Bullet.fromJson));

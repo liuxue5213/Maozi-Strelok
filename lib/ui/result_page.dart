@@ -12,6 +12,7 @@ import '../services/dope_card.dart';
 import 'app_state.dart';
 import 'cartridge_picker_dialog.dart';
 import 'format.dart';
+import 'hud_page.dart';
 import 'reticle_page.dart';
 
 class ResultPage extends StatefulWidget {
@@ -328,6 +329,16 @@ class _ResultPageState extends State<ResultPage> {
               ),
             ),
             icon: const Icon(Icons.center_focus_strong),
+          ),
+          IconButton(
+            tooltip: 'HUD (单发大数字显示)',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => HudPage(state: widget.state, traj: traj),
+              ),
+            ),
+            icon: const Icon(Icons.visibility),
           ),
           IconButton(
             tooltip: '导出 DOPE 卡',
