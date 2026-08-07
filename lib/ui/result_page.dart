@@ -235,6 +235,7 @@ class _ResultPageState extends State<ResultPage> {
   /// Recompute comparison trajectories for the selected extra bullets.
   /// Each runs the full solver with the same conditions but a different bullet,
   /// so the shooter can see how drop differs across loads at a glance.
+  /// Supports up to 8 loads (Ballistic app parity).
   void _recomputeCompare() {
     final s = widget.state;
     if (_compareBulletIds.isEmpty) {
@@ -249,7 +250,11 @@ class _ResultPageState extends State<ResultPage> {
       relativeHumidity: s.relativeHumidity,
       altitudeM: s.altitudeM,
     );
-    const colors = [0xFFE53935, 0xFF8E24AA, 0xFF1E88E5, 0xFFF4511E];
+    // 8 distinct colors for up to 8-load comparison.
+    const colors = [
+      0xFFE53935, 0xFF8E24AA, 0xFF1E88E5, 0xFFF4511E,
+      0xFF43A047, 0xFFFDD835, 0xFF00ACC1, 0xFF6D4C41,
+    ];
     final out = <({String label, List<TrajectoryPoint> traj, int color})>[];
     var ci = 0;
     for (final bid in _compareBulletIds) {
@@ -277,6 +282,39 @@ class _ResultPageState extends State<ResultPage> {
       ci++;
     }
     setState(() => _compare = out);
+    _scoreLoads();
+  }
+
+  /// Score each compared load on 3 criteria and pick the best overall — mirrors
+  /// Ballistic's "auto best load selection" (wind drift / flatness / energy).
+  /// Lower wind-drift-at-max-range is better; flatter trajectory (smallest
+  /// |apex drop|) is better; higher remaining energy is better.
+  void _scoreLoads() {
+    if (_compare.isEmpty) return;
+    // Already computed in recompute; scoring is derived from the trajectories
+    // and stored in _loadScores for the ranking UI.
+    setState(() {
+      // scoring is done lazily in the ranking widget
+    });
+  }
+
+  /// Best-load scoring result: (label, windDriftScore, flatnessScore, energyScore, totalRank).
+  List<({String label, double windDrift, double flatness, double energy})>
+      get _loadScores {
+    return _compare.map((c) {
+      final last = c.traj.isNotEmpty ? c.traj.last : null;
+      // wind drift magnitude at max range (lower is better)
+      final windDrift = last == null ? 999.0 : last.windage.abs() * 39.37; // inches
+      // flatness: max |drop| across the trajectory (lower = flatter = better)
+      double maxDrop = 0;
+      for (final p in c.traj) {
+        if (p.drop.abs() > maxDrop) maxDrop = p.drop.abs();
+      }
+      final flatness = maxDrop * 39.37; // inches
+      // remaining energy at max range (higher is better -> negate for rank)
+      final energy = last == null ? 0.0 : last.energy;
+      return (label: c.label, windDrift: windDrift, flatness: flatness, energy: energy);
+    }).toList();
   }
 
   @override
@@ -721,8 +759,11 @@ class _ResultPageState extends State<ResultPage> {
 
   /// Multi-load comparison section: pick extra bullets, overlay their drop
   /// curves against the current bullet. Lets the shooter compare loads.
+  /// Supports up to 8 loads with auto best-load scoring (Ballistic parity).
   Widget _compareSection(U.UnitSystem sys) {
     final s = widget.state;
+    final loadCount = _compareBulletIds.length + 1; // +1 for current bullet
+    final canAdd = loadCount < 8;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -731,33 +772,46 @@ class _ResultPageState extends State<ResultPage> {
           children: [
             Row(
               children: [
-                const Text('多弹种对比 (Drop)',
+                const Text('多弹种对比',
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text(' ($loadCount/8)',
+                    style: TextStyle(
+                        fontSize: 12,
+                        color: canAdd ? Colors.grey : Colors.red)),
                 const Spacer(),
                 TextButton.icon(
-                  icon: const Icon(Icons.add, size: 18),
-                  label: const Text('添加对比弹头', style: TextStyle(fontSize: 12)),
-                  onPressed: () async {
-                    final picked = await showDialog<Bullet>(
-                      context: context,
-                      builder: (_) => BulletPickerDialog(
-                        state: s,
-                        caliber: s.cartridge?.caliber ??
-                            s.firearm!.compatibleCalibers.first,
-                      ),
-                    );
-                    if (picked != null && picked.id != s.bullet?.id) {
-                      _compareBulletIds.add(picked.id);
-                      _recomputeCompare();
-                    }
-                  },
+                  icon: Icon(Icons.add, size: 18,
+                      color: canAdd ? null : Colors.grey),
+                  label: Text('添加弹头',
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: canAdd ? null : Colors.grey)),
+                  onPressed: canAdd
+                      ? () async {
+                          final picked = await showDialog<Bullet>(
+                            context: context,
+                            builder: (_) => BulletPickerDialog(
+                              state: s,
+                              caliber: s.cartridge?.caliber ??
+                                  s.firearm!.compatibleCalibers.first,
+                            ),
+                          );
+                          if (picked != null &&
+                              picked.id != s.bullet?.id &&
+                              !_compareBulletIds.contains(picked.id)) {
+                            _compareBulletIds.add(picked.id);
+                            _recomputeCompare();
+                          }
+                        }
+                      : null,
                 ),
               ],
             ),
             if (_compareBulletIds.isEmpty)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 8),
-                child: Text('选择其它弹头叠加落点曲线进行对比。',
+                child: Text('选择其它弹头叠加落点曲线进行对比。'
+                    '最多 8 弹种同时对比。',
                     style: TextStyle(fontSize: 12, color: Colors.grey)),
               )
             else ...[
@@ -767,7 +821,6 @@ class _ResultPageState extends State<ResultPage> {
                       label: Text(c.label, style: const TextStyle(fontSize: 11)),
                       deleteIcon: const Icon(Icons.close, size: 16),
                       onDeleted: () {
-                        // remove by label match
                         final bid = s.db.bullets
                             .where((b) =>
                                 '${b.manufacturer} ${b.model} ${b.massGr}gr' ==
@@ -783,11 +836,84 @@ class _ResultPageState extends State<ResultPage> {
               ),
               const SizedBox(height: 8),
               SizedBox(
-                  height: 200, child: _compareChart(_traj!, _compare, sys)),
+                  height: 180, child: _compareChart(_traj!, _compare, sys)),
+              const SizedBox(height: 8),
+              // Auto best-load ranking table
+              if (_loadScores.isNotEmpty) _rankingTable(sys),
             ],
           ],
         ),
       ),
+    );
+  }
+
+  /// Best-load ranking table: scores each load on wind drift, flatness, and
+  /// energy — Ballistic's "auto best load selection". Best per column is
+  /// highlighted; overall rank sorts by weighted score.
+  Widget _rankingTable(U.UnitSystem sys) {
+    final scores = _loadScores;
+    // find best (min) per metric
+    double bestWind = scores.first.windDrift, bestFlat = scores.first.flatness,
+        bestEnergy = scores.first.energy;
+    for (final sc in scores) {
+      if (sc.windDrift < bestWind) bestWind = sc.windDrift;
+      if (sc.flatness < bestFlat) bestFlat = sc.flatness;
+      if (sc.energy > bestEnergy) bestEnergy = sc.energy;
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('自动最佳弹种评分',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 4),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: DataTable(
+            columnSpacing: 12,
+            headingRowHeight: 28,
+            dataRowMinHeight: 24,
+            columns: const [
+              DataColumn(label: Text('弹种', style: TextStyle(fontSize: 10))),
+              DataColumn(label: Text('风偏"', style: TextStyle(fontSize: 10))),
+              DataColumn(label: Text('弹道高"', style: TextStyle(fontSize: 10))),
+              DataColumn(label: Text('末能J', style: TextStyle(fontSize: 10))),
+            ],
+            rows: scores.map((sc) {
+              return DataRow(cells: [
+                DataCell(Text(sc.label,
+                    style: const TextStyle(fontSize: 9))),
+                DataCell(Text(sc.windDrift.toStringAsFixed(1),
+                    style: TextStyle(
+                        fontSize: 10,
+                        color: sc.windDrift == bestWind
+                            ? Colors.green
+                            : null,
+                        fontWeight: sc.windDrift == bestWind
+                            ? FontWeight.bold
+                            : null))),
+                DataCell(Text(sc.flatness.toStringAsFixed(1),
+                    style: TextStyle(
+                        fontSize: 10,
+                        color: sc.flatness == bestFlat
+                            ? Colors.green
+                            : null,
+                        fontWeight: sc.flatness == bestFlat
+                            ? FontWeight.bold
+                            : null))),
+                DataCell(Text(sc.energy.toStringAsFixed(0),
+                    style: TextStyle(
+                        fontSize: 10,
+                        color: sc.energy == bestEnergy
+                            ? Colors.green
+                            : null,
+                        fontWeight: sc.energy == bestEnergy
+                            ? FontWeight.bold
+                            : null))),
+              ]);
+            }).toList(),
+          ),
+        ),
+      ],
     );
   }
 

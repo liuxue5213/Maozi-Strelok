@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../physics/units.dart' as U;
 import 'app_state.dart';
 
-/// Multi-zone wind editor. Lets the shooter define a downrange wind profile:
-/// a list of segments, each with its own speed and direction (e.g. headwind at
-/// the firing point, crosswind over the valley, different wind near the
-/// target). Mirrors the "Wind Profile Analysis" / multi-wind features of
-/// Applied Ballistics and JBM.
+/// Advanced Wind Kit — up to 8 user-positioned downrange wind zones, reorderable
+/// by drag, with per-zone speed/direction editing. Mirrors Ballistic app's
+/// "Advanced Wind Kit" feature (their standout differentiator). Each zone covers
+/// a downrange segment [fromYd, toYd]; the solver picks the active zone by the
+/// bullet's current downrange position during RK4 integration.
 class WindZonesPage extends StatefulWidget {
   final AppState state;
   const WindZonesPage({super.key, required this.state});
@@ -15,200 +16,230 @@ class WindZonesPage extends StatefulWidget {
   State<WindZonesPage> createState() => _WindZonesPageState();
 }
 
+const int kMaxWindZones = 8;
+
 class _WindZonesPageState extends State<WindZonesPage> {
-  /// One controller bundle per zone row, so editing is stable (no cursor jump).
-  final List<_ZoneControllers> _ctrls = [];
+  late List<WindZoneInput> _zones;
 
   @override
   void initState() {
     super.initState();
-    for (final z in widget.state.windZones) {
-      _ctrls.add(_ZoneControllers.from(z));
-    }
-  }
-
-  @override
-  void dispose() {
-    for (final c in _ctrls) {
-      c.dispose();
-    }
-    super.dispose();
+    _zones = List.of(widget.state.windZones);
+    if (_zones.isEmpty) _addZone(); // start with one starter zone
   }
 
   void _addZone() {
+    if (_zones.length >= kMaxWindZones) return;
     setState(() {
-      final lastTo = _ctrls.isEmpty ? '0' : _ctrls.last.to.text;
-      final baseTo = (double.tryParse(lastTo) ?? 0);
-      final c = _ZoneControllers();
-      c.from.text = lastTo;
-      c.to.text = (baseTo + 300).toStringAsFixed(0);
-      c.speed.text = '5';
-      c.dir.text = '90';
-      _ctrls.add(c);
+      final lastTo = _zones.isEmpty ? 100.0 : _zones.last.toYd;
+      _zones.add(WindZoneInput(
+        fromYd: lastTo,
+        toYd: lastTo + 200,
+        speedMph: 5,
+        dirDeg: 90,
+      ));
     });
   }
 
-  void _removeZone(int i) {
-    setState(() {
-      _ctrls[i].dispose();
-      _ctrls.removeAt(i);
-    });
-  }
+  void _removeZone(int i) => setState(() => _zones.removeAt(i));
 
   void _commit() {
-    widget.state.windZones = List.unmodifiable(
-      _ctrls.map((c) => WindZoneInput(
-            fromYd: double.tryParse(c.from.text) ?? 0,
-            toYd: double.tryParse(c.to.text) ?? 99999,
-            speedMph: double.tryParse(c.speed.text) ?? 0,
-            dirDeg: double.tryParse(c.dir.text) ?? 0,
-          )),
-    );
+    widget.state.windZones = List.unmodifiable(_zones);
     widget.state.persistEnvAndShooting();
     ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('已保存 ${_ctrls.length} 个风段')));
+        SnackBar(content: Text('已保存 ${_zones.length} 个风段')));
   }
 
   void _clear() {
-    setState(() {
-      for (final c in _ctrls) {
-        c.dispose();
-      }
-      _ctrls.clear();
-    });
+    setState(() => _zones = []);
     widget.state.windZones = const [];
     widget.state.persistEnvAndShooting();
   }
 
   @override
   Widget build(BuildContext context) {
+    final canAdd = _zones.length < kMaxWindZones;
     return Scaffold(
-      appBar: AppBar(title: const Text('多段风 (Wind Zones)')),
-      body: ListView(
-        padding: const EdgeInsets.all(12),
+      appBar: AppBar(
+        title: Text('多段风 (${_zones.length}/$kMaxWindZones)'),
+        actions: [
+          IconButton(
+            tooltip: '添加风段',
+            icon: Icon(Icons.add_circle_outline,
+                color: canAdd ? null : Colors.grey),
+            onPressed: canAdd ? _addZone : null,
+          ),
+          if (_zones.isNotEmpty)
+            IconButton(
+              tooltip: '清空',
+              icon: const Icon(Icons.delete_outline),
+              onPressed: _clear,
+            ),
+        ],
+      ),
+      body: Column(
         children: [
           const Card(
             child: ListTile(
-              leading: Icon(Icons.info_outline),
-              title: Text('多段风'),
-              subtitle: Text('按射程分段定义不同风速/风向。真实场景中射手位置、'
-                  '弹道中段、目标位置的风经常不同。定义后将覆盖单一风设置。'),
+              leading: Icon(Icons.air, color: Colors.blue),
+              title: Text('Advanced Wind Kit'),
+              subtitle: Text('沿射程分段设置风况。拖动右侧 ⋮⋮ 可调整优先级。'
+                  '最多 8 段,覆盖弹道各段的风速/风向。'),
             ),
           ),
-          const SizedBox(height: 8),
-          ..._ctrls.asMap().entries.map((e) {
-            final i = e.key;
-            final c = e.value;
-            return Card(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Text('段 ${i + 1}',
-                            style:
-                                const TextStyle(fontWeight: FontWeight.bold)),
-                        const Spacer(),
-                        IconButton(
-                          icon: const Icon(Icons.remove_circle_outline,
-                              size: 20),
-                          onPressed: () => _removeZone(i),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                            child: _field(c.from, '起点 yd')),
-                        const SizedBox(width: 8),
-                        Expanded(
-                            child: _field(c.to, '终点 yd')),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                            child: _field(c.speed, '风速 mph')),
-                        const SizedBox(width: 8),
-                        Expanded(
-                            child: _field(c.dir, '风向 °')),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              TextButton.icon(
-                icon: const Icon(Icons.add),
-                label: const Text('添加风段'),
-                onPressed: _addZone,
-              ),
-              const Spacer(),
-              if (_ctrls.isNotEmpty)
-                TextButton(
-                  onPressed: _clear,
-                  child: const Text('清空'),
-                ),
-            ],
+          const SizedBox(height: 4),
+          Expanded(
+            child: _zones.isEmpty
+                ? const Center(child: Text('无风段 — 使用上方 + 添加'))
+                : ReorderableListView.builder(
+                    padding: const EdgeInsets.all(8),
+                    itemCount: _zones.length,
+                    onReorder: (oldI, newI) => setState(() {
+                      if (newI > oldI) newI -= 1;
+                      final item = _zones.removeAt(oldI);
+                      _zones.insert(newI, item);
+                    }),
+                    itemBuilder: (ctx, i) {
+                      final z = _zones[i];
+                      return _zoneCard(i, z, Key('$i'));
+                    },
+                  ),
           ),
-          const SizedBox(height: 8),
-          FilledButton.icon(
-            icon: const Icon(Icons.check),
-            label: const Text('保存并应用'),
-            onPressed: _commit,
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.save),
+                    label: const Text('保存并应用'),
+                    onPressed: _commit,
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
-          Text(
-              _ctrls.isEmpty
-                  ? '当前: 使用单一风 (在计算页设置)'
-                  : '当前: ${_ctrls.length} 段风 (保存后生效)',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600])),
         ],
       ),
     );
   }
 
-  Widget _field(TextEditingController c, String label) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: TextField(
-        controller: c,
-        decoration: InputDecoration(
-            labelText: label, isDense: true, border: const OutlineInputBorder()),
-        keyboardType:
-            const TextInputType.numberWithOptions(decimal: true, signed: true),
+  Widget _zoneCard(int i, WindZoneInput z, Key key) {
+    return Card(
+      key: key,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // header: priority badge + drag handle + delete
+            Row(
+              children: [
+                CircleAvatar(
+                    radius: 12,
+                    backgroundColor: Colors.blue,
+                    child: Text('${i + 1}',
+                        style: const TextStyle(
+                            color: Colors.white, fontSize: 12))),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '第 ${i + 1} 段  ·  '
+                    '${z.fromYd.toStringAsFixed(0)}-${z.toYd.toStringAsFixed(0)} yd',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                ReorderableDragStartListener(
+                  index: i,
+                  child: const Padding(
+                    padding: EdgeInsets.all(4),
+                    child: Icon(Icons.drag_handle, color: Colors.grey),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, size: 18, color: Colors.red),
+                  onPressed: () => _removeZone(i),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            // Range sliders
+            _row('起点 yd', z.fromYd, 50, 2500, 10,
+                (v) => setState(() => _zones[i] =
+                    z.copyWith(fromYd: v))),
+            _row('终点 yd', z.toYd, 50, 3000, 10,
+                (v) => setState(() => _zones[i] =
+                    z.copyWith(toYd: v))),
+            const Divider(),
+            // Wind speed + direction
+            _row('风速 mph', z.speedMph, 0, 30, 0.5,
+                (v) => setState(() => _zones[i] =
+                    z.copyWith(speedMph: v))),
+            Row(
+              children: [
+                const SizedBox(width: 70, child: Text('风向°')),
+                Expanded(
+                  child: Slider(
+                    min: 0,
+                    max: 360,
+                    divisions: 72,
+                    value: z.dirDeg,
+                    label: '${z.dirDeg.toStringAsFixed(0)}°',
+                    onChanged: (v) => setState(() => _zones[i] =
+                        z.copyWith(dirDeg: v)),
+                  ),
+                ),
+                SizedBox(
+                  width: 50,
+                  child: Text('${z.dirDeg.toStringAsFixed(0)}°',
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _row(
+      String label, double value, double min, double max, double step,
+      ValueChanged<double> onChanged) {
+    return Row(
+      children: [
+        SizedBox(width: 70, child: Text(label)),
+        Expanded(
+          child: Slider(
+            min: min,
+            max: max,
+            divisions: ((max - min) / step).round(),
+            value: value.clamp(min, max),
+            label: value.toStringAsFixed(1),
+            onChanged: onChanged,
+          ),
+        ),
+        SizedBox(
+          width: 50,
+          child: Text(value.toStringAsFixed(0),
+              style: const TextStyle(fontWeight: FontWeight.w600)),
+        ),
+      ],
     );
   }
 }
 
-/// Persistent controllers for one wind-zone row.
-class _ZoneControllers {
-  final TextEditingController from = TextEditingController();
-  final TextEditingController to = TextEditingController();
-  final TextEditingController speed = TextEditingController();
-  final TextEditingController dir = TextEditingController();
-
-  _ZoneControllers();
-
-  factory _ZoneControllers.from(WindZoneInput z) {
-    final c = _ZoneControllers();
-    c.from.text = z.fromYd.toStringAsFixed(0);
-    c.to.text = z.toYd.toStringAsFixed(0);
-    c.speed.text = z.speedMph.toStringAsFixed(1);
-    c.dir.text = z.dirDeg.toStringAsFixed(0);
-    return c;
-  }
-
-  void dispose() {
-    from.dispose();
-    to.dispose();
-    speed.dispose();
-    dir.dispose();
-  }
+extension on WindZoneInput {
+  WindZoneInput copyWith({
+    double? fromYd,
+    double? toYd,
+    double? speedMph,
+    double? dirDeg,
+  }) =>
+      WindZoneInput(
+        fromYd: fromYd ?? this.fromYd,
+        toYd: toYd ?? this.toYd,
+        speedMph: speedMph ?? this.speedMph,
+        dirDeg: dirDeg ?? this.dirDeg,
+      );
 }
