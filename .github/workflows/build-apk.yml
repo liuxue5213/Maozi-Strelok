@@ -45,6 +45,13 @@ jobs:
           # template counter app; remove it so `flutter test` only runs our suite.
           rm -f test/widget_test.dart
 
+      # Apply our weapon launcher icon + "帽子计算器" app label onto the freshly
+      # generated android/ platform folder.
+      - name: Apply app icon & name (帽子计算器)
+        run: |
+          pip install pillow
+          python3 tools/setup_android_icon.py
+
       - name: Install dependencies
         run: flutter pub get
 
@@ -57,7 +64,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: ballistics-calculator-apk
+          name: 帽子计算器-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 30
