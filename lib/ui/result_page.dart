@@ -375,15 +375,14 @@ class _ResultPageState extends State<ResultPage> {
         title: const Text('弹道结果'),
         actions: [
           IconButton(
-            tooltip: '分划板模拟',
+            tooltip: '瞄准演示 (不同距离瞄准哪里)',
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) =>
-                    ReticlePage(state: widget.state, traj: traj),
+                builder: (_) => AimDemoPage(state: widget.state, traj: traj),
               ),
             ),
-            icon: const Icon(Icons.center_focus_strong),
+            icon: const Icon(Icons.ads_click),
           ),
           IconButton(
             tooltip: 'HUD (单发大数字显示)',
@@ -396,34 +395,47 @@ class _ResultPageState extends State<ResultPage> {
             icon: const Icon(Icons.visibility),
           ),
           IconButton(
-            tooltip: '瞄准演示 (不同距离瞄准哪里)',
+            tooltip: '分划板模拟',
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => AimDemoPage(state: widget.state, traj: traj),
+                builder: (_) =>
+                    ReticlePage(state: widget.state, traj: traj),
               ),
             ),
-            icon: const Icon(Icons.ads_click),
+            icon: const Icon(Icons.center_focus_strong),
           ),
-          IconButton(
-            tooltip: '导出 DOPE 卡',
-            onPressed: () => _showDope(context, bullet, ct, traj, sys),
-            icon: const Icon(Icons.ios_share),
-          ),
-          IconButton(
-            tooltip: '导出 CSV',
-            onPressed: () => _showCsv(context, traj, sys),
-            icon: const Icon(Icons.table_view),
-          ),
-          IconButton(
-            tooltip: _showMoa ? '切换 MIL' : '切换 MOA',
-            onPressed: () => setState(() => _showMoa = !_showMoa),
-            icon: Icon(_showMoa ? Icons.architecture : Icons.straighten),
-          ),
-          IconButton(
-            tooltip: _useWez ? 'WEZ蒙特卡洛 (点击切解析法)' : '解析法 (点击切WEZ蒙特卡洛)',
-            onPressed: () { setState(() => _useWez = !_useWez); _compute(); },
-            icon: const Icon(Icons.casino),
+          PopupMenuButton<String>(
+            tooltip: '更多工具',
+            onSelected: (v) {
+              switch (v) {
+                case 'dope':
+                  _showDope(context, bullet, ct, traj, sys);
+                  break;
+                case 'csv':
+                  _showCsv(context, traj, sys);
+                  break;
+                case 'moa':
+                  setState(() => _showMoa = !_showMoa);
+                  break;
+                case 'wez':
+                  setState(() => _useWez = !_useWez);
+                  _compute();
+                  break;
+              }
+            },
+            itemBuilder: (_) => [
+              const PopupMenuItem(
+                  value: 'dope', child: Text('导出 DOPE 卡')),
+              const PopupMenuItem(
+                  value: 'csv', child: Text('导出 CSV 轨迹')),
+              PopupMenuItem(
+                  value: 'moa',
+                  child: Text(_showMoa ? '切换 MIL' : '切换 MOA')),
+              PopupMenuItem(
+                  value: 'wez',
+                  child: Text(_useWez ? '命中率: 解析法' : '命中率: WEZ蒙特卡洛')),
+            ],
           ),
         ],
       ),
@@ -560,32 +572,37 @@ class _ResultPageState extends State<ResultPage> {
               ),
             ],
             const SizedBox(height: 8),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 3,
-              childAspectRatio: 2.2,
-              mainAxisSpacing: 6,
-              crossAxisSpacing: 6,
-              children: [
-                _stat('初速', Fmt.velocity(muzzleV, sys)),
-                _stat('归零距离',
-                    '${widget.state.mod.zeroRangeYd.toStringAsFixed(0)} yd'),
-                _stat('近零点', _nearZero == null
-                    ? '-'
-                    : '${(_nearZero! * 1.09361).toStringAsFixed(0)} yd'),
-                _stat('远零点', _farZero == null
-                    ? '-'
-                    : '${(_farZero! * 1.09361).toStringAsFixed(0)} yd'),
-                _stat('最大有效射程', _maxRange == null
-                    ? '-'
-                    : '${(_maxRange! * 1.09361).toStringAsFixed(0)} yd'),
-                _stat('直射距离(MPBR)', _mpbrM == null
-                    ? '-'
-                    : '${(_mpbrM! * 1.09361).toStringAsFixed(0)} yd'),
-                _stat('末速', Fmt.velocity(_traj!.last.speed, sys)),
-              ],
-            ),
+            LayoutBuilder(builder: (ctx, c) {
+              // Narrow phones: 2 columns so labels like 直射距离(MPBR) /
+              // 最大有效射程 don't wrap and rows stay aligned.
+              final cols = c.maxWidth >= 420 ? 3 : 2;
+              return GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: cols,
+                childAspectRatio: cols == 3 ? 1.9 : 2.4,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+                children: [
+                  _stat('初速', Fmt.velocity(muzzleV, sys)),
+                  _stat('归零距离',
+                      '${widget.state.mod.zeroRangeYd.toStringAsFixed(0)} yd'),
+                  _stat('近零点', _nearZero == null
+                      ? '-'
+                      : '${(_nearZero! * 1.09361).toStringAsFixed(0)} yd'),
+                  _stat('远零点', _farZero == null
+                      ? '-'
+                      : '${(_farZero! * 1.09361).toStringAsFixed(0)} yd'),
+                  _stat('最大有效射程', _maxRange == null
+                      ? '-'
+                      : '${(_maxRange! * 1.09361).toStringAsFixed(0)} yd'),
+                  _stat('直射距离(MPBR)', _mpbrM == null
+                      ? '-'
+                      : '${(_mpbrM! * 1.09361).toStringAsFixed(0)} yd'),
+                  _stat('末速', Fmt.velocity(_traj!.last.speed, sys)),
+                ],
+              );
+            }),
           ],
         ),
       ),
@@ -594,19 +611,28 @@ class _ResultPageState extends State<ResultPage> {
 
   Widget _stat(String label, String value) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
         color: Colors.grey.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 11, color: Colors.grey)),
-          Text(value,
-              style:
-                  const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+          const SizedBox(height: 2),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(value,
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontWeight: FontWeight.w600, fontSize: 13)),
+          ),
         ],
       ),
     );

@@ -50,102 +50,26 @@ class _HomePageState extends State<HomePage> {
         title: const Text('Ballistics Calculator'),
         actions: [
           IconButton(
-            tooltip: '我的装备 (快速载入常用配置)',
-            icon: const Icon(Icons.shield_outlined),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => MyGearPage(state: widget.state),
-                ),
-              );
-              setState(() {});
-            },
-          ),
-          IconButton(
-            tooltip: '配置文件 (Profiles)',
-            icon: const Icon(Icons.bookmarks_outlined),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ProfilePage(state: widget.state),
-                ),
-              );
-              setState(() {});
-            },
-          ),
-          IconButton(
-            tooltip: '目标日志',
-            icon: const Icon(Icons.fact_check),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => TargetLogPage(state: widget.state),
-                ),
-              );
-              setState(() {});
-            },
-          ),
-          IconButton(
-            tooltip: '弹道校准 (Truing)',
-            icon: const Icon(Icons.tune),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => TruingPage(state: widget.state),
-                ),
-              );
-              setState(() {});
-            },
-          ),
-          IconButton(
-            tooltip: '多点落点校准 (DSF)',
-            icon: const Icon(Icons.stacked_line_chart),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => DsfPage(state: widget.state),
-                ),
-              );
-              setState(() {});
-            },
-          ),
-          IconButton(
-            tooltip: '枪管寿命追踪',
-            icon: const Icon(Icons.history),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => BarrelLifePage(state: widget.state),
-                ),
-              );
-              setState(() {});
-            },
-          ),
-          IconButton(
-            tooltip: '自定义数据',
-            icon: const Icon(Icons.playlist_add),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EditCustomPage(state: widget.state),
-                ),
-              );
-              setState(() {});
-            },
-          ),
-          IconButton(
             tooltip: '单位切换',
             icon: Icon(widget.state.unitSystem.name == 'metric'
                 ? Icons.straighten
                 : Icons.square_foot),
             onPressed: widget.state.toggleUnitSystem,
+          ),
+          PopupMenuButton<String>(
+            tooltip: '更多功能',
+            onSelected: _openFeature,
+            itemBuilder: (_) => const [
+              PopupMenuItem(
+                  value: 'gear', child: Text('我的装备 (常用配置)')),
+              PopupMenuItem(value: 'profile', child: Text('配置文件')),
+              PopupMenuItem(value: 'log', child: Text('目标日志')),
+              PopupMenuItem(value: 'truing', child: Text('弹道校准 (Truing)')),
+              PopupMenuItem(
+                  value: 'dsf', child: Text('多点落点校准 (DSF)')),
+              PopupMenuItem(value: 'barrel', child: Text('枪管寿命')),
+              PopupMenuItem(value: 'custom', child: Text('自定义数据')),
+            ],
           ),
         ],
       ),
@@ -234,6 +158,37 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  /// Open a feature from the AppBar "更多" overflow menu.
+  Future<void> _openFeature(String v) async {
+    Widget? page;
+    switch (v) {
+      case 'gear':
+        page = MyGearPage(state: widget.state);
+        break;
+      case 'profile':
+        page = ProfilePage(state: widget.state);
+        break;
+      case 'log':
+        page = TargetLogPage(state: widget.state);
+        break;
+      case 'truing':
+        page = TruingPage(state: widget.state);
+        break;
+      case 'dsf':
+        page = DsfPage(state: widget.state);
+        break;
+      case 'barrel':
+        page = BarrelLifePage(state: widget.state);
+        break;
+      case 'custom':
+        page = EditCustomPage(state: widget.state);
+        break;
+    }
+    if (page == null) return;
+    await Navigator.push(context, MaterialPageRoute(builder: (_) => page!));
+    if (mounted) setState(() {});
   }
 
   Widget _chip(String label, bool selected, VoidCallback onTap, IconData? icon) {
