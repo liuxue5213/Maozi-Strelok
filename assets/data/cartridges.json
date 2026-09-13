@@ -1168,5 +1168,35 @@
     "muzzleVelocityFps": 1450,
     "refBarrelLengthIn": 20,
     "bulletId": "lightfield-525exp-12ga"
+  },
+  {
+    "id": "ct-300nm-215hyb",
+    "designation": "300 NM 215gr Hybrid Target",
+    "manufacturer": "Berger",
+    "caliber": ".300 Norma Mag",
+    "muzzleVelocityFps": 2950,
+    "refBarrelLengthIn": 26,
+    "bulletId": "berger-215hyb-300nm",
+    "notes": "Factory match load, long-range precision"
+  },
+  {
+    "id": "ct-6mmc-87eldm",
+    "designation": "6mm CM 87gr ELD-M",
+    "manufacturer": "Hornady",
+    "caliber": "6mm Creedmoor",
+    "muzzleVelocityFps": 3425,
+    "refBarrelLengthIn": 24,
+    "bulletId": "hornady-87eldm-6mm",
+    "notes": "Match factory load, flat shooting"
+  },
+  {
+    "id": "ct-6mmc-105hyb",
+    "designation": "6mm CM 105gr Hybrid Target",
+    "manufacturer": "Berger",
+    "caliber": "6mm Creedmoor",
+    "muzzleVelocityFps": 3125,
+    "refBarrelLengthIn": 26,
+    "bulletId": "berger-105hyb-6mm",
+    "notes": "Factory match load, PRS favorite"
   }
 ]

@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show Clipboard;
 
 import '../models/firearm.dart';
 import '../physics/atmosphere.dart';
@@ -33,6 +34,8 @@ class _ResultPageState extends State<ResultPage> {
   double? _transonicM;
   double? _mpbrM; // max point blank range (vital-zone)
   double? _leadM; // linear lead at max range for moving target
+  double? _apexM; // max ordinate: highest point above LOS between the zeros
+  double? _daM; // density altitude at current conditions
   List<Map<String, double>> _multiTargets = const [];
   double? _hitProb; // hit probability at max range target
   ShotConfig? _cfg;
@@ -145,6 +148,12 @@ class _ResultPageState extends State<ResultPage> {
             targetSpeedMps: targetMps,
             rangeM: U.Units.yardsToM(s.maxRangeYd));
       }
+      // Max ordinate: highest trajectory point above the line of sight.
+      double apex = 0;
+      for (final p in traj) {
+        if (p.drop > apex) apex = p.drop;
+      }
+      final daM = atmo.densityAltitudeM;
       // Per-target corrections for the multi-target list.
       final multiTargets = <Map<String, double>>[];
       for (final yd in s.customTargetsYd) {
@@ -223,6 +232,8 @@ class _ResultPageState extends State<ResultPage> {
         _transonicM = transonic;
         _mpbrM = mpbr.mpbrM;
         _leadM = lead;
+        _apexM = apex;
+        _daM = daM;
         _multiTargets = multiTargets;
         _hitProb = hitProb;
         _error = null;
@@ -286,20 +297,6 @@ class _ResultPageState extends State<ResultPage> {
       ci++;
     }
     setState(() => _compare = out);
-    _scoreLoads();
-  }
-
-  /// Score each compared load on 3 criteria and pick the best overall — mirrors
-  /// Ballistic's "auto best load selection" (wind drift / flatness / energy).
-  /// Lower wind-drift-at-max-range is better; flatter trajectory (smallest
-  /// |apex drop|) is better; higher remaining energy is better.
-  void _scoreLoads() {
-    if (_compare.isEmpty) return;
-    // Already computed in recompute; scoring is derived from the trajectories
-    // and stored in _loadScores for the ranking UI.
-    setState(() {
-      // scoring is done lazily in the ranking widget
-    });
   }
 
   /// Best-load scoring result: (label, windDriftScore, flatnessScore, energyScore, totalRank).
@@ -545,8 +542,8 @@ class _ResultPageState extends State<ResultPage> {
                 ),
                 child: Text(
                     '🎯 移动目标提前量 @${widget.state.maxRangeYd.toStringAsFixed(0)}yd: '
-                    '${(_leadM! * (_showMoa ? 0 : 39.37)).toStringAsFixed(1)}${_showMoa ? '' : 'in'}'
-                    '${_showMoa ? '约 ${(U.Units.radToMil(_leadM! / U.Units.yardsToM(widget.state.maxRangeYd))).toStringAsFixed(1)} MIL' : ''}',
+                    '${(_leadM! * 39.37).toStringAsFixed(1)}in '
+                    '(≈ ${(U.Units.radToMil(_leadM! / U.Units.yardsToM(widget.state.maxRangeYd))).toStringAsFixed(1)} MIL)',
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 12)),
               ),
@@ -599,6 +596,14 @@ class _ResultPageState extends State<ResultPage> {
                   _stat('直射距离(MPBR)', _mpbrM == null
                       ? '-'
                       : '${(_mpbrM! * 1.09361).toStringAsFixed(0)} yd'),
+                  _stat('最大弹道高', _apexM == null || _apexM! <= 0
+                      ? '-'
+                      : Fmt.shortLen(_apexM!, sys)),
+                  _stat('密度高度', _daM == null
+                      ? '-'
+                      : sys == U.UnitSystem.imperial
+                          ? '${(_daM! * 3.28084).toStringAsFixed(0)} ft'
+                          : '${_daM!.toStringAsFixed(0)} m'),
                   _stat('末速', Fmt.velocity(_traj!.last.speed, sys)),
                 ],
               );
@@ -650,6 +655,27 @@ class _ResultPageState extends State<ResultPage> {
     return Colors.green;
   }
 
+  /// Touch tooltip for the trajectory charts: shows "distance · value" at the
+  /// pressed point so the shooter can read exact numbers off the curve.
+  LineTouchData _touchData(String Function(FlSpot) fmt) {
+    return LineTouchData(
+      touchTooltipData: LineTouchTooltipData(
+        getTooltipItems: (spots) => spots
+            .map((s) => LineTooltipItem(
+                fmt(s),
+                const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600)))
+            .toList(),
+      ),
+    );
+  }
+
+  /// Shared x-label ("yd"/"m") for tooltip text.
+  String _xUnit(U.UnitSystem sys) =>
+      sys == U.UnitSystem.imperial ? 'yd' : 'm';
+
   Widget _dropChart(List<TrajectoryPoint> traj, U.UnitSystem sys) {
     final toX = (double m) =>
         sys == U.UnitSystem.imperial ? m * 1.09361 : m;
@@ -667,6 +693,8 @@ class _ResultPageState extends State<ResultPage> {
       maxY: maxY,
       minX: minX,
       maxX: maxX,
+      lineTouchData: _touchData((s) =>
+          '${s.x.toStringAsFixed(0)}${_xUnit(sys)} · ${s.y.toStringAsFixed(1)}${sys == U.UnitSystem.imperial ? 'in' : 'cm'}'),
       gridData: FlGridData(
         show: true,
         drawVerticalLine: false,
@@ -719,6 +747,8 @@ class _ResultPageState extends State<ResultPage> {
       minY: 0,
       minX: 0,
       maxX: xs.last * 1.05,
+      lineTouchData: _touchData((s) =>
+          '${s.x.toStringAsFixed(0)}${_xUnit(sys)} · ${s.y.toStringAsFixed(0)}${sys == U.UnitSystem.imperial ? 'fps' : 'm/s'}'),
       gridData: const FlGridData(show: true, drawVerticalLine: false),
       extraLinesData: ExtraLinesData(horizontalLines: [
         HorizontalLine(
@@ -771,6 +801,8 @@ class _ResultPageState extends State<ResultPage> {
       minY: 0,
       minX: minX,
       maxX: maxX,
+      lineTouchData: _touchData((s) =>
+          '${s.x.toStringAsFixed(0)}${_xUnit(sys)} · ${s.y.toStringAsFixed(1)}${sys == U.UnitSystem.imperial ? 'in' : 'cm'}'),
       gridData: FlGridData(
         show: true,
         drawVerticalLine: false,
@@ -1005,6 +1037,8 @@ class _ResultPageState extends State<ResultPage> {
       minY: 0,
       minX: minX,
       maxX: maxX,
+      lineTouchData: _touchData((s) =>
+          '${s.x.toStringAsFixed(0)}${_xUnit(sys)} · ${s.y.toStringAsFixed(1)}${sys == U.UnitSystem.imperial ? 'in' : 'cm'}'),
       gridData: const FlGridData(show: true, drawVerticalLine: false),
       titlesData: FlTitlesData(
         bottomTitles: AxisTitles(
@@ -1123,6 +1157,14 @@ class _ResultPageState extends State<ResultPage> {
         ),
         actions: [
           TextButton(
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: text));
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('DOPE 卡已复制到剪贴板')));
+            },
+            child: const Text('复制'),
+          ),
+          TextButton(
             onPressed: () => Navigator.pop(dctx),
             child: const Text('关闭'),
           ),
@@ -1147,6 +1189,14 @@ class _ResultPageState extends State<ResultPage> {
           ),
         ),
         actions: [
+          TextButton(
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: csv));
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('CSV 数据已复制到剪贴板')));
+            },
+            child: const Text('复制'),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(dctx),
             child: const Text('关闭'),

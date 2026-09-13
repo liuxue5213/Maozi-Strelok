@@ -101,6 +101,9 @@ class AppState extends ChangeNotifier {
 
   U.UnitSystem unitSystem = U.UnitSystem.metric;
 
+  /// Theme mode: 'system' (follow OS) | 'light' | 'dark'. Persisted.
+  String themeMode = 'system';
+
   Firearm? get firearm => _firearm;
   Cartridge? get cartridge => _cartridge;
   Bullet? get bullet => _bullet;
@@ -178,6 +181,18 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Cycle theme mode: system → light → dark → system. Notifies so the
+  /// MaterialApp in main.dart rebuilds with the new brightness.
+  void cycleThemeMode() {
+    themeMode = switch (themeMode) {
+      'system' => 'light',
+      'light' => 'dark',
+      _ => 'system',
+    };
+    _persist();
+    notifyListeners();
+  }
+
   void setEnvironment({
     double? temperatureC,
     double? pressureHpa,
@@ -219,7 +234,11 @@ class AppState extends ChangeNotifier {
     final profiles = db.loadProfiles();
     final snap = profiles[name];
     if (snap == null) return;
+    // Theme is an app preference, not a shooting configuration — keep the
+    // current choice even when restoring older snapshots that predate it.
+    final theme = themeMode;
     fromJson(snap, db);
+    themeMode = theme;
     // ensure linked objects exist after restore
     if (_firearm == null && snap['firearmId'] != null) {
       _firearm = db.firearm(snap['firearmId'] as String);
@@ -286,6 +305,7 @@ class AppState extends ChangeNotifier {
         'dsf': dsf.map((k, v) => MapEntry(k.toString(), v)),
         'customTargetsYd': customTargetsYd,
         'unitSystem': unitSystem.name,
+        'themeMode': themeMode,
       };
 
   void fromJson(Map<String, dynamic> m, DatabaseService db) {
@@ -337,6 +357,10 @@ class AppState extends ChangeNotifier {
         const [];
     unitSystem = U.UnitSystem.values
         .byName((m['unitSystem'] as String?) ?? 'metric');
+    themeMode = switch (m['themeMode'] as String?) {
+      'light' || 'dark' => m['themeMode'] as String,
+      _ => 'system',
+    };
     _mod = m['mod'] is Map
         ? Modification.fromJson(m['mod'] as Map<String, dynamic>)
         : const Modification();

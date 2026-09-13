@@ -2002,5 +2002,89 @@
     "lengthIn": 0.9,
     "bcG1": 0.15,
     "type": "slug"
+  },
+  {
+    "id": "berger-215hyb-300nm",
+    "manufacturer": "Berger",
+    "model": "Hybrid Target 215gr",
+    "caliber": ".300 Norma Mag",
+    "massGr": 215,
+    "diameterIn": 0.308,
+    "lengthIn": 1.435,
+    "bcG1": 0.756,
+    "bcG7": 0.39,
+    "type": "hpbt"
+  },
+  {
+    "id": "hornady-225eldm-300nm",
+    "manufacturer": "Hornady",
+    "model": "ELD-M 225gr",
+    "caliber": ".300 Norma Mag",
+    "massGr": 225,
+    "diameterIn": 0.308,
+    "lengthIn": 1.58,
+    "bcG1": 0.777,
+    "bcG7": 0.4,
+    "type": "hpbt"
+  },
+  {
+    "id": "berger-105hyb-6mm",
+    "manufacturer": "Berger",
+    "model": "Hybrid Target 105gr",
+    "caliber": "6mm Creedmoor",
+    "massGr": 105,
+    "diameterIn": 0.243,
+    "lengthIn": 1.15,
+    "bcG1": 0.546,
+    "bcG7": 0.281,
+    "type": "hpbt"
+  },
+  {
+    "id": "hornady-87eldm-6mm",
+    "manufacturer": "Hornady",
+    "model": "ELD-M 87gr",
+    "caliber": "6mm Creedmoor",
+    "massGr": 87,
+    "diameterIn": 0.243,
+    "lengthIn": 1.02,
+    "bcG1": 0.433,
+    "bcG7": 0.223,
+    "type": "hpbt"
+  },
+  {
+    "id": "sierra-107smk-6mm",
+    "manufacturer": "Sierra",
+    "model": "MatchKing 107gr",
+    "caliber": "6mm Creedmoor",
+    "massGr": 107,
+    "diameterIn": 0.243,
+    "lengthIn": 1.09,
+    "bcG1": 0.505,
+    "bcG7": null,
+    "type": "hpbt"
+  },
+  {
+    "id": "sierra-180gk-76254r",
+    "manufacturer": "Sierra",
+    "model": "GameKing SBT 180gr",
+    "caliber": "7.62x54R",
+    "massGr": 180,
+    "diameterIn": 0.308,
+    "lengthIn": 1.18,
+    "bcG1": 0.496,
+    "bcG7": null,
+    "type": "hpbt"
+  },
+  {
+    "id": "hornady-158xtp-357",
+    "manufacturer": "Hornady",
+    "model": "XTP 158gr",
+    "caliber": ".357 Mag",
+    "massGr": 158,
+    "diameterIn": 0.357,
+    "lengthIn": 0.61,
+    "bcG1": 0.197,
+    "bcG7": null,
+    "type": "hp"
   }
 ]

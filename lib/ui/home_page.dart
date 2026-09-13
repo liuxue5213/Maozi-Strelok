@@ -50,6 +50,19 @@ class _HomePageState extends State<HomePage> {
         title: const Text('Ballistics Calculator'),
         actions: [
           IconButton(
+            tooltip: '主题: ${switch (widget.state.themeMode) {
+              'light' => '浅色',
+              'dark' => '深色',
+              _ => '跟随系统',
+            }} (点击切换)',
+            icon: Icon(switch (widget.state.themeMode) {
+              'light' => Icons.light_mode,
+              'dark' => Icons.dark_mode,
+              _ => Icons.brightness_auto,
+            }),
+            onPressed: widget.state.cycleThemeMode,
+          ),
+          IconButton(
             tooltip: '单位切换',
             icon: Icon(widget.state.unitSystem.name == 'metric'
                 ? Icons.straighten

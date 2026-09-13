@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../models/firearm.dart';
 import '../models/modification.dart';
+import '../physics/atmosphere.dart';
 import '../physics/drag_models.dart';
+import '../physics/units.dart' as U;
 import 'app_state.dart';
 import 'cartridge_picker_dialog.dart';
 import 'mil_ranging_dialog.dart';
@@ -27,6 +29,31 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
   late final TextEditingController _latCtrl;
   late final TextEditingController _azCtrl;
 
+  /// Cached text controllers/focus nodes for the numeric fields, keyed by
+  /// field name. Creating a controller inside build() would reset the field on
+  /// every setState (slider drag, toggle…) — so they live here for the page
+  /// lifetime.
+  final Map<String, TextEditingController> _numCtrls = {};
+  final Map<String, FocusNode> _numFocus = {};
+
+  TextEditingController _numCtrl(String key, String text) {
+    final c =
+        _numCtrls.putIfAbsent(key, () => TextEditingController(text: text));
+    _numFocus.putIfAbsent(key, () => FocusNode());
+    if (c.text != text) {
+      // Sync for external value changes (e.g. profile restore) unless the user
+      // is mid-edit in this exact field. Deferred to after the build because
+      // mutating a controller's text during build is not allowed.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!c.hasFocus && c.text != text) c.text = text;
+      });
+    }
+    return c;
+  }
+
+  FocusNode _numFocusNode(String key) =>
+      _numFocus.putIfAbsent(key, () => FocusNode());
+
   @override
   void initState() {
     super.initState();
@@ -40,6 +67,12 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
   void dispose() {
     _latCtrl.dispose();
     _azCtrl.dispose();
+    for (final c in _numCtrls.values) {
+      c.dispose();
+    }
+    for (final f in _numFocus.values) {
+      f.dispose();
+    }
     super.dispose();
   }
 
@@ -63,6 +96,16 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
                 (v) => setState(() => s.relativeHumidity = v / 100)),
             _slider('海拔', s.altitudeM, 0, 4000, ' m', 10, 0,
                 (v) => setState(() => s.altitudeM = v.roundToDouble())),
+            ListTile(
+              dense: true,
+              leading: const Icon(Icons.terrain, size: 20),
+              title: Text(
+                  '密度高度: ${_densityAltitudeText(s)}',
+                  style: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w600)),
+              subtitle: const Text(
+                  '由当前温/压/湿/海拔换算，弹道按此空气密度求解'),
+            ),
           ]),
           const SizedBox(height: 12),
           _section('风', [
@@ -431,6 +474,19 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
     );
   }
 
+  /// Density altitude for the current conditions, shown in the environment
+  /// card (Applied Ballistics-style DA workflow).
+  String _densityAltitudeText(AppState s) {
+    final atmo = Atmosphere(
+      temperatureC: s.temperatureC,
+      pressurePa: U.Units.hpaToPa(s.pressureHpa),
+      relativeHumidity: s.relativeHumidity,
+      altitudeM: s.altitudeM,
+    );
+    final daM = atmo.densityAltitudeM;
+    return '${daM.toStringAsFixed(0)} m (${(daM * 3.28084).toStringAsFixed(0)} ft)';
+  }
+
   Widget _windDial(AppState s) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -526,10 +582,11 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
               border: OutlineInputBorder(),
             ),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            controller: TextEditingController(
-                text: s.chronoVelocityFps == 0
+            controller: _numCtrl('chrono',
+                s.chronoVelocityFps == 0
                     ? ''
                     : s.chronoVelocityFps.toStringAsFixed(0)),
+            focusNode: _numFocusNode('chrono'),
             onChanged: (v) => s.chronoVelocityFps = double.tryParse(v) ?? 0,
           ),
         ),
@@ -550,8 +607,9 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
             ),
             keyboardType: const TextInputType.numberWithOptions(
                 signed: true, decimal: true),
-            controller: TextEditingController(
-                text: s.powderTempF == 0 ? '' : s.powderTempF.toStringAsFixed(0)),
+            controller: _numCtrl('powderTemp',
+                s.powderTempF == 0 ? '' : s.powderTempF.toStringAsFixed(0)),
+            focusNode: _numFocusNode('powderTemp'),
             onChanged: (v) => s.powderTempF = double.tryParse(v) ?? 0,
           ),
         ),
@@ -565,10 +623,11 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
             ),
             keyboardType:
                 const TextInputType.numberWithOptions(decimal: true, signed: true),
-            controller: TextEditingController(
-                text: s.mvTempSensitivityFpsPerF == 0
+            controller: _numCtrl('mvSens',
+                s.mvTempSensitivityFpsPerF == 0
                     ? ''
                     : s.mvTempSensitivityFpsPerF.toStringAsFixed(2)),
+            focusNode: _numFocusNode('mvSens'),
             onChanged: (v) =>
                 s.mvTempSensitivityFpsPerF = double.tryParse(v) ?? 0,
           ),
@@ -737,7 +796,8 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
         ),
         keyboardType:
             const TextInputType.numberWithOptions(decimal: true, signed: true),
-        controller: TextEditingController(text: value.toStringAsFixed(2)),
+        controller: _numCtrl(label, value.toStringAsFixed(2)),
+        focusNode: _numFocusNode(label),
         onChanged: (v) {
           final d = double.tryParse(v);
           if (d != null) onChanged(d);

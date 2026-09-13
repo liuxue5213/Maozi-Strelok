@@ -102,6 +102,13 @@ class _SplashState extends State<Splash> {
               useMaterial3: true,
               brightness: Brightness.dark,
             ),
+            // Follow the user's persisted theme preference; 'system' lets the
+            // OS dark mode decide (field/night use).
+            themeMode: switch (snap.data!.themeMode) {
+              'light' => ThemeMode.light,
+              'dark' => ThemeMode.dark,
+              _ => ThemeMode.system,
+            },
             builder: (context, child) => SafeArea(
               top: false,
               bottom: true,
