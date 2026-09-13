@@ -45,7 +45,9 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
       // is mid-edit in this exact field. Deferred to after the build because
       // mutating a controller's text during build is not allowed.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!c.hasFocus && c.text != text) c.text = text;
+        if (!(_numFocus[key]?.hasFocus ?? false) && c.text != text) {
+          c.text = text;
+        }
       });
     }
     return c;
