@@ -1,0 +1,61 @@
+name: Deploy Web
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # The repo intentionally does not include platform folders. Web builds
+      # only need the web/ scaffold (the APK workflow regenerates android/).
+      - name: Generate web platform folder
+        run: |
+          cp pubspec.yaml pubspec.yaml.bak
+          flutter create --platforms=web --org com.ballistics --project-name ballistics_calculator .
+          cp pubspec.yaml.bak pubspec.yaml
+          rm pubspec.yaml.bak
+          rm -f test/widget_test.dart
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build web (release)
+        run: |
+          flutter build web --release
+          sed -i 's|<title>.*</title>|<title>帽子计算器 - 弹道计算</title>|' build/web/index.html
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.MAOZI_DEPLOY_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan ${{ secrets.MAOZI_DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy to server
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+            build/web/ \
+            ${{ secrets.MAOZI_DEPLOY_USER }}@${{ secrets.MAOZI_DEPLOY_HOST }}:/www/maozi-strelok/
+
+      - name: Verify deployment
+        run: |
+          sleep 2
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            http://${{ secrets.MAOZI_DEPLOY_HOST }}:${{ secrets.MAOZI_DEPLOY_PORT }}/)
+          echo "HTTP status: $code"
+          [ "$code" = "200" ] || { echo "Deployment verification failed"; exit 1; }
