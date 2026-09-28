@@ -99,6 +99,31 @@ def set_label():
     return True
 
 
+
+def inject_location_permissions():
+    """geolocator needs location permissions in the (CI-regenerated) manifest."""
+    if not os.path.exists(MANIFEST):
+        print(f"!! manifest missing: {MANIFEST}")
+        return False
+    with open(MANIFEST, "r", encoding="utf-8") as f:
+        xml = f.read()
+    if "ACCESS_FINE_LOCATION" in xml:
+        print("  location permissions already present")
+        return True
+    perms = (
+        '    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>\n'
+        '    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>\n'
+    )
+    new_xml, n = re.subn(r"([ \t]*<application)", perms + r"\1", xml, count=1)
+    if n != 1:
+        print("!! <application> tag not found in manifest")
+        return False
+    with open(MANIFEST, "w", encoding="utf-8") as f:
+        f.write(new_xml)
+    print("  manifest + ACCESS_COARSE/FINE_LOCATION")
+    return True
+
+
 def main():
     if not os.path.exists(ANDROID_RES):
         print("!! android res dir not found; run after flutter create")
@@ -106,8 +131,9 @@ def main():
     icons_ok = set_icons()
     adaptive_ok = set_adaptive_foreground()
     label_ok = set_label()
-    print(f"  icons={icons_ok} adaptive={adaptive_ok} label={label_ok}")
-    return 0 if (icons_ok and label_ok) else 1
+    perms_ok = inject_location_permissions()
+    print(f"  icons={icons_ok} adaptive={adaptive_ok} label={label_ok} perms={perms_ok}")
+    return 0 if (icons_ok and label_ok and perms_ok) else 1
 
 
 if __name__ == "__main__":
