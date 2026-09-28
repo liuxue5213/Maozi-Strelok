@@ -33,10 +33,15 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build web (release)
+      # Apply the Chinese app name, PWA manifest and icons onto the freshly
+      # generated web/ scaffold (same pattern as the Android icon step).
+      - name: Apply web branding (帽子计算器 PWA)
         run: |
-          flutter build web --release
-          sed -i 's|<title>.*</title>|<title>帽子计算器 - 弹道计算</title>|' build/web/index.html
+          pip install pillow
+          python3 tools/setup_web_meta.py
+
+      - name: Build web (release)
+        run: flutter build web --release
 
       - name: Set up SSH key
         run: |

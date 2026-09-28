@@ -210,6 +210,37 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
                   'G6/G8=平头, GI=Ingalls, GL=钝头软尖',
                   style: TextStyle(fontSize: 10, color: Colors.grey)),
             ),
+            // Gentle suggestion when the selected bullet has a measured G7 BC
+            // (modern boat-tail bullets track the G7 standard far better).
+            if ((s.bullet?.bcG7 ?? null) != null && s.dragModelId != 'G7')
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  children: [
+                    const Icon(Icons.lightbulb_outline,
+                        size: 14, color: Colors.orange),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                          '此弹有实测 G7 BC (${s.bullet!.bcG7!.toStringAsFixed(3)})，'
+                          '船尾弹建议用 G7 模型',
+                          style: const TextStyle(
+                              fontSize: 11, color: Colors.orange)),
+                    ),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                      onPressed: () =>
+                          setState(() => s.dragModelId = 'G7'),
+                      child: const Text('切换',
+                          style:
+                              TextStyle(fontSize: 12, color: Colors.orange)),
+                    ),
+                  ],
+                ),
+              ),
             SwitchListTile(
               title: const Text('计算自旋漂移'),
               subtitle: const Text('右旋膛线弹丸向右的陀螺漂移 (远程射击)'),
