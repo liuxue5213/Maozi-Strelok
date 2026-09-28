@@ -1,0 +1,41 @@
+name: Server Diagnostics
+
+on:
+  workflow_dispatch:
+    inputs:
+      unban_ip:
+        description: 'Client IP to unban (optional)'
+        required: false
+        default: ''
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.MAOZI_DEPLOY_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan ${{ secrets.MAOZI_DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      # Print only targeted facts (public-repo logs are readable): uptime,
+      # whether the client IP is banned, and service health. No log dumps.
+      - name: Diagnose & unban
+        env:
+          UNBAN_IP: ${{ inputs.unban_ip }}
+        run: |
+          SS="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes ${{ secrets.MAOZI_DEPLOY_USER }}@${{ secrets.MAOZI_DEPLOY_HOST }}"
+          $SS 'uptime; systemctl is-active nginx; curl -s -o /dev/null -w "local-web=%{http_code}\n" http://127.0.0.1:60195/'
+          if [ -n "$UNBAN_IP" ]; then
+            echo "--- iptables rules mentioning $UNBAN_IP ---"
+            $SS "iptables-save | grep -F '$UNBAN_IP' || echo 'not in iptables'"
+            echo "--- fail2ban ---"
+            $SS "fail2ban-client status sshd 2>/dev/null | grep -A5 'Banned IP' || echo 'no fail2ban or not banned'"
+            echo "--- hosts.deny / ufw ---"
+            $SS "grep -F '$UNBAN_IP' /etc/hosts.deny 2>/dev/null || echo 'not in hosts.deny'; ufw status 2>/dev/null | grep -F '$UNBAN_IP' || echo 'not in ufw'"
+            echo "--- applying unbans (ignore errors for absent mechanisms) ---"
+            $SS "iptables-save | grep -F '$UNBAN_IP' | sed -E 's/-A (-N)?/--delete /; s/^-A/--delete/' > /tmp/unban.txt; cat /tmp/unban.txt | while read -r cmd; do iptables \$cmd 2>/dev/null || true; done; echo iptables-done"
+            $SS "fail2ban-client set sshd unbanip $UNBAN_IP 2>/dev/null || true; sed -i '/$UNBAN_IP/d' /etc/hosts.deny 2>/dev/null || true; echo unban-attempted"
+          fi

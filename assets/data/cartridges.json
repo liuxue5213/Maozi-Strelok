@@ -218,7 +218,7 @@
     "id": "ct-m882-9mm",
     "designation": "M882 NATO",
     "manufacturer": "Winchester",
-    "caliber": "9x19 NATO",
+    "caliber": "9x19",
     "muzzleVelocityFps": 1200,
     "refBarrelLengthIn": 5,
     "bulletId": "m882-9mm"
