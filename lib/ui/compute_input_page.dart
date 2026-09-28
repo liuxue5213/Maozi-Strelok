@@ -728,9 +728,10 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
             mvFps != null
                 ? FilledButton(
                     onPressed: () {
-                      s.chronoVelocityFps = mvFps;
-                      _numCtrl('chrono', mvFps!.toStringAsFixed(0)).text =
-                          mvFps.toStringAsFixed(0);
+                      final mv = mvFps!;
+                      s.chronoVelocityFps = mv;
+                      _numCtrl('chrono', mv.toStringAsFixed(0)).text =
+                          mv.toStringAsFixed(0);
                       Navigator.pop(dctx);
                     },
                     child: const Text('应用'),
