@@ -40,5 +40,18 @@ void main() {
       expect(Units.fToC(212), closeTo(100, 1e-9));
       expect(Units.cToK(0), closeTo(273.15, 1e-9));
     });
+
+    test('wind display units convert round-trip through mph', () {
+      for (final unit in ['mph', 'ms', 'kmh']) {
+        expect(Units.windToMph(Units.windFromMph(15, unit), unit),
+            closeTo(15, 1e-9));
+      }
+      // reference points: 10 mph = 4.4704 m/s = 16.09344 km/h
+      expect(Units.windFromMph(10, 'ms'), closeTo(4.4704, 1e-9));
+      expect(Units.windFromMph(10, 'kmh'), closeTo(16.09344, 1e-9));
+      expect(Units.windUnitLabel('ms'), 'm/s');
+      expect(Units.windUnitLabel('kmh'), 'km/h');
+      expect(Units.windUnitLabel('mph'), 'mph');
+    });
   });
 }

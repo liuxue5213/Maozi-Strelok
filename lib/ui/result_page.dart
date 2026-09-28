@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
+import 'package:share_plus/share_plus.dart';
 
 import '../models/firearm.dart';
 import '../physics/atmosphere.dart';
@@ -1198,6 +1199,10 @@ class _ResultPageState extends State<ResultPage> {
             child: const Text('复制'),
           ),
           TextButton(
+            onPressed: () => Share.share(text, subject: 'DOPE 卡'),
+            child: const Text('分享'),
+          ),
+          TextButton(
             onPressed: () => Navigator.pop(dctx),
             child: const Text('关闭'),
           ),
@@ -1229,6 +1234,10 @@ class _ResultPageState extends State<ResultPage> {
                   const SnackBar(content: Text('CSV 数据已复制到剪贴板')));
             },
             child: const Text('复制'),
+          ),
+          TextButton(
+            onPressed: () => Share.share(csv, subject: '弹道轨迹 CSV'),
+            child: const Text('分享'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dctx),

@@ -18,6 +18,8 @@ dependencies:
   # place that compiles them.
   geolocator: ^13.0.1
   flutter_compass: ^0.8.0
+  # Native share sheet for DOPE card / CSV export (web -> navigator.share).
+  share_plus: ^10.0.0
 
 dev_dependencies:
   flutter_test:

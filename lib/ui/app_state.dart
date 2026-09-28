@@ -33,6 +33,9 @@ class AppState extends ChangeNotifier {
   // --- Wind (imperial input, converted) ---
   double windSpeedMph = 0;
   double windDirectionDeg = 270; // default: from left
+  /// Display unit for wind speeds ('mph' | 'ms' | 'kmh'). Storage stays mph;
+  /// this only drives sliders/labels at the UI boundary. Persisted.
+  String windUnit = 'mph';
   /// Optional multi-zone wind profile (downrange segments). When non-empty
   /// this overrides the single wind above. Each entry: {fromYd, toYd, speedMph, dirDeg}.
   /// Kept in user-friendly yards/degrees here; converted to SI on compute.
@@ -273,6 +276,7 @@ class AppState extends ChangeNotifier {
         'altitudeM': altitudeM,
         'windSpeedMph': windSpeedMph,
         'windDirectionDeg': windDirectionDeg,
+        'windUnit': windUnit,
         'windZones': windZones.map((z) => z.toJson()).toList(),
         'useZeroAtmo': useZeroAtmo,
         'zeroTempC': zeroTempC,
@@ -315,6 +319,10 @@ class AppState extends ChangeNotifier {
     altitudeM = (m['altitudeM'] as num?)?.toDouble() ?? 0;
     windSpeedMph = (m['windSpeedMph'] as num?)?.toDouble() ?? 0;
     windDirectionDeg = (m['windDirectionDeg'] as num?)?.toDouble() ?? 270;
+    windUnit = switch (m['windUnit'] as String?) {
+      'ms' || 'kmh' => m['windUnit'] as String,
+      _ => 'mph',
+    };
     windZones = (m['windZones'] as List?)
             ?.map((e) => WindZoneInput.fromJson(e as Map<String, dynamic>))
             .toList() ??

@@ -111,8 +111,35 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
           ]),
           const SizedBox(height: 12),
           _section('风', [
-            _slider('风速', s.windSpeedMph, 0, 30, ' mph', 0.5, 1,
-                (v) => setState(() => s.windSpeedMph = v)),
+            Row(
+              children: [
+                const Text('风速单位'),
+                const SizedBox(width: 8),
+                DropdownButton<String>(
+                  value: s.windUnit,
+                  items: const [
+                    DropdownMenuItem(value: 'mph', child: Text('mph')),
+                    DropdownMenuItem(value: 'ms', child: Text('m/s')),
+                    DropdownMenuItem(value: 'kmh', child: Text('km/h')),
+                  ],
+                  onChanged: (v) =>
+                      setState(() => s.windUnit = v ?? 'mph'),
+                ),
+                const Spacer(),
+                Text('内部换算统一为 mph',
+                    style: TextStyle(fontSize: 10, color: Colors.grey[500])),
+              ],
+            ),
+            _slider(
+                '风速',
+                U.windFromMph(s.windSpeedMph, s.windUnit),
+                0,
+                U.windFromMph(30, s.windUnit),
+                ' ${U.windUnitLabel(s.windUnit)}',
+                s.windUnit == 'ms' ? 0.2 : 0.5,
+                1,
+                (v) => setState(
+                    () => s.windSpeedMph = U.windToMph(v, s.windUnit))),
             _windDial(s),
             ListTile(
               dense: true,

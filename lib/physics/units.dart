@@ -109,6 +109,25 @@ class Units {
   /// Angular (radians) needed to displace a linear offset at range R.
   static double linearToAngular(double linearM, double rangeM) =>
       linearM / rangeM;
+
+  // ---- Wind speed display units ('mph' | 'ms' | 'kmh') ----
+  // Storage stays mph everywhere (AppState / WindZoneInput); these convert
+  // only at the UI boundary.
+
+  static double windFromMph(double mph, String unit) => switch (unit) {
+        'ms' => mph * 0.44704,
+        'kmh' => mph * 1.609344,
+        _ => mph,
+      };
+
+  static double windToMph(double value, String unit) => switch (unit) {
+        'ms' => value / 0.44704,
+        'kmh' => value / 1.609344,
+        _ => value,
+      };
+
+  static String windUnitLabel(String unit) =>
+      switch (unit) { 'ms' => 'm/s', 'kmh' => 'km/h', _ => 'mph' };
 }
 
 /// A unit-system preference used by the UI layer.
