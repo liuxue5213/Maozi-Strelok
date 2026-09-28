@@ -64,9 +64,26 @@ void main() {
     await tester.pump();
   }
 
+  /// Temporary diagnostics: show what actually rendered when finders come up
+  /// empty (printed to the CI log).
+  void dumpTree(WidgetTester tester, String tag) {
+    debugPrint('DUMP[$tag] exception=${tester.takeException()}');
+    debugPrint('DUMP[$tag] page=${find.byType(ComputeInputPage).evaluate().length} '
+        'scaffold=${find.byType(Scaffold).evaluate().length} '
+        'listview=${find.byType(ListView).evaluate().length} '
+        'textField=${find.byType(TextField).evaluate().length} '
+        'text=${find.byType(Text).evaluate().length}');
+    final texts = tester.widgetList<Text>(find.byType(Text))
+        .map((w) => w.data ?? w.textSpan?.toPlainText() ?? '<span>')
+        .take(50)
+        .toList();
+    debugPrint('DUMP[$tag] TEXTS(${texts.length}): ${texts.join(' | ')}');
+  }
+
   testWidgets('typed chrono velocity survives a full page rebuild',
       (tester) async {
     await pumpPage(tester);
+    dumpTree(tester, 'chrono');
 
     final field = find.widgetWithText(TextField, '测速仪初速 (fps, 0=用标称)');
     expect(field, findsOneWidget);
