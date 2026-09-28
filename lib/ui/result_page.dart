@@ -154,12 +154,45 @@ class _ResultPageState extends State<ResultPage> {
         if (p.drop > apex) apex = p.drop;
       }
       final daM = atmo.densityAltitudeM;
-      // Per-target corrections for the multi-target list.
+      // Per-target corrections for the multi-target list, each with its own
+      // hit probability (sensitivities estimated from adjacent trajectory
+      // samples, same budget as the max-range estimate below).
+      final targetRadiusM = U.Units.inchToM(s.targetSizeIn) / 2;
       final multiTargets = <Map<String, double>>[];
       for (final yd in s.customTargetsYd) {
         final m = U.Units.yardsToM(yd);
         final pt = traj.reduce((a, b) =>
             (a.range - m).abs() < (b.range - m).abs() ? a : b);
+        final idx = traj.indexOf(pt);
+        double dropPerYd = 0;
+        double driftPerMph = pt.range * 0.0005; // nominal when calm
+        if (idx > 0) {
+          final prev = traj[idx - 1];
+          final dRange = (pt.range - prev.range).abs();
+          if (dRange > 1e-9) {
+            dropPerYd = (pt.drop - prev.drop).abs() / (dRange * 1.09361);
+          }
+          if (s.windSpeedMph > 0.1) {
+            driftPerMph = pt.windage.abs() / s.windSpeedMph;
+          }
+        }
+        double hp = 0;
+        if (traj.length >= 3) {
+          final sigma = HitProbability.sigmaRadFromBudget(
+            gunMoa: s.gunAccuracyMoa,
+            shooterMoa: s.shooterErrorMoa,
+            windErrMph: s.windErrorMph,
+            rangeErrYd: s.rangeErrorYd,
+            windDriftPerMphM: driftPerMph,
+            dropPerYdM: dropPerYd,
+            rangeM: pt.range,
+          );
+          hp = HitProbability.circularP(
+            targetRadiusM: targetRadiusM,
+            rangeM: pt.range,
+            sigmaRad: sigma,
+          );
+        }
         multiTargets.add({
           'yd': yd,
           'range': pt.range,
@@ -168,6 +201,7 @@ class _ResultPageState extends State<ResultPage> {
           'comeUp': pt.comeUpRad,
           'speed': pt.speed,
           'tof': pt.timeOfFlight,
+          'hitProb': hp,
         });
       }
       // Hit probability at the max-range target: estimate the wind-drift and
@@ -190,7 +224,6 @@ class _ResultPageState extends State<ResultPage> {
         } else {
           driftPerMph = (last.range * 0.0005); // nominal sensitivity
         }
-        final targetRadiusM = U.Units.inchToM(s.targetSizeIn) / 2;
         if (_useWez) {
           // Monte-Carlo WEZ (Applied Ballistics method).
           hitProb = Wez.run(
@@ -1220,7 +1253,7 @@ class _ResultPageState extends State<ResultPage> {
                 child: Row(
                   children: [
                     SizedBox(
-                        width: 56,
+                        width: 52,
                         child: Text('${t['yd']?.toStringAsFixed(0)}yd',
                             style:
                                 const TextStyle(fontWeight: FontWeight.bold))),
@@ -1240,8 +1273,14 @@ class _ResultPageState extends State<ResultPage> {
                               : '${U.Units.radToMil((t['windage']! / t['range']!).abs()).toStringAsFixed(1)} MIL',
                           Colors.purple),
                     ),
+                    Expanded(
+                      child: _multiChip(
+                          '命中',
+                          '${(t['hitProb']! * 100).toStringAsFixed(0)}%',
+                          _hitProbColor(t['hitProb']!)),
+                    ),
                     SizedBox(
-                        width: 64,
+                        width: 56,
                         child: Text(
                             sys == U.UnitSystem.imperial
                                 ? '${(t['speed']! * 3.28084).toStringAsFixed(0)}fps'
