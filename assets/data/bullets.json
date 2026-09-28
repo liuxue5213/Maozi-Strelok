@@ -2086,5 +2086,53 @@
     "bcG1": 0.197,
     "bcG7": null,
     "type": "hp"
+  },
+  {
+    "id": "hornady-180eldm-7mmprc",
+    "manufacturer": "Hornady",
+    "model": "ELD-M 180gr",
+    "caliber": "7mm PRC",
+    "massGr": 180,
+    "diameterIn": 0.284,
+    "lengthIn": 1.455,
+    "bcG1": 0.797,
+    "bcG7": 0.409,
+    "type": "hpbt"
+  },
+  {
+    "id": "hornady-175eldx-7mmprc",
+    "manufacturer": "Hornady",
+    "model": "ELD-X 175gr",
+    "caliber": "7mm PRC",
+    "massGr": 175,
+    "diameterIn": 0.284,
+    "lengthIn": 1.412,
+    "bcG1": 0.692,
+    "bcG7": 0.355,
+    "type": "hpbt"
+  },
+  {
+    "id": "hornady-212eldm-300prc",
+    "manufacturer": "Hornady",
+    "model": "ELD-M 212gr",
+    "caliber": ".300 PRC",
+    "massGr": 212,
+    "diameterIn": 0.308,
+    "lengthIn": 1.585,
+    "bcG1": 0.825,
+    "bcG7": 0.425,
+    "type": "hpbt"
+  },
+  {
+    "id": "berger-230hyb-300prc",
+    "manufacturer": "Berger",
+    "model": "Hybrid OTM 230gr",
+    "caliber": ".300 PRC",
+    "massGr": 230,
+    "diameterIn": 0.308,
+    "lengthIn": 1.655,
+    "bcG1": 0.743,
+    "bcG7": 0.382,
+    "type": "hpbt"
   }
 ]

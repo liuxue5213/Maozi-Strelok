@@ -1198,5 +1198,25 @@
     "refBarrelLengthIn": 26,
     "bulletId": "berger-105hyb-6mm",
     "notes": "Factory match load, PRS favorite"
+  },
+  {
+    "id": "ct-7mmprc-180eldm",
+    "designation": "7mm PRC 180gr ELD-M",
+    "manufacturer": "Hornady",
+    "caliber": "7mm PRC",
+    "muzzleVelocityFps": 3000,
+    "refBarrelLengthIn": 24,
+    "bulletId": "hornady-180eldm-7mmprc",
+    "notes": "Factory match load"
+  },
+  {
+    "id": "ct-300prc-212eldm",
+    "designation": "300 PRC 212gr ELD-M",
+    "manufacturer": "Hornady",
+    "caliber": ".300 PRC",
+    "muzzleVelocityFps": 2860,
+    "refBarrelLengthIn": 26,
+    "bulletId": "hornady-212eldm-300prc",
+    "notes": "Factory match load"
   }
 ]

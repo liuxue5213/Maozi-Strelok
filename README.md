@@ -13,9 +13,9 @@
 - **Miller 陀螺稳定性**：按缠距/弹长/速度/密度判断弹丸稳定性
 
 ### 内置数据库（选型号即用）
-- **181 款弹头**（Sierra / Hornady / Nosler / Berger / Lapua 等厂商，含 G1/G7 BC）
-- **128 款弹药**（M855、M80、M118LR、MK262、MK318、.338 LM、.50 BMG、6mm Creedmoor、.300 Norma Mag…）
-- **67 款枪械**，覆盖各国主流制式（军/警/特种）+ 民用：
+- **185 款弹头**（Sierra / Hornady / Nosler / Berger / Lapua 等厂商，含 G1/G7 BC）
+- **130 款弹药**（M855、M80、M118LR、MK262、MK318、.338 LM、.50 BMG、6mm Creedmoor、.300 Norma Mag、7mm PRC、.300 PRC…）
+- **68 款枪械**，覆盖各国主流制式（军/警/特种）+ 民用：
   - 突击步枪：M4/M16、HK416、AK-74/12、QBZ-95/191、G36、SCAR、Tavor…
   - 狙击/DMR：M24/M40、M110、M2010、Barrett M82/M107、SVD、L115A3、SAKO TRG…
   - 手枪：SIG M17/M18、Beretta M9、Glock、Makarov、QSZ-92…
@@ -74,7 +74,16 @@ flutter run         # 运行
 4. 编译 release APK
 5. 上传为可下载的 artifact
 
-**下载 APK**：GitHub 仓库 → Actions 选项卡 → 选择最近的运行 → Artifacts → `ballistics-calculator-apk`
+**下载 APK**：GitHub 仓库 → Actions 选项卡 → 选择最近的运行 → Artifacts → `帽子计算器-apk`
+
+## 🌐 Web 版（PWA，浏览器直接用）
+
+推送代码后 `.github/workflows/deploy-web.yml` 自动构建 Flutter Web 并 rsync 部署到服务器（nginx 静态站点，端口 `60195`），部署后自动验证 HTTP 200。所有弹道计算在浏览器本地完成，无需后端。
+
+- **访问**：`http://120.48.13.152:60195/`
+- **PWA**：支持"添加到主屏幕"，手机上可像原生应用一样全屏使用（manifest/图标/主题色由 `tools/setup_web_meta.py` 在 CI 中生成）
+- **部署密钥**：存于 GitHub Secrets（`MAOZI_DEPLOY_*`），密码不落仓库
+- **服务器诊断**：Actions 手动触发 `Server Diagnostics` workflow，可远程查防火墙/解封 IP
 
 ## ✅ 物理准确性
 
