@@ -175,13 +175,13 @@ class _WindZonesPageState extends State<WindZonesPage> {
             // Wind speed + direction (display unit follows the wind-unit
             // preference set on the compute page; storage stays mph)
             _row(
-                '风速 ${U.windUnitLabel(widget.state.windUnit)}',
-                U.windFromMph(z.speedMph, widget.state.windUnit),
+                '风速 ${U.Units.windUnitLabel(widget.state.windUnit)}',
+                U.Units.windFromMph(z.speedMph, widget.state.windUnit),
                 0,
-                U.windFromMph(30, widget.state.windUnit),
+                U.Units.windFromMph(30, widget.state.windUnit),
                 0.5,
                 (v) => setState(() => _zones[i] = z.copyWith(
-                    speedMph: U.windToMph(v, widget.state.windUnit)))),
+                    speedMph: U.Units.windToMph(v, widget.state.windUnit)))),
             Row(
               children: [
                 const SizedBox(width: 70, child: Text('风向°')),

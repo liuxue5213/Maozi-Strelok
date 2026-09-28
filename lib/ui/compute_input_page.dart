@@ -132,14 +132,14 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
             ),
             _slider(
                 '风速',
-                U.windFromMph(s.windSpeedMph, s.windUnit),
+                U.Units.windFromMph(s.windSpeedMph, s.windUnit),
                 0,
-                U.windFromMph(30, s.windUnit),
-                ' ${U.windUnitLabel(s.windUnit)}',
+                U.Units.windFromMph(30, s.windUnit),
+                ' ${U.Units.windUnitLabel(s.windUnit)}',
                 s.windUnit == 'ms' ? 0.2 : 0.5,
                 1,
                 (v) => setState(
-                    () => s.windSpeedMph = U.windToMph(v, s.windUnit))),
+                    () => s.windSpeedMph = U.Units.windToMph(v, s.windUnit))),
             _windDial(s),
             ListTile(
               dense: true,
