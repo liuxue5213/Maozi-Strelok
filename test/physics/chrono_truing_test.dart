@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ballistics_calculator/physics/atmosphere.dart';
 import 'package:ballistics_calculator/physics/ballistics_solver.dart';
+import 'package:ballistics_calculator/physics/drag_models.dart';
 import 'package:ballistics_calculator/physics/units.dart' as U;
 
 /// Chronograph-to-muzzle extrapolation: a chrono placed downrange reads LESS
@@ -11,14 +12,14 @@ void main() {
   ShotConfig config(double mvFps) {
     return ShotConfig(
       muzzleVelocity: mvFps / 3.28084,
-      mass: 0.0109, // 168 gr
-      diameter: 0.00782, // .308 cal
+      mass: U.Units.grainToKg(168),
+      diameter: U.Units.inchToM(0.308),
       bc: 0.462, // G1
-      dragModel: 'G1',
+      dragModel: G1DragModel.instance,
       sightHeight: U.Units.inchToM(1.7),
       zeroRange: U.Units.yardsToM(100),
       atmosphere: Atmosphere.standardIcao(),
-      wind: Wind.calm(),
+      wind: const Wind.calm(),
       spinDrift: false,
       twistIn: 0,
       lengthIn: 0,
