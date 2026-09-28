@@ -589,6 +589,64 @@ class BallisticsSolver {
     return raw.last.z;
   }
 
+  /// Remaining speed [m/s] at [rangeM] with the current config (wind-free,
+  /// flat fire — the conditions a chronograph measurement reflects).
+  double speedAtRange(double rangeM) {
+    final raw = _integrate(stopRange: rangeM, elevation: 0);
+    if (raw.isEmpty) return 0;
+    final s = raw.last;
+    return sqrt(s.vx * s.vx + s.vz * s.vz);
+  }
+
+  /// Speed at [rangeM] for an alternate muzzle velocity — the inner function
+  /// of the chronograph extrapolation below (speed grows monotonically with
+  /// muzzle velocity).
+  double _speedAtRangeWithMv(double rangeM, double mvMs) {
+    final alt = ShotConfig(
+      muzzleVelocity: mvMs,
+      mass: config.mass,
+      diameter: config.diameter,
+      bc: config.bc,
+      dragModel: config.dragModel,
+      sightHeight: config.sightHeight,
+      zeroRange: config.zeroRange,
+      atmosphere: config.atmosphere,
+      wind: Wind.calm(),
+      spinDrift: false,
+      twistIn: 0,
+      lengthIn: 0,
+      losAngleRad: config.losAngleRad,
+    );
+    final raw = BallisticsSolver(alt, dt: dt)
+        ._integrate(stopRange: rangeM, elevation: 0);
+    if (raw.isEmpty) return 0;
+    final s = raw.last;
+    return sqrt(s.vx * s.vx + s.vz * s.vz);
+  }
+
+  /// Chronograph-to-muzzle extrapolation: a chronograph placed [chronoRangeM]
+  /// downrange reads [chronoSpeedMps] — lower than the true muzzle velocity.
+  /// Returns the muzzle velocity [m/s] whose modeled speed at that distance
+  /// matches the reading, or null if no match within ±30% of the nominal MV.
+  double? truedMvByChrono(
+      {required double chronoSpeedMps, required double chronoRangeM}) {
+    final base = config.muzzleVelocity;
+    double lo = base * 0.7, hi = base * 1.3;
+    double fLo = _speedAtRangeWithMv(chronoRangeM, lo) - chronoSpeedMps;
+    double fHi = _speedAtRangeWithMv(chronoRangeM, hi) - chronoSpeedMps;
+    if ((fLo > 0) == (fHi > 0)) return null; // reading out of band
+    for (int i = 0; i < 50; i++) {
+      final mid = 0.5 * (lo + hi);
+      final fMid = _speedAtRangeWithMv(chronoRangeM, mid) - chronoSpeedMps;
+      if ((fLo > 0) != (fMid > 0)) {
+        hi = mid;
+      } else {
+        lo = mid;
+      }
+    }
+    return 0.5 * (lo + hi);
+  }
+
   /// Drop (m, relative to LOS) at a given range for a hypothetical BC.
   /// Used by the truing routine.
   double _dropAtRangeWithBc(double rangeM, double bc) {

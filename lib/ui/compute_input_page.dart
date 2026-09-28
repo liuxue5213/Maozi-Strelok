@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import '../models/firearm.dart';
 import '../models/modification.dart';
 import '../physics/atmosphere.dart';
+import '../physics/ballistics_solver.dart' show BallisticsSolver, Wind;
 import '../physics/drag_models.dart';
 import '../physics/units.dart' as U;
+import '../services/shot_builder.dart';
 import 'app_state.dart';
 import 'cartridge_picker_dialog.dart';
 import 'mil_ranging_dialog.dart';
@@ -628,7 +630,9 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
     );
   }
 
-  /// Chronograph velocity input: overrides the cartridge nominal MV when set.
+  /// Chronograph field with an extrapolation helper: chronographs sit downrange,
+  /// so the reading is lower than the true muzzle velocity. The helper solves
+  /// for the MV whose modeled speed at the chrono distance matches the reading.
   Widget _chronoField(AppState s) {
     return Row(
       children: [
@@ -650,8 +654,141 @@ class _ComputeInputPageState extends State<ComputeInputPage> {
             onChanged: (v) => s.chronoVelocityFps = double.tryParse(v) ?? 0,
           ),
         ),
+        IconButton(
+          tooltip: '由测速点读数外推枪口初速',
+          icon: const Icon(Icons.calculate_outlined, size: 20),
+          onPressed: s.canCompute ? () => _chronoExtrapolationDialog(s) : null,
+        ),
       ],
     );
+  }
+
+  /// Dialog: chrono reading + chrono distance from muzzle -> solved muzzle
+  /// velocity, applied to the chrono field on accept.
+  Future<void> _chronoExtrapolationDialog(AppState s) async {
+    final speedCtrl = TextEditingController(
+        text: s.chronoVelocityFps == 0 ? '' : s.chronoVelocityFps.toStringAsFixed(0));
+    final distCtrl = TextEditingController(text: '10');
+    double? mvFps;
+    String? error;
+
+    await showDialog(
+      context: context,
+      builder: (dctx) => StatefulBuilder(
+        builder: (dctx, setDialogState) => AlertDialog(
+          title: const Text('外推枪口初速'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                    '测速仪装在枪口前方一段距离，读数低于真实枪口初速。'
+                    '输入读数与测速点到枪口的距离，按当前弹道条件反解枪口初速。',
+                    style: TextStyle(fontSize: 12, color: Colors.grey)),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: speedCtrl,
+                  autofocus: true,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(
+                      labelText: '测速仪读数 (fps)',
+                      border: OutlineInputBorder()),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: distCtrl,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(
+                      labelText: '测速点到枪口距离 (yd)',
+                      border: OutlineInputBorder()),
+                ),
+                if (mvFps != null) ...[
+                  const SizedBox(height: 12),
+                  Text('外推枪口初速 ≈ ${mvFps!.toStringAsFixed(0)} fps',
+                      style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.green)),
+                ],
+                if (error != null)
+                  Text(error!,
+                      style: const TextStyle(
+                          fontSize: 12, color: Colors.red)),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(dctx),
+                child: const Text('取消')),
+            mvFps != null
+                ? FilledButton(
+                    onPressed: () {
+                      s.chronoVelocityFps = mvFps;
+                      _numCtrl('chrono', mvFps!.toStringAsFixed(0)).text =
+                          mvFps.toStringAsFixed(0);
+                      Navigator.pop(dctx);
+                    },
+                    child: const Text('应用'),
+                  )
+                : FilledButton(
+                    onPressed: () {
+                      final speed =
+                          double.tryParse(speedCtrl.text);
+                      final distYd = double.tryParse(distCtrl.text) ?? 0;
+                      if (speed == null || speed <= 0 || distYd <= 0) {
+                        setDialogState(() =>
+                            error = '请输入有效的读数与距离');
+                        return;
+                      }
+                      final mv = _solveMuzzleVelocity(
+                          s, speed, U.Units.yardsToM(distYd));
+                      setDialogState(() {
+                        if (mv == null) {
+                          error = '读数超出可解范围（±30%），请检查输入';
+                        } else {
+                          mvFps = mv * 3.28084;
+                          error = null;
+                        }
+                      });
+                    },
+                    child: const Text('计算'),
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build the current shot config (nominal MV, calm wind) and bisect for the
+  /// muzzle velocity matching the chrono reading. Returns m/s, or null.
+  double? _solveMuzzleVelocity(AppState s, double chronoFps, double chronoRangeM) {
+    try {
+      final atmo = Atmosphere(
+        temperatureC: s.temperatureC,
+        pressurePa: U.Units.hpaToPa(s.pressureHpa),
+        relativeHumidity: s.relativeHumidity,
+        altitudeM: s.altitudeM,
+      );
+      final cfg = ShotBuilder.build(
+        firearm: s.firearm!,
+        cartridge: s.cartridge!,
+        bullet: s.bullet!,
+        mod: s.mod,
+        atmosphere: atmo,
+        wind: Wind.calm(),
+        dragModelId: s.dragModelId,
+        spinDrift: false,
+      );
+      return BallisticsSolver(cfg)
+          .truedMvByChrono(chronoSpeedMps: chronoFps / 3.28084, chronoRangeM: chronoRangeM);
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Powder temperature sensitivity inputs: chrono-time temp + fps/°F rate.
