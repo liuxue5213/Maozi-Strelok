@@ -41,19 +41,25 @@ void main() {
     final lat = find.widgetWithText(TextField, '纬度 (°, +北 / -南)');
     final az = find.widgetWithText(TextField, '射击方位角 (°, 北=0 顺时针)');
     final los = find.widgetWithText(TextField, '射击仰俯角 (°, +上 / -下)');
+    final decl =
+        find.widgetWithText(TextField, '磁偏角 (°, +东; 罗盘填数时自动加上)');
     expect(lat, findsOneWidget);
     expect(az, findsOneWidget);
     expect(los, findsOneWidget);
+    expect(decl, findsOneWidget);
 
     await tester.enterText(lat, '39.9');
     await tester.enterText(az, '315');
     await tester.enterText(los, '-5');
+    await tester.enterText(decl, '-7.4');
     await tester.tap(find.text('应用'));
     await tester.pump();
 
     expect(state.latitudeDeg, 39.9);
     expect(state.azimuthDeg, 315);
     expect(state.losAngleDeg, -5);
+    // declination syncs immediately while typing (listener), no apply needed
+    expect(state.magneticDeclinationDeg, -7.4);
   });
 
   testWidgets('coriolis switch toggles in the dialog', (tester) async {

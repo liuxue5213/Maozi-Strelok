@@ -20,6 +20,7 @@ void main() {
     s.windSpeedMph = 12.5;
     s.windDirectionDeg = 37;
     s.windUnit = 'ms';
+    s.magneticDeclinationDeg = -7.4;
     s.windZones = const [
       WindZoneInput(fromYd: 0, toYd: 400, speedMph: 8, dirDeg: 270),
       WindZoneInput(fromYd: 400, toYd: 100000, speedMph: 15, dirDeg: 90),
@@ -65,6 +66,7 @@ void main() {
     expect(restored.windSpeedMph, s.windSpeedMph);
     expect(restored.windDirectionDeg, s.windDirectionDeg);
     expect(restored.windUnit, 'ms');
+    expect(restored.magneticDeclinationDeg, -7.4);
     expect(restored.windZones.length, 2);
     expect(restored.windZones[0].fromYd, 0);
     expect(restored.windZones[1].speedMph, 15);
@@ -109,6 +111,7 @@ void main() {
     expect(s.themeMode, 'system');
     expect(s.dragModelId, 'G1');
     expect(s.windUnit, 'mph');
+    expect(s.magneticDeclinationDeg, 0);
     expect(s.temperatureC, 15);
     expect(s.pressureHpa, 1013.25);
     expect(s.unitSystem, U.UnitSystem.metric);

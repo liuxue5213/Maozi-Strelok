@@ -21,6 +21,7 @@ class _SensorsHelperDialogState extends State<SensorsHelperDialog> {
   late final TextEditingController _lat;
   late final TextEditingController _az;
   late final TextEditingController _los;
+  late final TextEditingController _decl;
   bool _gpsBusy = false;
   bool _compassBusy = false;
 
@@ -31,6 +32,15 @@ class _SensorsHelperDialogState extends State<SensorsHelperDialog> {
     _lat = TextEditingController(text: s.latitudeDeg.toStringAsFixed(1));
     _az = TextEditingController(text: s.azimuthDeg.toStringAsFixed(0));
     _los = TextEditingController(text: s.losAngleDeg.toStringAsFixed(1));
+    _decl = TextEditingController(
+        text: s.magneticDeclinationDeg == 0
+            ? ''
+            : s.magneticDeclinationDeg.toStringAsFixed(1));
+    // keep the persisted declination in sync with manual edits
+    _decl.addListener(() {
+      widget.state.magneticDeclinationDeg =
+          double.tryParse(_decl.text) ?? 0;
+    });
   }
 
   @override
@@ -38,6 +48,7 @@ class _SensorsHelperDialogState extends State<SensorsHelperDialog> {
     _lat.dispose();
     _az.dispose();
     _los.dispose();
+    _decl.dispose();
     super.dispose();
   }
 
@@ -97,9 +108,11 @@ class _SensorsHelperDialogState extends State<SensorsHelperDialog> {
               const SizedBox(height: 8),
               _field(_lat, '纬度 (°, +北 / -南)', signed: true),
               _field(_az, '射击方位角 (°, 北=0 顺时针)', signed: true),
+              _field(_decl, '磁偏角 (°, +东; 罗盘填数时自动加上)', signed: true),
               _field(_los, '射击仰俯角 (°, +上 / -下)', signed: true),
               const SizedBox(height: 8),
-              const Text('提示: 方位角 = 目标相对正北的顺时针角度(罗盘读数)。'
+              const Text('提示: 方位角 = 目标相对正北的顺时针角度(罗盘读数+磁偏角)。'
+                  '磁偏角可从当地地图/在线地磁模型查询，一次设置长期有效。'
                   '仰俯角 = 视线上仰为正、下俯为负(可用测角仪/余弦指示器读取)。',
                   style: TextStyle(fontSize: 11, color: Colors.grey)),
             ],
@@ -145,6 +158,8 @@ class _SensorsHelperDialogState extends State<SensorsHelperDialog> {
   }
 
   /// Compass auto-fill: points the phone at the target and reads the heading.
+  /// The reading is magnetic north; the configured declination is added so
+  /// the Coriolis azimuth gets a true-north value.
   Future<void> _fillFromCompass() async {
     setState(() => _compassBusy = true);
     final heading = await SensorService.readHeading();
@@ -154,10 +169,14 @@ class _SensorsHelperDialogState extends State<SensorsHelperDialog> {
       _snack('此设备/浏览器没有可用的罗盘传感器，请手动输入方位角');
       return;
     }
+    final decl = double.tryParse(_decl.text) ?? 0;
     // normalize to 0..360 (heading can read slightly negative)
-    final az = ((heading % 360) + 360) % 360;
+    final az = (((heading + decl) % 360) + 360) % 360;
     _az.text = az.toStringAsFixed(0);
-    _snack('已填入方位角 ${az.toStringAsFixed(0)}°');
+    _snack(decl.abs() < 0.05
+        ? '已填入磁北方位角 ${az.toStringAsFixed(0)}°'
+        : '磁北 ${heading.toStringAsFixed(0)}° + 磁偏角 ${decl.toStringAsFixed(1)}° '
+            '= 真北 ${az.toStringAsFixed(0)}°');
   }
 
   void _snack(String msg) {

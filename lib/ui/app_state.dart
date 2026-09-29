@@ -36,6 +36,11 @@ class AppState extends ChangeNotifier {
   /// Display unit for wind speeds ('mph' | 'ms' | 'kmh'). Storage stays mph;
   /// this only drives sliders/labels at the UI boundary. Persisted.
   String windUnit = 'mph';
+  /// Magnetic declination [deg, +east] applied to compass readings when
+  /// auto-filling the firing azimuth (phone compasses read magnetic north;
+  /// the Coriolis correction wants true north). User-configurable — set it
+  /// once from a local map/online model. 0 = uncorrected. Persisted.
+  double magneticDeclinationDeg = 0;
   /// Optional multi-zone wind profile (downrange segments). When non-empty
   /// this overrides the single wind above. Each entry: {fromYd, toYd, speedMph, dirDeg}.
   /// Kept in user-friendly yards/degrees here; converted to SI on compute.
@@ -277,6 +282,7 @@ class AppState extends ChangeNotifier {
         'windSpeedMph': windSpeedMph,
         'windDirectionDeg': windDirectionDeg,
         'windUnit': windUnit,
+        'magneticDeclinationDeg': magneticDeclinationDeg,
         'windZones': windZones.map((z) => z.toJson()).toList(),
         'useZeroAtmo': useZeroAtmo,
         'zeroTempC': zeroTempC,
@@ -323,6 +329,8 @@ class AppState extends ChangeNotifier {
       'ms' || 'kmh' => m['windUnit'] as String,
       _ => 'mph',
     };
+    magneticDeclinationDeg =
+        (m['magneticDeclinationDeg'] as num?)?.toDouble() ?? 0;
     windZones = (m['windZones'] as List?)
             ?.map((e) => WindZoneInput.fromJson(e as Map<String, dynamic>))
             .toList() ??
