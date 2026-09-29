@@ -13,9 +13,8 @@ dependencies:
   fl_chart: ^0.68.0
   shared_preferences: ^2.2.2
   intl: ^0.19.0
-  # Device sensors for auto-filling shooting conditions. Version-pinned (no
-  # caret drift) because their APIs change between majors and CI is the only
-  # place that compiles them.
+  # Device sensors for auto-filling shooting conditions. Major-version-pinned
+  # caret ranges (APIs change between majors; CI is the only compile check).
   geolocator: ^13.0.1
   flutter_compass: ^0.8.0
   # Native share sheet for DOPE card / CSV export (web -> navigator.share).

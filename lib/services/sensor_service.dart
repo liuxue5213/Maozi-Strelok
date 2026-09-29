@@ -52,13 +52,16 @@ class SensorService {
   }
 
   /// One compass heading reading (degrees clockwise from magnetic north),
-  /// or null when the device/browser has no compass. Returns the first
-  /// non-null heading from the sensor stream.
+  /// or null when the device/browser has no compass or it stays silent for
+  /// 3s. Returns the first non-null heading from the sensor stream.
   static Future<double?> readHeading() async {
     try {
       final events = FlutterCompass.events;
       if (events == null) return null;
-      await for (final e in events) {
+      // Some browsers expose the stream but never emit (no permission or no
+      // sensor) — a silent wait would spin the UI button forever.
+      await for (final e in events.timeout(const Duration(seconds: 3),
+          onTimeout: (sink) => sink.close())) {
         final h = e.heading;
         if (h != null && !h.isNaN) return h;
       }

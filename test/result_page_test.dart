@@ -61,10 +61,11 @@ void main() {
     expect(find.text('命中'), findsNWidgets(2));
   });
 
-  testWidgets('solver rejects an impossible configuration with an error view',
+  testWidgets('degenerate configuration renders without crashing',
       (tester) async {
     final state = await readyState();
-    // zero-range beyond max range makes the solve degenerate
+    // zero-range beyond max range is a nonsensical setup: the page must land
+    // on either the error view or a rendered result, never crash or hang.
     state.updateMod(state.mod.copyWith(zeroRangeYd: 2000));
     state.maxRangeYd = 100;
 
